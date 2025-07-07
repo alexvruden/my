@@ -1,0 +1,20 @@
+#wf-udp=443
+
+--wf-udp=443
+
+# profile#1
+--filter-udp=443
++hostlist
+--dpi-desync=fake
+--dpi-desync-repeats=6
++dpi-desync-fake-quic=quic_initial_www_google_com.bin
+
+# profile#5
+--new
+--filter-udp=443
++ipset
+--dpi-desync=fake
+--dpi-desync-repeats=6
++dpi-desync-fake-quic=quic_initial_www_google_com.bin
+
+# profile#0

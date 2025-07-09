@@ -16,6 +16,7 @@ set /a c2=8
 set /a c3=12
 set /a c4=30
 set /a c5=50
+set /a blkc=0
 
 >nul dism ||( 
 	echo.Для некоторых действий сценария необходимы высокие привилегии, запустите скрипт с правами 'Администратора'.
@@ -220,6 +221,7 @@ if %menu_choice% EQU %terminate_count% (
 	)
 	goto:menu
 )
+if %blkc% equ 1 goto:terminate_done
 if %menu_choice% LSS %terminate_count% goto:terminate_done
 
 :terminate_one
@@ -240,6 +242,8 @@ if %errorlevel% EQU 0 (
 	sc stop windivert 1>nul 2>&1
 	sc delete windivert 1>nul 2>&1
 )
+if %blkc% equ 1 goto:blockcheck
+
 if exist %home%\bin\status del /F /Q %home%\bin\status >nul
 set "winws_arg= "
 if exist %home%\strategy\%strategy_name%\about set /p about_strategy=<%home%\strategy\%strategy_name%\about
@@ -528,6 +532,10 @@ if not exist %home%\lists\blockcheck.txt (
 	pause
 	goto menu
 )
+set /a blkc=1
+if defined strategy_run goto:terminate_all
+set /a blkc=0
+
 rem - https://github.com/bol-van/zapret?tab=readme-ov-file#%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%B0-%D0%BF%D1%80%D0%BE%D0%B2%D0%B0%D0%B9%D0%B4%D0%B5%D1%80%D0%B0
 REM CURL - замена программы curl
 REM CURL_MAX_TIME - время таймаута curl в секундах

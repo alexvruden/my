@@ -9,3 +9,4 @@ start daemon
 menu after daemon starting
 <img src="https://github.com/alexvruden/my/blob/main/1.png" />
 
+=======

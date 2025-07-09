@@ -244,10 +244,11 @@ if %errorlevel% EQU 0 (
 )
 if %blkc% equ 1 goto:blockcheck
 
-if not exist %home%\bin\zapret-win-bundle-master\zapret-winws\winws.exe (
+if not exist %home%\bin\windows-x86_64\winws.exe (
 	echo.
-	echo.download developers code and put in '%home%\bin\zapret-win-bundle-master\'
-	echo.https://github.com/bol-van/zapret-win-bundle
+	echo.[5G[37mDownload developers code '[33mbinaries\windows-x86_64\[37m' and put in '[33m%home%\bin\windows-x86_64\[37m'[0m
+	echo.
+	echo.[5Ghttps://github.com/bol-van/zapret/releases
 	echo.
 	pause
 	goto:menu
@@ -266,59 +267,120 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 	for /F "eol=# skip=1 tokens=1* delims==" %%M in (%home%\strategy\%strategy_name%\%%~nxI) do (
 		set "fletter=%%~M"
 		set "fletter=!fletter: =!"
-		if "x!fletter!"=="x--hostlist-auto" set "profile_param=--hostlist-auto=%home%\lists\hostlist\hostlist.auto"
-		if "x!fletter!"=="x--hostlist" (
+		if "x!fletter!"=="x--hostlist-auto" (
 			if "x%%~N"=="x" (
+				if not exist %home%\lists\hostlist\hostlist-auto.txt echo.#>%home%\lists\hostlist\hostlist-auto.txt
+				set "profile_param=!profile_param! --hostlist-auto=%home%\lists\hostlist\hostlist-auto.txt"
+			) else (
+				if not exist %home%\lists\hostlist\%%~N echo.#>%home%\lists\hostlist\%%~N
+				set "profile_param=!profile_param! --hostlist-auto=%home%\lists\hostlist\%%~N"
+			)
+		) else if "x!fletter!"=="x--hostlist" (
+			if "x%%~N"=="x" (
+				set /a foo = 0
 				for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\hostlist\*.txt') do (
 					set "profile_param=!profile_param! --hostlist=%home%\lists\hostlist\%%X"
+					set /a foo = 1
 				)
+				if !foo! equ 0 (
+					call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'%home%\lists\hostlist\*'"
+					call:cecho 7 "Параметр" 3 "!fletter!=%%N" 1 "отброшен"	
+				)				
 			) else (
-				set "profile_param=!profile_param! --hostlist=%home%\lists\hostlist\%%~N"
+				if exist %home%\lists\hostlist\%%~N (
+					set "profile_param=!profile_param! --hostlist=%home%\lists\hostlist\%%~N"
+				) else (
+					call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'%home%\lists\hostlist\%%~N'"
+					call:cecho 7 "Параметр" 3 "!fletter!=%%~N" 1 "отброшен"	
+				)
 			)
-			if exist %home%\lists\hostlist\exclude (
+		) else if "x!fletter!"=="x--hostlist-exclude" (
+			if "x%%~N"=="x" (
+				if not exist %home%\lists\hostlist\exclude md %home%\lists\hostlist\exclude >nul
+				set /a foo = 0
 				for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\hostlist\exclude\*.txt') do (
 					set "profile_param=!profile_param! --hostlist-exclude=%home%\lists\hostlist\exclude\%%X"
+					set /a foo = 1
+				)
+				if !foo! equ 0 (
+					call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'%home%\lists\hostlist\exclude\*'"
+					call:cecho 7 "Параметр" 3 "!fletter!=%%N" 1 "отброшен"	
+				)				
+			) else (
+				if exist %home%\lists\hostlist\exclude\%%~N (
+					set "profile_param=!profile_param! --hostlist-exclude=%home%\lists\hostlist\exclude\%%~N"
+				) else (
+					call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'%home%\lists\hostlist\exclude\%%~N'"
+					call:cecho 7 "Параметр" 3 "!fletter!=%%N" 1 "отброшен"	
 				)
 			)
 		) else if "x!fletter!"=="x--ipset" (
-			if "x%IPsetStatus%"=="xon" (
-				for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\ipset\*.txt') do (
-					set "profile_param=!profile_param! --ipset=%home%\lists\ipset\%%~X"
-				)
-				if exist %home%\lists\ipset\exclude (
-					for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\ipset\exclude\*.txt') do (
-						set "profile_param=!profile_param! --ipset-exclude=%home%\lists\ipset\exclude\%%X"
+			if "x%%~N"=="x" (
+				if "x%IPsetStatus%"=="xon" (
+					set /a foo = 0
+					for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\ipset\*.txt') do (
+						set "profile_param=!profile_param! --ipset=%home%\lists\ipset\%%~X"
+						set /a foo = 1
 					)
-				)
-			) else set "skip_profile=on"
+					if !foo! equ 0 (
+						call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'%home%\lists\ipset\*'"
+						call:cecho 7 "Параметр" 3 "!fletter!=%%N" 1 "отброшен"	
+					)				
+				) else set "skip_profile=on"
+			) else (
+				if "x%IPsetStatus%"=="xon" (
+					if exist %home%\lists\ipset\%%~N (
+						set "profile_param=!profile_param! --ipset=%home%\lists\ipset\%%~N"
+					) else (
+						call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'%home%\lists\ipset\%%~N'"
+						call:cecho 7 "Параметр" 3 "!fletter!=%%~N" 1 "отброшен"	
+					)
+				) else set "skip_profile=on"
+			)
+		) else if "x!fletter!"=="x--ipset-exclude" (
+			if "x%%~N"=="x" (
+				if "x%IPsetStatus%"=="xon" (
+					if not exist %home%\lists\ipset\exclude md %home%\lists\ipset\exclude >nul
+					set /a foo = 0
+					for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\ipset\exclude\*.txt') do (
+						set "profile_param=!profile_param! --ipset-exclude=%home%\lists\ipset\exclude\%%~X"
+						set /a foo = 1
+					)
+					if !foo! equ 0 (
+						call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'%home%\lists\ipset\exclude\*'"
+						call:cecho 7 "Параметр" 3 "!fletter!=%%N" 1 "отброшен"	
+					)				
+				) else set "skip_profile=on"
+			) else (
+				if "x%IPsetStatus%"=="xon" (
+					if exist %home%\lists\ipset\exclude\%%~N (
+						set "profile_param=!profile_param! --ipset-exclude=%home%\lists\ipset\exclude\%%~N"
+					) else (
+						call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'%home%\lists\ipset\exclude\%%~N'"
+						call:cecho 7 "Параметр" 3 "!fletter!=%%~N" 1 "отброшен"	
+					)
+				) else set "skip_profile=on"
+			)
 		) else if "x!fletter!"=="x--wf-tcp" (
 			if "x%%~N"=="x" (
 				if "x%PortFilter%"=="x0" set "skip_profile=on"
 				set "profile_param=!profile_param! --wf-tcp=%PortFilter%"
-			) else (
-				set "profile_param=!profile_param! --wf-tcp=%%~N"
-			)
+			) else set "profile_param=!profile_param! --wf-tcp=%%~N"
 		) else if "x!fletter!"=="x--wf-udp" (
 			if "x%%~N"=="x" (
 				if "x%PortFilter%"=="x0" set "skip_profile=on"
 				set "profile_param=!profile_param! --wf-udp=%PortFilter%"
-			) else (
-				set "profile_param=!profile_param! --wf-udp=%%~N"
-			)
+			) else set "profile_param=!profile_param! --wf-udp=%%~N"
 		) else if "x!fletter!"=="x--filter-udp" (
 			if "x%%~N"=="x" (
 				if "x%PortFilter%"=="x0" set "skip_profile=on"
 				set "profile_param=!profile_param! --filter-udp=%PortFilter%"
-			) else (
-				set "profile_param=!profile_param! --filter-udp=%%~N"
-			)
+			) else set "profile_param=!profile_param! --filter-udp=%%~N"
 		) else if "x!fletter!"=="x--filter-tcp" (
 			if "x%%~N"=="x" (
 				if "x%PortFilter%"=="x0" set "skip_profile=on"
 				set "profile_param=!profile_param! --filter-tcp=%PortFilter%"
-			) else (
-				set "profile_param=!profile_param! --filter-tcp=%%~N"
-			)
+			) else set "profile_param=!profile_param! --filter-tcp=%%~N"
 		) else if "x!fletter!"=="x--dpi-desync-split-seqovl-pattern" (
 			set "foo=%%~N"
 			set "foo=!foo: =!"
@@ -364,13 +426,9 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 			)
 		) else if "x%%~N"=="x" (
 			set "profile_param=!profile_param! %%~M"
-		) else (
-			set "profile_param=!profile_param! %%~M=%%~N"
-		)
+		) else set "profile_param=!profile_param! %%~M=%%~N"
 	)
-	if "x!skip_profile!"=="xoff" (
-		set "tmp_profile_param=!tmp_profile_param! !profile_param!"
-	)
+	if "x!skip_profile!"=="xoff" set "tmp_profile_param=!tmp_profile_param! !profile_param!"
 	
 	if "x!tmp_profile_param!"=="x " (
 		if "x%PortFilter%"=="x0" call:cecho 1 "Исключен" 7 "фильтр с параметром 'PortFilter=0'"
@@ -387,7 +445,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 	)
 )
 
-for /f "delims=" %%I in ('%home%\bin\zapret-win-bundle-master\zapret-winws\winws.exe --version') do set "foo=%%I"
+for /f "delims=" %%I in ('%home%\bin\windows-x86_64\winws.exe --version') do set "foo=%%I"
 set foo=%foo:(=[%
 set foo=%foo:)=]%
 call:cecho 7 "Windivert" 3 "'%foo%'" 7 "initialized"
@@ -413,11 +471,11 @@ for /l %%i in (1,1,%pcount%) do (
 	set foo=--comment [%strategy_name%][%PortFilter%][%IPsetStatus%][!sabout!][%daemon%][%debug%] !foo!
 	echo.!foo!>%home%\strategy\%strategy_name%\log\dry-run.strategy-%%i.log
 	call:cecho 7 "Проверка параметров" 3 "'%strategy_name%' [!sabout!]"
-	%home%\bin\zapret-win-bundle-master\zapret-winws\winws.exe --dry-run !foo! 2>&1 1>%home%\bin\status
+	%home%\bin\windows-x86_64\winws.exe --dry-run !foo! 2>&1 1>%home%\bin\status
 	if %errorlevel% neq 0 goto:strategy_list_arg_error
 	call:cecho 7 "Запуск" 3 "'%strategy_name%' [!sabout!]"
-	if "x%daemon%"=="xoff" start "%strategy_name%:[!sabout!] PortFilter:[%PortFilter%] IPset:[%IPsetStatus%] Debug:[%debug%]" %home%\bin\zapret-win-bundle-master\zapret-winws\winws.exe !foo!
-	if "x%daemon%"=="xon" %home%\bin\zapret-win-bundle-master\zapret-winws\winws.exe !foo! 1>nul 2>&1
+	if "x%daemon%"=="xoff" start "%strategy_name%:[!sabout!] PortFilter:[%PortFilter%] IPset:[%IPsetStatus%] Debug:[%debug%]" %home%\bin\windows-x86_64\winws.exe !foo!
+	if "x%daemon%"=="xon" %home%\bin\windows-x86_64\winws.exe !foo! 1>nul 2>&1
 	if %errorlevel% neq 0 goto:strategy_list_arg_error
 )
 if %pcount% neq 0 ( 
@@ -528,8 +586,9 @@ goto:menu_0
 echo.
 if not exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh (
 	echo.
-	echo.download developers code and put in '%home%\bin\zapret-win-bundle-master\'
-	echo.https://github.com/bol-van/zapret-win-bundle
+	echo.[5G[37mDownload developers code and put in '[33m%home%\bin\zapret-win-bundle-master\[37m'[0m
+	echo.
+	echo.[5Ghttps://github.com/bol-van/zapret-win-bundle
 	echo.
 	pause
 	goto:menu
@@ -599,8 +658,8 @@ for /F "eol=# skip=1 delims=" %%a in (%home%\lists\blockcheck.txt) do (
 	echo ENABLE_HTTPS_TLS12=1
 	echo ENABLE_HTTPS_TLS13=0
 	echo ENABLE_HTTP3=0
-	echo REPEATS=4
-	echo PARALLEL=0
+	echo REPEATS=8
+	echo PARALLEL=1
 	echo SCANLEVEL=standard
 	echo BATCH=1
 	echo DOMAINS="!foo!"

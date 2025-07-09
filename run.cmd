@@ -244,6 +244,14 @@ if %errorlevel% EQU 0 (
 )
 if %blkc% equ 1 goto:blockcheck
 
+if not exist %home%\bin\zapret-win-bundle-master\zapret-winws\winws.exe (
+	echo.
+	echo.download developers code and put in '%home%\bin\zapret-win-bundle-master\'
+	echo.https://github.com/bol-van/zapret-win-bundle
+	echo.
+	pause
+	goto:menu
+)
 if exist %home%\bin\status del /F /Q %home%\bin\status >nul
 set "winws_arg= "
 if exist %home%\strategy\%strategy_name%\about set /p about_strategy=<%home%\strategy\%strategy_name%\about
@@ -519,11 +527,12 @@ goto:menu_0
 :blockcheck
 echo.
 if not exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh (
-echo.
-echo.download developers code and put in '%home%\bin\zapret-win-bundle-master\'
-echo.https://github.com/bol-van/zapret-win-bundle
-echo.
-goto:menu
+	echo.
+	echo.download developers code and put in '%home%\bin\zapret-win-bundle-master\'
+	echo.https://github.com/bol-van/zapret-win-bundle
+	echo.
+	pause
+	goto:menu
 )
 if not exist %home%\lists\blockcheck.txt (
 	echo.[5G[37mДобавьте в '[33m%home%\lists\blockcheck.txt[37m' домены для сканирования.[0m

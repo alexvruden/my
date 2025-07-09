@@ -379,7 +379,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 	)
 )
 
-for /f "delims=" %%I in ('%home%\bin\winws.exe --version') do set "foo=%%I"
+for /f "delims=" %%I in ('%home%\bin\zapret-win-bundle-master\zapret-winws\winws.exe --version') do set "foo=%%I"
 set foo=%foo:(=[%
 set foo=%foo:)=]%
 call:cecho 7 "Windivert" 3 "'%foo%'" 7 "initialized"
@@ -405,11 +405,11 @@ for /l %%i in (1,1,%pcount%) do (
 	set foo=--comment [%strategy_name%][%PortFilter%][%IPsetStatus%][!sabout!][%daemon%][%debug%] !foo!
 	echo.!foo!>%home%\strategy\%strategy_name%\log\dry-run.strategy-%%i.log
 	call:cecho 7 "Проверка параметров" 3 "'%strategy_name%' [!sabout!]"
-	%home%\bin\winws.exe --dry-run !foo! 2>&1 1>%home%\bin\status
+	%home%\bin\zapret-win-bundle-master\zapret-winws\winws.exe --dry-run !foo! 2>&1 1>%home%\bin\status
 	if %errorlevel% neq 0 goto:strategy_list_arg_error
 	call:cecho 7 "Запуск" 3 "'%strategy_name%' [!sabout!]"
-	if "x%daemon%"=="xoff" start "%strategy_name%:[!sabout!] PortFilter:[%PortFilter%] IPset:[%IPsetStatus%] Debug:[%debug%]" %home%\bin\winws.exe !foo!
-	if "x%daemon%"=="xon" %home%\bin\winws.exe !foo! 1>nul 2>&1
+	if "x%daemon%"=="xoff" start "%strategy_name%:[!sabout!] PortFilter:[%PortFilter%] IPset:[%IPsetStatus%] Debug:[%debug%]" %home%\bin\zapret-win-bundle-master\zapret-winws\winws.exe !foo!
+	if "x%daemon%"=="xon" %home%\bin\zapret-win-bundle-master\zapret-winws\winws.exe !foo! 1>nul 2>&1
 	if %errorlevel% neq 0 goto:strategy_list_arg_error
 )
 if %pcount% neq 0 ( 
@@ -518,6 +518,13 @@ goto:menu_0
 
 :blockcheck
 echo.
+if not exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh (
+echo.
+echo.download developers code and put in '%home%\bin\zapret-win-bundle-master\'
+echo.https://github.com/bol-van/zapret-win-bundle
+echo.
+goto:menu
+)
 if not exist %home%\lists\blockcheck.txt (
 	echo.[5G[37mДобавьте в '[33m%home%\lists\blockcheck.txt[37m' домены для сканирования.[0m
 	(
@@ -588,21 +595,21 @@ for /F "eol=# skip=1 delims=" %%a in (%home%\lists\blockcheck.txt) do (
 	echo SCANLEVEL=standard
 	echo BATCH=1
 	echo DOMAINS="!foo!"
-)>%home%\bin\blockcheck\zapret\config_win
+)>%home%\bin\zapret-win-bundle-master\blockcheck\zapret\config_win
 chcp 1251 >nul
-if exist %home%\bin\blockcheck\zapret\config del /F /Q %home%\bin\blockcheck\zapret\config
+if exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\config del /F /Q %home%\bin\zapret-win-bundle-master\blockcheck\zapret\config
 
 rem CRLF to LF
 rem ----------------- http://stackoverflow.com/a/6379861/1012053
 (set LF=^
 %=EMPTY=%
 )
-for /F "delims=" %%a in (d:\dpi\bin\blockcheck\zapret\config_win) do (
-	<nul set /p =%%a!LF!>>%home%\bin\blockcheck\zapret\config
+for /F "delims=" %%a in (d:\dpi\bin\zapret-win-bundle-master\blockcheck\zapret\config_win) do (
+	<nul set /p =%%a!LF!>>%home%\bin\zapret-win-bundle-master\blockcheck\zapret\config
 )
 rem ----------------- http://stackoverflow.com/a/6379861/1012053
 
-start %home%\bin\cygwin\bin\bash -i "%home%\bin\blockcheck\zapret\blog.sh"
+start %home%\bin\zapret-win-bundle-master\cygwin\bin\bash -i "%home%\bin\zapret-win-bundle-master\blockcheck\zapret\blog.sh"
 echo.[5G[37mСканирование доменов из листа '[33m%home%\lists\blockcheck.txt[37m' запущено.[0m
 echo.
 for /l %%x in (5,-1,1) do (

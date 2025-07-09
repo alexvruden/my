@@ -2,15 +2,14 @@
 
 --wf-tcp=80
 --filter-tcp=80
-+hostlist
+--hostlist=
 --dpi-desync=fake,split2
 --dpi-desync-autottl=2
 --dpi-desync-fooling=md5sig
 
-# profile#6
 --new
 --filter-tcp=80
-+ipset
+--ipset=
 --dpi-desync=fake,split2
 --dpi-desync-autottl=2
 --dpi-desync-fooling=md5sig

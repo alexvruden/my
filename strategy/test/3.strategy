@@ -4,12 +4,12 @@
 --wf-udp=443
 
 ##profile 1: hostlist
-#--hostlist=
-#--dpi-desync=fake
-#--dpi-desync-repeats=6
-#--dpi-desync-fake-quic=quic_initial_www_google_com.bin
+--hostlist=
+--dpi-desync=fake
+--dpi-desync-repeats=6
+--dpi-desync-fake-quic=quic_initial_www_google_com.bin
 
-#--new
+--new
 
 ##profile 2: ipset
 --ipset=

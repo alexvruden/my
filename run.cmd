@@ -316,25 +316,12 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 						call:cecho 7 "Параметр" 3 "!fletter!=%%~N" 1 "отброшен"	
 					)
 				)
-			) else if "x!fletter!"=="x--hostlist-exclude" (
-				if "x%%~N"=="x" (
-					if not exist %home%\lists\hostlist\exclude md %home%\lists\hostlist\exclude >nul
-					set /a foo = 0
-					for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\hostlist\exclude\*.txt') do (
-						set "profile_param=!profile_param! --hostlist-exclude=%home%\lists\hostlist\exclude\%%X"
-						set /a foo = 1
-					)
-					if !foo! equ 0 (
-						call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'%home%\lists\hostlist\exclude\*'"
-						call:cecho 7 "Параметр" 3 "!fletter!=%%N" 1 "отброшен"	
-					)				
-				) else (
-					if exist %home%\lists\hostlist\exclude\%%~N (
-						set "profile_param=!profile_param! --hostlist-exclude=%home%\lists\hostlist\exclude\%%~N"
-					) else (
-						call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'%home%\lists\hostlist\exclude\%%~N'"
-						call:cecho 7 "Параметр" 3 "!fletter!=%%N" 1 "отброшен"	
-					)
+				if not exist %home%\lists\exclude (
+					md %home%\lists\exclude >nul
+					if not exist %home%\lists\exclude\exclude.txt echo.127.0.0.0/8 >%home%\lists\exclude\exclude.txt
+				)
+				for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\exclude\*.txt') do (
+					set "profile_param=!profile_param! --hostlist-exclude=%home%\lists\exclude\%%X"
 				)
 			) else if "x!fletter!"=="x--ipset" (
 				if "x%%~N"=="x" (
@@ -365,35 +352,12 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 						call:cecho 1 "Исключен" 7 "WinWS фильтр с параметром" 3 "'IPset=off'"
 					)
 				)
-			) else if "x!fletter!"=="x--ipset-exclude" (
-				if "x%%~N"=="x" (
-					if "x%IPsetStatus%"=="xon" (
-						if not exist %home%\lists\ipset\exclude md %home%\lists\ipset\exclude >nul
-						set /a foo = 0
-						for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\ipset\exclude\*.txt') do (
-							set "profile_param=!profile_param! --ipset-exclude=%home%\lists\ipset\exclude\%%~X"
-							set /a foo = 1
-						)
-						if !foo! equ 0 (
-							call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'%home%\lists\ipset\exclude\*'"
-							call:cecho 7 "Параметр" 3 "!fletter!=%%N" 1 "отброшен"	
-						)				
-					) else (
-						set "skip_profile=on"
-						call:cecho 1 "Исключен" 7 "WinWS фильтр с параметром" 3 "'IPset=off'"
-					)
-				) else (
-					if "x%IPsetStatus%"=="xon" (
-						if exist %home%\lists\ipset\exclude\%%~N (
-							set "profile_param=!profile_param! --ipset-exclude=%home%\lists\ipset\exclude\%%~N"
-						) else (
-							call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'%home%\lists\ipset\exclude\%%~N'"
-							call:cecho 7 "Параметр" 3 "!fletter!=%%~N" 1 "отброшен"	
-						)
-					) else (
-						set "skip_profile=on"
-						call:cecho 1 "Исключен" 7 "WinWS фильтр с параметром" 3 "'IPset=off'"
-					)
+				if not exist %home%\lists\exclude (
+					md %home%\lists\exclude >nul
+					if not exist %home%\lists\exclude\exclude.txt echo.127.0.0.0/8 >%home%\lists\exclude\exclude.txt
+				)
+				for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\exclude\*.txt') do (
+					set "profile_param=!profile_param! --ipset-exclude=%home%\lists\exclude\%%~X"
 				)
 			) else if "x!fletter!"=="x--wf-tcp" (
 				if "x!sabout!"=="x" (

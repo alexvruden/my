@@ -271,7 +271,6 @@ del /F /Q %home%\strategy\%strategy_name%\log\* >nul
 call:cecho 7 "Парсинг параметров, см." 3 "%home%\strategy\%strategy_name%\log\"
 set /a pcount=0
 set /a scount=0
-set /a scount_new=0
 for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strategy') do (
 	set "skip_profile=off"
 	set "skip_WinDivert=off"
@@ -483,7 +482,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 				)
 			) else if "x!fletter!"=="x--new" (
 				if "x!skip_profile!"=="xoff" (
-					set /a scount_new=!scount_new! + 1
+					set /a scount=!scount! + 1
 					if "x!tmp_profile_param!"=="x" ( set "tmp_profile_param=!profile_param!" ) else ( set "tmp_profile_param=!tmp_profile_param! !profile_param!" )
 					set "profile_param=--new"
 					if "x!sabout!"=="x" ( 
@@ -505,7 +504,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 	
 	if "x!skip_WinDivert!"=="xoff" (
 		if "x!skip_profile!"=="xoff" (
-			set /a scount=!scount! + 1 + !scount_new!
+			set /a scount=!scount! + 1
 			if "x!tmp_profile_param!"=="x" ( 
 				set "tmp_profile_param=!profile_param!" 
 			) else (
@@ -517,9 +516,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 				if not "x!psabout!"=="x" set "sabout=!sabout! !psabout!" 
 			)
 		) else (
-			set /a scount=!scount! - 1
 			set "skip_profile=off"
-			if !scount_new! neq 0 set /a scount_new=!scount_new! - 1
 		)
 		
 		if not "x!tmp_profile_param!"=="x " (
@@ -528,11 +525,9 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 			if "x!psabout!"=="x" ( 
 				set "sabout=no about" 
 			)
-			echo.!sabout!>>%home%\strategy\%strategy_name%\log\%%~nxI-about.log
+			echo.!sabout!>>%home%\strategy\%strategy_name%\log\!pcount!-about.log
 		)
 	)
-	set /a scount_new=0
-	
 )
 
 for /f "delims=" %%I in ('%winwsdir%\winws.exe --version') do set "foo=%%I"
@@ -543,9 +538,9 @@ call:cecho 7 "Windivert" 3 "'%foo%'" 7 "initialized"
 
 for /l %%i in (1,1,%pcount%) do (
 	set "sabout=x"
-	if exist %home%\strategy\%strategy_name%\log\%%i.strategy-about.log set /p sabout=<%home%\strategy\%strategy_name%\log\%%i.strategy-about.log
+	if exist %home%\strategy\%strategy_name%\log\%%i-about.log set /p sabout=<%home%\strategy\%strategy_name%\log\%%i-about.log
 	set "foo=!winws_arg%%i!"
-	echo.!foo!>>%home%\strategy\%strategy_name%\log\strategy-%%i.log
+	echo.!foo!>>%home%\strategy\%strategy_name%\log\%%i-run.log
 	set "debug_status=%debug%"
 	if "x%debug%"=="xon" (
 		set foo=--debug=1 !foo!
@@ -554,13 +549,13 @@ for /l %%i in (1,1,%pcount%) do (
 	) else (
 		if not exist %home%\strategy\%strategy_name%\debug md %home%\strategy\%strategy_name%\debug >nul
 		del /F /Q %home%\strategy\%strategy_name%\debug\* >nul
-		set foo=--debug=@%home%\strategy\%strategy_name%\debug\%%i.strategy-debug.log !foo!
-		call:cecho 7 "Запись отладочных сообщений стратегии в файл" 3 "'%home%\strategy\%strategy_name%\debug\%%i.strategy-debug.log'"
+		set foo=--debug=@%home%\strategy\%strategy_name%\debug\%%i-debug.log !foo!
+		call:cecho 7 "Запись отладочных сообщений стратегии в файл" 3 "'%home%\strategy\%strategy_name%\debug\%%i-debug.log'"
 	)
 	
 	if "x%daemon%"=="xon" set foo=--daemon !foo!
 	set foo=--comment [%strategy_name%][%PortFilter%][%IPsetStatus%][!sabout!][%daemon%][%debug%] !foo!
-	echo.!foo!>%home%\strategy\%strategy_name%\log\dry-run.strategy-%%i.log
+	echo.!foo!>%home%\strategy\%strategy_name%\log\%%i-dry-run.log
 	call:cecho 7 "Проверка параметров" 3 "'%strategy_name%' [!sabout!]"
 	%winwsdir%\winws.exe --dry-run !foo! 2>&1 1>%home%\bin\status
 	if %errorlevel% neq 0 goto:strategy_list_arg_error

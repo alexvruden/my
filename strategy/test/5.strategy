@@ -1,0 +1,15 @@
+#tcp: user, profile #1: ipset
+
+##udp: user
+--wf-tcp=
+
+##profile 1: ipset
+
+--ipset=
+--dpi-desync=split2
+--dpi-desync-split-seqovl=681
+--dpi-desync-split-pos=1
+--dpi-desync-fooling=badseq,hopbyhop2
+--dpi-desync-split-seqovl-pattern=tls_clienthello_www_google_com.bin
+
+# profile#0

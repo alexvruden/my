@@ -1,8 +1,0 @@
-#zapret: udp=50000-50099
-
---wf-udp=50000-50099
-
---filter-udp=50000-50099
---filter-l7=discord,stun
---dpi-desync=fake
-

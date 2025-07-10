@@ -1,0 +1,20 @@
+# test - skip this line
+
+##tcp: 80
+--wf-tcp=80
+
+# this user comments here
+
+##profile 1: hostlist
+--hostlist=
+--dpi-desync=fake,split2
+--dpi-desync-autottl=2
+--dpi-desync-fooling=md5sig
+
+--new
+
+##profile 2: ipset
+--ipset=
+--dpi-desync=fake,split2
+--dpi-desync-autottl=2
+--dpi-desync-fooling=md5sig

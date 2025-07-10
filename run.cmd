@@ -635,7 +635,7 @@ goto:menu_0
 
 :blockcheck
 echo.
-if not exist %home%\bin\zapret-win-bundle-master\cygwin\bin\bash (
+if not exist %home%\bin\zapret-win-bundle-master\cygwin\bin\bash.exe (
 	echo.[5G[31mОшибка. [37mФайл не найден: '[33m%home%\bin\zapret-win-bundle-master\cygwin\bin\bash[37m'[0m
 	goto:err_blockcheck
 )

@@ -23,6 +23,7 @@ set /a c5=50
 set /a blkc=0
 set "arg_1=%~1"
 set "arg_2=%~2"
+set "arg_3=%~3"
 
 >nul dism ||( 
 	echo.Для некоторых действий сценария необходимы высокие привилегии, запустите скрипт с правами 'Администратора'.
@@ -127,7 +128,7 @@ if "x%arg_1%"=="xstart" (
 	if "x%arg_2%"=="x" ( 
 		set /a ecode=1
 		echo.[5G[31mПустой аргумент: [37m'[33m%arg_2%[37m'[0m]
-		goto:menu_0
+		goto:strategy_list_end
 	) else ( 
 		set "strategy_name=%arg_2%" 
 	)
@@ -294,14 +295,46 @@ if not exist %home%\lists\exclude md %home%\lists\exclude >nul
 for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\exclude\*.txt') do (
 	set "zapret_hosts_user_exclude=%zapret_hosts_user_exclude% --hostlist-exclude=%home%\lists\exclude\%%X"
 )
-
+set "daemon_bakup=%daemon%"
+set "debug_bakup=%debug%"
+set "PortFilter_bakup=%PortFilter%"
+set "IPsetStatus_bakup=%IPsetStatus%"
+if not defined arg_3 goto:arg_3_default
+if "x%arg_3:~0,1%"=="x0" (
+	set "daemon=off"
+) else (
+	if "x%arg_3:~0,1%"=="x1" (
+		set "daemon=on"
+	) else goto:error_arg3
+)
+if "x%arg_3:~1,1%"=="x0" (
+	set "debug=off"
+) else (
+	if "x%arg_3:~1,1%"=="x1" (
+		set "debug=on"
+	) else goto:error_arg3
+)
+if "x%arg_3:~2,1%"=="x0" (
+	set "PortFilter=0"
+) else (
+	if "x%arg_3:~2,1%"=="x1" (
+		set /p PortFilter=<%home%\bin\port_filter
+	) else goto:error_arg3
+)
+if "x%arg_3:~3,1%"=="x0" (
+	set "IPsetStatus=off"
+) else (
+	if "x%arg_3:~3,1%"=="x1" (
+		set "IPsetStatus=on"
+	) else goto:error_arg3
+)
+:arg_3_default
 call:cecho 7 "Парсинг параметров, см." 3 "%home%\strategy\%strategy_name%\log\"
 set /a pcount=0
 set /a scount=0
 for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strategy') do (
 	set "skip_profile=off"
 	set "skip_WinDivert=off"
-	rem set "profile_param=--comment strategy-%%~nI"
 	set "profile_param= "
 	set "tmp_profile_param= "
 	set "sabout="
@@ -555,24 +588,25 @@ if %pcount% neq 0 (
 	set /a ecode=1
 )
 :strategy_list_end
-if "x%arg_1%"=="xstart" exit /b %ecode%
 echo.
 pause
+if "x%arg_1%"=="xstart" (
+	set "daemon=%daemon_bakup%"
+	set "debug=%debug_bakup%"
+	set "PortFilter=%PortFilter_bakup%"
+	set "IPsetStatus=%IPsetStatus_bakup%"
+	exit /b %ecode%
+)
 REM for /l %%x in (5,-1,1) do (
 	REM echo.[F
 	REM <nul set /p =[5G[37mВозврат в меню через [32m%%x[37m с.[0m
 	REM timeout /T 1 /NOBREAK >nul
 REM )
 goto menu
-REM :strategy_list_parse_error
-REM call:cecho 1 "Ошибка." 7 "Парсинг файла профиля, смотри в" 3 "'%home%\log\%strategy_name%.profiles.log'"
-REM set /a ecode=1
-REM goto:strategy_list_end
-REM :strategy_list_nofile_error
-REM call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'%winws_arg%'"
-REM set "winws_arg="
-REM set /a ecode=1
-REM goto:strategy_list_end
+:error_arg3
+set /a ecode=1
+echo.[5G[31mНеверный аргумент #3: [37m'[33m%arg_3%[37m'[0m]
+goto:strategy_list_end
 :strategy_list_arg_error
 call:cecho 1 "Ошибка." 7 "Подробности смотри в" 3 "'%home%\strategy\%strategy_name%\log\%scount%-status.log'"
 set /a ecode=1
@@ -743,6 +777,7 @@ for /F "eol=# skip=1 delims=" %%a in (%home%\lists\blockcheck.txt) do (
 	echo SCANLEVEL=standard
 	echo BATCH=1
 	rem echo PKTWS_EXTRA='user strategy for test'
+	rem echo PKTWS_EXTRA='--wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig'
 	echo DOMAINS="!foo!"
 )>%home%\bin\zapret-win-bundle-master\blockcheck\zapret\config_win
 chcp 1251 >nul

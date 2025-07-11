@@ -5,6 +5,8 @@ echo.]0;Bypassing Censorship
 set "PortFilterStatus=off"
 set "IPsetStatus=off"
 set "strategy_run="
+set /a socks5=0
+set /a ecode=0
 set /a ccall=0
 set "debug=off"
 set "daemon=on"
@@ -19,6 +21,8 @@ set /a c3=12
 set /a c4=30
 set /a c5=50
 set /a blkc=0
+set "arg_1=%~1"
+set "arg_2=%~2"
 
 >nul dism ||( 
 	echo.Для некоторых действий сценария необходимы высокие привилегии, запустите скрипт с правами 'Администратора'.
@@ -27,6 +31,7 @@ set /a blkc=0
 	pause
 	exit
 )
+
 echo.[39;49m
 if not exist %home%\bin\port_filter echo.1024-65535>%home%\bin\port_filter
 if not exist %home%\bin\port_filter.status echo.off>%home%\bin\port_filter.status
@@ -36,7 +41,7 @@ if not exist %home%\bin\debugpar echo.off>%home%\bin\debugpar
 
 :menu
 cls
-echo.
+echo.[32mAuto Refresh screen every 60 sec.[0m
 if exist %home%\bin\port_filter.status set /p PortFilterStatus=<%home%\bin\port_filter.status
 if exist %home%\bin\daemonpar set /p daemon=<%home%\bin\daemonpar
 if exist %home%\bin\debugpar set /p debug=<%home%\bin\debugpar
@@ -48,6 +53,12 @@ if "x%PortFilterStatus%"=="xon" (
 set "PortFilter=%PortFilter: =%"
 set /p IPsetStatus=<%home%\bin\ipset.status
 set "winws_pid="
+set /a socks5=0
+tasklist /FI "IMAGENAME eq 3proxy.exe" | find /I "3proxy.exe" > nul
+if %errorlevel% equ 0 (
+	echo.[32mSOCKS5 WiFi hotspot ON[0m
+	set /a socks5=1
+) else echo.
 set /a foo=0
 for /f "tokens=2 delims=," %%i in ('2^>nul tasklist /FI "IMAGENAME eq winws.exe" /fo csv /nh') do (
 	set /a foo=!foo!+1
@@ -112,6 +123,16 @@ if %profile_count% GTR 0 (
 )
 echo.
 rem --------------------------------------
+if "x%arg_1%"=="xstart" (
+	if "x%arg_2%"=="x" ( 
+		set /a ecode=1
+		echo.[5G[31mПустой аргумент: [37m'[33m%arg_2%[37m'[0m]
+		goto:menu_0
+	) else ( 
+		set "strategy_name=%arg_2%" 
+	)
+	goto:terminate
+)
 
 set /a foo=1
 set /a menu_count=0
@@ -206,6 +227,7 @@ if "x%strategy_name%"=="x" (
 
 :terminate
 if not defined strategy_run goto:terminate_done
+if "x%arg_1%"=="xstart" goto:terminate_all
 if %menu_choice% EQU %terminate_count% goto:terminate_all
 if %menu_choice% GTR %terminate_count% goto:terminate_one
 :terminate_all
@@ -215,6 +237,7 @@ for /l %%i in (1,1,%profile_count%) do (
 		powershell -NoP -sta -NonI -Command "Stop-Process -Id !pid%%i! -Force" 1>nul 2>&1
 	)
 )
+if "x%arg_1%"=="xstart" goto:terminate_done
 if %menu_choice% EQU %terminate_count% (
 	call:cecho 2 "Готово"
 	echo.
@@ -264,7 +287,7 @@ set "winwsdir=%foo%"
 set "fakedir=%foo:~0,-24%\files\fake"
 
 if exist %home%\bin\status del /F /Q %home%\bin\status >nul
-set "winws_arg= "
+REM set "winws_arg= "
 if exist %home%\strategy\%strategy_name%\about set /p about_strategy=<%home%\strategy\%strategy_name%\about
 if not exist %home%\strategy\%strategy_name%\log md %home%\strategy\%strategy_name%\log >nul
 del /F /Q %home%\strategy\%strategy_name%\log\* >nul
@@ -274,7 +297,8 @@ set /a scount=0
 for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strategy') do (
 	set "skip_profile=off"
 	set "skip_WinDivert=off"
-	set "profile_param=--comment strategy-%%~nI"
+	rem set "profile_param=--comment strategy-%%~nI"
+	set "profile_param= "
 	set "tmp_profile_param= "
 	set "sabout="
 	set "psabout="
@@ -501,10 +525,7 @@ call:cecho 7 "Создано профилей:" 3 "'%scount%'"
 call:cecho 7 "Windivert" 3 "'%foo%'" 7 "initialized"
 
 for /l %%i in (1,1,%pcount%) do (
-	set "sabout=x"
-	if exist %home%\strategy\%strategy_name%\log\%%i-about.log set /p sabout=<%home%\strategy\%strategy_name%\log\%%i-about.log
 	set "foo=!winws_arg%%i!"
-	echo.!foo!>>%home%\strategy\%strategy_name%\log\%%i-run.log
 	set "debug_status=%debug%"
 	if "x%debug%"=="xon" (
 		set foo=--debug=1 !foo!
@@ -518,9 +539,12 @@ for /l %%i in (1,1,%pcount%) do (
 	)
 	
 	if "x%daemon%"=="xon" set foo=--daemon !foo!
+	set "sabout=x"
+	if exist %home%\strategy\%strategy_name%\log\%%i-about.log set /p sabout=<%home%\strategy\%strategy_name%\log\%%i-about.log
 	set foo=--comment [%strategy_name%][%PortFilter%][%IPsetStatus%][!sabout!][%daemon%][%debug%] !foo!
-	echo.!foo!>%home%\strategy\%strategy_name%\log\%%i-dry-run.log
-	call:cecho 7 "Проверка параметров" 3 "'%strategy_name%' [!sabout!]"
+	rem echo.!foo!>%home%\strategy\%strategy_name%\log\%%i-dry-run.log
+	echo.!foo!>>%home%\strategy\%strategy_name%\log\%%i-run.log
+	rem call:cecho 7 "Проверка параметров" 3 "'%strategy_name%' [!sabout!]"
 	%winwsdir%\winws.exe --dry-run !foo! 2>&1 1>%home%\bin\status
 	if %errorlevel% neq 0 goto:strategy_list_arg_error
 	call:cecho 7 "Запуск" 3 "'%strategy_name%' [!sabout!]"
@@ -530,10 +554,13 @@ for /l %%i in (1,1,%pcount%) do (
 )
 if %pcount% neq 0 ( 
 	call:cecho 2 "Готово" 
-) else call:cecho 1 "Отсутствуют параметры стратегии" 
-
-set /a ecode=0
+	set /a ecode=0
+) else (
+	call:cecho 1 "Отсутствуют параметры стратегии" 
+	set /a ecode=1
+)
 :strategy_list_end
+if "x%arg_1%"=="xstart" exit /b %ecode%
 echo.
 pause
 REM for /l %%x in (5,-1,1) do (
@@ -542,15 +569,15 @@ REM for /l %%x in (5,-1,1) do (
 	REM timeout /T 1 /NOBREAK >nul
 REM )
 goto menu
-:strategy_list_parse_error
-call:cecho 1 "Ошибка." 7 "Парсинг файла профиля, смотри в" 3 "'%home%\log\%strategy_name%.profiles.log'"
-set /a ecode=1
-goto:strategy_list_end
-:strategy_list_nofile_error
-call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'%winws_arg%'"
-set "winws_arg="
-set /a ecode=1
-goto:strategy_list_end
+REM :strategy_list_parse_error
+REM call:cecho 1 "Ошибка." 7 "Парсинг файла профиля, смотри в" 3 "'%home%\log\%strategy_name%.profiles.log'"
+REM set /a ecode=1
+REM goto:strategy_list_end
+REM :strategy_list_nofile_error
+REM call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'%winws_arg%'"
+REM set "winws_arg="
+REM set /a ecode=1
+REM goto:strategy_list_end
 :strategy_list_arg_error
 call:cecho 1 "Ошибка." 7 "Подробности смотри в" 3 "'%home%\bin\status'"
 set /a ecode=1
@@ -562,7 +589,7 @@ for /l %%x in (5,-1,1) do (
 	<nul set /p =[5G[37mВыход через [32m%%x[37m с.[0m
 	timeout /T 1 /NOBREAK >nul
 )
-exit /b
+exit /b %ecode%
 
 :menu_1
 if "x%daemon%"=="xon" ( set "daemon=off" ) else ( set "daemon=on" )

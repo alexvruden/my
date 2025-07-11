@@ -56,7 +56,7 @@ set "winws_pid="
 set /a socks5=0
 tasklist /FI "IMAGENAME eq 3proxy.exe" | find /I "3proxy.exe" > nul
 if %errorlevel% equ 0 (
-	echo.[32mSOCKS5 WiFi hotspot ON[0m
+	echo.[37mSOCKS[31m5 [37mWiFi hotspot [32mON[0m
 	set /a socks5=1
 ) else echo.
 set /a foo=0
@@ -286,11 +286,15 @@ if not exist %foo%\winws.exe (
 set "winwsdir=%foo%"
 set "fakedir=%foo:~0,-24%\files\fake"
 
-if exist %home%\bin\status del /F /Q %home%\bin\status >nul
-REM set "winws_arg= "
 if exist %home%\strategy\%strategy_name%\about set /p about_strategy=<%home%\strategy\%strategy_name%\about
 if not exist %home%\strategy\%strategy_name%\log md %home%\strategy\%strategy_name%\log >nul
 del /F /Q %home%\strategy\%strategy_name%\log\* >nul
+set "zapret_hosts_user_exclude=--hostlist-exclude=%winwsdir:~0,-24%\ipset\zapret-hosts-user-exclude.txt.default"
+if not exist %home%\lists\exclude md %home%\lists\exclude >nul
+for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\exclude\*.txt') do (
+	set "zapret_hosts_user_exclude=%zapret_hosts_user_exclude% --hostlist-exclude=%home%\lists\exclude\%%X"
+)
+
 call:cecho 7 "Парсинг параметров, см." 3 "%home%\strategy\%strategy_name%\log\"
 set /a pcount=0
 set /a scount=0
@@ -340,13 +344,6 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 						call:cecho 7 "Параметр" 3 "!fletter!=%%~N" 1 "отброшен"	
 					)
 				)
-				if not exist %home%\lists\exclude (
-					md %home%\lists\exclude >nul
-					if not exist %home%\lists\exclude\exclude.txt echo.127.0.0.0/8 >%home%\lists\exclude\exclude.txt
-				)
-				for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\exclude\*.txt') do (
-					set "profile_param=!profile_param! --hostlist-exclude=%home%\lists\exclude\%%X"
-				)
 			) else if "x!fletter!"=="x--ipset" (
 				if "x%%~N"=="x" (
 					if "x%IPsetStatus%"=="xon" (
@@ -375,13 +372,6 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 						set "skip_profile=on"
 						call:cecho 1 "Исключен" 7 "WinWS фильтр с параметром" 3 "'IPset=off'"
 					)
-				)
-				if not exist %home%\lists\exclude (
-					md %home%\lists\exclude >nul
-					if not exist %home%\lists\exclude\exclude.txt echo.127.0.0.0/8 >%home%\lists\exclude\exclude.txt
-				)
-				for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\exclude\*.txt') do (
-					set "profile_param=!profile_param! --ipset-exclude=%home%\lists\exclude\%%~X"
 				)
 			) else if "x!fletter!"=="x--wf-tcp" (
 				if "x!sabout!"=="x" (
@@ -471,7 +461,11 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 			) else if "x!fletter!"=="x--new" (
 				if "x!skip_profile!"=="xoff" (
 					set /a scount=!scount! + 1
-					if "x!tmp_profile_param!"=="x" ( set "tmp_profile_param=!profile_param!" ) else ( set "tmp_profile_param=!tmp_profile_param! !profile_param!" )
+					if "x!tmp_profile_param!"=="x" ( 
+						set "tmp_profile_param=!profile_param! %zapret_hosts_user_exclude%" 
+					) else ( 
+						set "tmp_profile_param=!tmp_profile_param! !profile_param! %zapret_hosts_user_exclude%" 
+					)
 					set "profile_param=--new"
 					if "x!sabout!"=="x" ( 
 						if not "x!psabout!"=="x" set "sabout=!psabout!" 
@@ -494,9 +488,9 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 		if "x!skip_profile!"=="xoff" (
 			set /a scount=!scount! + 1
 			if "x!tmp_profile_param!"=="x" ( 
-				set "tmp_profile_param=!profile_param!" 
+				set "tmp_profile_param=!profile_param! %zapret_hosts_user_exclude%" 
 			) else (
-				set "tmp_profile_param=!tmp_profile_param! !profile_param!"
+				set "tmp_profile_param=!tmp_profile_param! !profile_param! %zapret_hosts_user_exclude%"
 			)
 			if "x!sabout!"=="x" ( 
 				if not "x!psabout!"=="x" set "sabout=!psabout!" 
@@ -523,8 +517,9 @@ set foo=%foo:(=[%
 set foo=%foo:)=]%
 call:cecho 7 "Создано профилей:" 3 "'%scount%'"
 call:cecho 7 "Windivert" 3 "'%foo%'" 7 "initialized"
-
+set /a scount=0
 for /l %%i in (1,1,%pcount%) do (
+	set /a scount=%%i
 	set "foo=!winws_arg%%i!"
 	set "debug_status=%debug%"
 	if "x%debug%"=="xon" (
@@ -545,7 +540,7 @@ for /l %%i in (1,1,%pcount%) do (
 	rem echo.!foo!>%home%\strategy\%strategy_name%\log\%%i-dry-run.log
 	echo.!foo!>>%home%\strategy\%strategy_name%\log\%%i-run.log
 	rem call:cecho 7 "Проверка параметров" 3 "'%strategy_name%' [!sabout!]"
-	%winwsdir%\winws.exe --dry-run !foo! 2>&1 1>%home%\bin\status
+	%winwsdir%\winws.exe --dry-run !foo! 2>&1 1>%home%\strategy\%strategy_name%\log\%%i-status.log
 	if %errorlevel% neq 0 goto:strategy_list_arg_error
 	call:cecho 7 "Запуск" 3 "'%strategy_name%' [!sabout!]"
 	if "x%daemon%"=="xoff" start "%strategy_name%:[!sabout!] PortFilter:[%PortFilter%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !foo!
@@ -579,7 +574,7 @@ REM set "winws_arg="
 REM set /a ecode=1
 REM goto:strategy_list_end
 :strategy_list_arg_error
-call:cecho 1 "Ошибка." 7 "Подробности смотри в" 3 "'%home%\bin\status'"
+call:cecho 1 "Ошибка." 7 "Подробности смотри в" 3 "'%home%\strategy\%strategy_name%\log\%scount%-status.log'"
 set /a ecode=1
 goto:strategy_list_end
 
@@ -744,9 +739,10 @@ for /F "eol=# skip=1 delims=" %%a in (%home%\lists\blockcheck.txt) do (
 	echo ENABLE_HTTPS_TLS13=0
 	echo ENABLE_HTTP3=0
 	echo REPEATS=8
-	echo PARALLEL=1
+	echo PARALLEL=0
 	echo SCANLEVEL=standard
 	echo BATCH=1
+	rem echo PKTWS_EXTRA='user strategy for test'
 	echo DOMAINS="!foo!"
 )>%home%\bin\zapret-win-bundle-master\blockcheck\zapret\config_win
 chcp 1251 >nul

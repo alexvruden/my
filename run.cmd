@@ -134,6 +134,9 @@ if "x%arg_1%"=="xstart" (
 	)
 	goto:terminate
 )
+if "x%arg_1%"=="xstop" (
+	goto:terminate
+)
 
 set /a foo=1
 set /a menu_count=0
@@ -141,9 +144,13 @@ if "x%daemon%"=="xon" set /a foo=2
 echo.[%c1%G[37m1.[%c2%GДемон[%c5%G[[3%foo%m%daemon%[0m]
 set /a menu_count=%menu_count%+1
 set /a foo=1
+set "atten="
 if "x%debug%"=="xon" set /a foo=2
-if "x%debug%"=="x@filename" set /a foo=7
-echo.[%c1%G[37m2.[%c2%GОтладка[%c5%G[[3%foo%m%debug%[0m]
+if "x%debug%"=="x@filename" (
+	set /a foo=7
+	set "atten=very slow"
+)
+echo.[%c1%G[37m2.[%c2%GОтладка[%c5%G[[3%foo%m%debug%[0m] [31m%atten%[0m
 set /a menu_count=%menu_count%+1
 if "x%PortFilterStatus%"=="xon" echo.[%c1%G[37m3.[%c2%GДиапазон портов для фильтрации[%c5%G[%PortFilter%]
 if "x%PortFilterStatus%"=="xoff" echo.[%c1%G[37m3.[%c2%GДиапазон портов для фильтрации[%c5%G[[31m%PortFilterStatus%[0m]
@@ -237,6 +244,7 @@ if "x%strategy_name%"=="x" (
 :terminate
 if not defined strategy_run goto:terminate_done
 if "x%arg_1%"=="xstart" goto:terminate_all
+if "x%arg_1%"=="xstop" goto:terminate_all
 if %menu_choice% EQU %terminate_count% goto:terminate_all
 if %menu_choice% GTR %terminate_count% goto:terminate_one
 :terminate_all
@@ -247,6 +255,7 @@ for /l %%i in (1,1,%profile_count%) do (
 	)
 )
 if "x%arg_1%"=="xstart" goto:terminate_done
+if "x%arg_1%"=="xstop" goto:terminate_done
 if %menu_choice% EQU %terminate_count% (
 	call:cecho 2 "Готово"
 	echo.
@@ -279,6 +288,7 @@ if %errorlevel% EQU 0 (
 	sc delete windivert 1>nul 2>&1
 	rem sc stop windivert 1>nul 2>&1
 )
+if "x%arg_1%"=="xstop" exit /b
 if %blkc% equ 1 goto:blockcheck
 
 set "foo="
@@ -415,11 +425,6 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 					)
 				)
 			) else if "x!fletter!"=="x--wf-tcp" (
-				if "x!sabout!"=="x" (
-					set "sabout=!psabout!" 
-				) else (
-					set "sabout=!sabout! !psabout!" 
-				)
 				if "x%%~N"=="x" (
 					if "x%PortFilter%"=="x0" (
 						set "skip_WinDivert=on"
@@ -429,12 +434,12 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 				) else (
 					if "x!sWinDivert!"=="x" ( set "sWinDivert=--wf-tcp=%%~N" ) else ( set "sWinDivert=!sWinDivert! --wf-tcp=%%~N" )
 				)
-			) else if "x!fletter!"=="x--wf-udp" (
 				if "x!sabout!"=="x" (
-					set "sabout=!psabout!" 
+					if "x!psabout!"=="x" ( set "sabout=!sWinDivert:~5!" ) else ( set "sabout=!psabout!" )
 				) else (
-					set "sabout=!sabout! !psabout!" 
+					if "x!psabout!"=="x" ( set "sabout=!sabout! !sWinDivert:~5!" ) else ( set "sabout=!sabout! !psabout!" )
 				)
+			) else if "x!fletter!"=="x--wf-udp" (
 				if "x%%~N"=="x" (
 					if "x%PortFilter%"=="x0" (
 						set "skip_WinDivert=on"
@@ -443,6 +448,11 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 					if "x!sWinDivert!"=="x" ( set "sWinDivert=--wf-udp=%PortFilter%" ) else ( set "sWinDivert=!sWinDivert! --wf-udp=%PortFilter%" )
 				) else (
 					if "x!sWinDivert!"=="x" ( set "sWinDivert=--wf-udp=%%~N" ) else ( set "sWinDivert=!sWinDivert! --wf-udp=%%~N" )
+				)
+				if "x!sabout!"=="x" (
+					if "x!psabout!"=="x" ( set "sabout=!sWinDivert:~5!" ) else ( set "sabout=!psabout!" )
+				) else (
+					if "x!psabout!"=="x" ( set "sabout=!sabout! !sWinDivert:~5!" ) else ( set "sabout=!sabout! !psabout!" )
 				)
 			) else if "x!fletter!"=="x--filter-udp" (
 				if "x%%~N"=="x" (
@@ -545,7 +555,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 		if not "x!tmp_profile_param!"=="x " (
 			set /a pcount=!pcount!+1
 			set "winws_arg!pcount!=!sWinDivert! !tmp_profile_param!"
-			if "x!psabout!"=="x" ( 
+			if "x!sabout!"=="x" ( 
 				set "sabout=no about" 
 			)
 			echo.!sabout!>>%home%\strategy\%strategy_name%\log\!pcount!-about.log
@@ -559,6 +569,7 @@ set foo=%foo:)=]%
 call:cecho 7 "Создано профилей:" 3 "'%scount%'"
 call:cecho 7 "Windivert" 3 "'%foo%'" 7 "initialized"
 set /a scount=0
+if %pcount% neq 0 call:cecho 7 "Запуск" 3 "'%strategy_name%'"
 for /l %%i in (1,1,%pcount%) do (
 	set /a scount=%%i
 	set "foo=!winws_arg%%i!"
@@ -583,7 +594,7 @@ for /l %%i in (1,1,%pcount%) do (
 	rem call:cecho 7 "Проверка параметров" 3 "'%strategy_name%' [!sabout!]"
 	%winwsdir%\winws.exe --dry-run !foo! 2>&1 1>%home%\strategy\%strategy_name%\log\%%i-status.log
 	if %errorlevel% neq 0 goto:strategy_list_arg_error
-	call:cecho 7 "Запуск" 3 "'%strategy_name%' [!sabout!]"
+	call:cecho 3 "'!sabout!'"
 	if "x%daemon%"=="xoff" start "%strategy_name%:[!sabout!] PortFilter:[%PortFilter%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !foo!
 	if "x%daemon%"=="xon" %winwsdir%\winws.exe !foo! 1>nul 2>&1
 	if %errorlevel% neq 0 goto:strategy_list_arg_error

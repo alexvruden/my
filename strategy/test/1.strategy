@@ -1,11 +1,13 @@
 # test - skip this line
+# if line begin # - comment this file, skip parsing
+# this user comments here blabla
 
-##tcp: 80
+# if line begin ## - comment use in parsing for 'about' this strategy and rules
+
+##tcp=80
 --wf-tcp=80
 
-# this user comments here
-
-##profile 1: hostlist
+##rule 1: hostlist
 --hostlist=
 --dpi-desync=fake,split2
 --dpi-desync-autottl=2
@@ -13,7 +15,7 @@
 
 --new
 
-##profile 2: ipset
+##rule 2: ipset
 --ipset=
 --dpi-desync=fake,split2
 --dpi-desync-autottl=2

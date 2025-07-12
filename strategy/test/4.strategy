@@ -1,12 +1,12 @@
-#udp: 50000-50100, profile #1: discord,stun
+#discord,stun
 
 
-##udp: 50000-50100
+#udp: 50000-50100
 --wf-udp=50000-50100
 
-##profile 1: filter-l7=discord,stun
+#rule 1: filter-l7=discord,stun
 --filter-l7=discord,stun
 --dpi-desync=fake
 --dpi-desync-repeats=6
 
-# profile#0
+# rule 0

@@ -1,9 +1,9 @@
-#tcp: 443, profile #1: hostlist,profile #2: ipset
+#blabla
 
-##tcp: 443
+#tcp: 443
 --wf-tcp=443
 
-##profile 1: hostlist
+#rule 1: hostlist
 --hostlist=
 --dpi-desync=split2
 --dpi-desync-repeats=2
@@ -14,7 +14,7 @@
 
 --new
 
-##profile 2: ipset
+#rule 2: ipset
 --ipset=
 --dpi-desync=split2
 --dpi-desync-split-seqovl=681
@@ -22,4 +22,4 @@
 --dpi-desync-fooling=badseq,hopbyhop2
 --dpi-desync-split-seqovl-pattern=tls_clienthello_www_google_com.bin
 
-# profile#0
+# rule 0

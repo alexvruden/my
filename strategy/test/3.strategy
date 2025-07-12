@@ -1,9 +1,9 @@
-#udp: 443, profile #1: hostlist, profile #2: ipset
+#udp443
 
-##udp: 443
+#udp: 443
 --wf-udp=443
 
-##profile 1: hostlist
+#rule 1: hostlist
 --hostlist=
 --dpi-desync=fake
 --dpi-desync-repeats=6
@@ -11,10 +11,10 @@
 
 --new
 
-##profile 2: ipset
+#rule 2: ipset
 --ipset=
 --dpi-desync=fake
 --dpi-desync-repeats=6
 --dpi-desync-fake-quic=quic_initial_www_google_com.bin
 
-# profile#0
+# rule 0

@@ -8,6 +8,7 @@ set "strategy_run="
 set /a socks5=0
 set /a ecode=0
 set /a ccall=0
+set /a rand=0
 set "debug=off"
 set "daemon=on"
 set "home=%~dp0"
@@ -590,14 +591,19 @@ for /l %%i in (1,1,%pcount%) do (
 	if exist %home%\strategy\%strategy_name%\log\%%i-about.log set /p sabout=<%home%\strategy\%strategy_name%\log\%%i-about.log
 	set foo=--comment [%strategy_name%][%PortFilter%][%IPsetStatus%][!sabout!][%daemon%][%debug%] !foo!
 	rem echo.!foo!>%home%\strategy\%strategy_name%\log\%%i-dry-run.log
-	echo.!foo!>>%home%\strategy\%strategy_name%\log\%%i-run.log
 	rem call:cecho 7 "Проверка параметров" 3 "'%strategy_name%' [!sabout!]"
 	%winwsdir%\winws.exe --dry-run !foo! 2>&1 1>%home%\strategy\%strategy_name%\log\%%i-status.log
 	if %errorlevel% neq 0 goto:strategy_list_arg_error
 	call:cecho 3 "'!sabout!'"
-	if "x%daemon%"=="xoff" start "%strategy_name%:[!sabout!] PortFilter:[%PortFilter%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !foo!
-	if "x%daemon%"=="xon" %winwsdir%\winws.exe !foo! 1>nul 2>&1
-	if %errorlevel% neq 0 goto:strategy_list_arg_error
+	if "x%daemon%"=="xoff" (
+		echo.start "%strategy_name%:[!sabout!] PortFilter:[%PortFilter%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !foo! >>%home%\strategy\%strategy_name%\log\%%i-run.log
+		start "%strategy_name%:[!sabout!] PortFilter:[%PortFilter%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !foo!
+	)
+	if "x%daemon%"=="xon" (
+		echo.%winwsdir%\winws.exe !foo! >>%home%\strategy\%strategy_name%\log\%%i-run.log
+		%winwsdir%\winws.exe !foo! 1>nul 2>&1
+		if %errorlevel% neq 0 goto:strategy_list_arg_error
+	)
 )
 if %pcount% neq 0 ( 
 	call:cecho 2 "Готово" 
@@ -821,7 +827,6 @@ for /l %%x in (5,-1,1) do (
 	timeout /T 1 /NOBREAK >nul
 )
 goto:menu
-
 :cecho
 set "curtime=%TIME:~0,2%.%TIME:~3,2%.%TIME:~6,2%"
 set "curtime=%curtime: =0%"

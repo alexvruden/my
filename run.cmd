@@ -57,12 +57,12 @@ if "x%PortFilterStatus%"=="xon" (
 set "PortFilter=%PortFilter: =%"
 set /p IPsetStatus=<%home%\bin\ipset.status
 set "winws_pid="
-set /a socks5=0
-tasklist /FI "IMAGENAME eq 3proxy.exe" | find /I "3proxy.exe" > nul
-if %errorlevel% equ 0 (
-	echo.[37mSOCKS[31m5 [37mWiFi hotspot [32mON[0m
-	set /a socks5=1
-) else echo.
+REM set /a socks5=0
+REM tasklist /FI "IMAGENAME eq 3proxy.exe" | find /I "3proxy.exe" > nul
+REM if %errorlevel% equ 0 (
+	REM echo.[37mSOCKS[31m5 [37mWiFi hotspot [32mON[0m
+	REM set /a socks5=1
+REM ) else echo.
 set /a foo=0
 for /f "tokens=2 delims=," %%i in ('2^>nul tasklist /FI "IMAGENAME eq winws.exe" /fo csv /nh') do (
 	set /a foo=!foo!+1
@@ -294,9 +294,8 @@ if %errorlevel% EQU 0 (
 if "x%arg_1%"=="xstop" exit /b
 if %blkc% equ 1 goto:blockcheck
 
-set "foo="
-for /f "delims=" %%I in ('2^>nul dir /b /s /a:d %home%\%arch%') do set "foo=%%~I"
-if not exist %foo%\winws.exe (
+for /f "delims=" %%I in ('2^>nul dir /b /s /a:d %home%\%arch%') do set "winwsdir=%%~I"
+if not exist %winwsdir%\winws.exe (
 	echo.
 	echo.[5G[37mDownload developers code, unzip and put in '[33m%home%\bin\[37m' from: [0m
 	echo.
@@ -305,8 +304,7 @@ if not exist %foo%\winws.exe (
 	pause
 	goto:menu
 )
-set "winwsdir=%foo%"
-set "fakedir=%foo:~0,-24%\files\fake"
+for /f "delims=" %%I in ('2^>nul dir /b /s /a:d %home%\fake') do set "fakedir=%%~I"
 
 if exist %home%\strategy\%strategy_name%\about set /p about_strategy=<%home%\strategy\%strategy_name%\about
 if not exist %home%\strategy\%strategy_name%\log md %home%\strategy\%strategy_name%\log >nul

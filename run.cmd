@@ -57,12 +57,12 @@ if "x%PortFilterStatus%"=="xon" (
 set "PortFilter=%PortFilter: =%"
 set /p IPsetStatus=<%home%\bin\ipset.status
 set "winws_pid="
-REM set /a socks5=0
-REM tasklist /FI "IMAGENAME eq 3proxy.exe" | find /I "3proxy.exe" > nul
-REM if %errorlevel% equ 0 (
-	REM echo.[37mSOCKS[31m5 [37mWiFi hotspot [32mON[0m
-	REM set /a socks5=1
-REM ) else echo.
+set /a socks5=0
+tasklist /FI "IMAGENAME eq 3proxy.exe" | find /I "3proxy.exe" > nul
+if %errorlevel% equ 0 (
+	echo.[37mSOCKS[31m5 [32mON[0m
+	set /a socks5=1
+) else echo.
 set /a foo=0
 for /f "tokens=2 delims=," %%i in ('2^>nul tasklist /FI "IMAGENAME eq winws.exe" /fo csv /nh') do (
 	set /a foo=!foo!+1
@@ -661,11 +661,18 @@ echo.%daemon%>%home%\bin\daemonpar
 goto menu
 
 :menu_2
+rem debug=@filename - very slow :(
+
 if "x%debug%"=="xon" (
-	set "debug=@filename"
+	set "debug=off"
 ) else if "x%debug%"=="xoff" (
 	set "debug=on"
-) else if "x%debug%"=="x@filename" set "debug=off"
+) 
+REM if "x%debug%"=="xon" (
+	REM set "debug=@filename"
+REM ) else if "x%debug%"=="xoff" (
+	REM set "debug=on"
+REM ) else if "x%debug%"=="x@filename" set "debug=off"
 echo.%debug%>%home%\bin\debugpar
 goto menu
 

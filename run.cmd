@@ -13,6 +13,7 @@ set /a rand=0
 set "debug=off"
 set "daemon=on"
 set "home=%~dp0"
+for %%i in ("%home%") do set "home=%%~si"
 set "home=%home:~0,-1%"
 set "winwsdir="
 set "fakedir="
@@ -79,7 +80,6 @@ set "pr="
 set "pid="
 set "daemon_status=on"
 set "debug_status="
-
 
 if %foo% GTR 0 ( 
 	for /l %%i in (1,1,%foo%) do (
@@ -377,6 +377,10 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 					if not exist %home%\lists\hostlist\%%~N echo.#>%home%\lists\hostlist\%%~N
 					set "profile_param=!profile_param! --hostlist-auto=%home%\lists\hostlist\%%~N"
 				)
+				REM Режим autohostlist включает в себя режим hostlist.???
+				REM for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\hostlist\*.txt %home%\lists\hostlist\*.lst %home%\lists\hostlist\*.gz') do (
+					REM set "profile_param=!profile_param! --hostlist=%home%\lists\hostlist\%%X"
+				REM )
 			) else if "x!fletter!"=="x--hostlist" (
 				if "x%%~N"=="x" (
 					set /a foo = 0

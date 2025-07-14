@@ -20,11 +20,11 @@ if %s1% equ 0 start "start" %cmd_run%
 set /a s1=1
 set /a s0=0
 echo.started '%cmd_run%' >%home%\bin\agent_status
-goto:@loop_
+rem goto:@loop_
 
 :@stop
 if %s0% equ 0 start "stop" %home%\run.cmd stop
 set /a s1=0
 set /a s0=1
 echo.stoped>%home%\bin\agent_status
-goto:@loop_
+rem goto:@loop_

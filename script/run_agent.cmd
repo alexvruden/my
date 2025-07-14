@@ -3,6 +3,7 @@ chcp 1251 >nul
 set "home=%~1"
 if "x%home%"=="x" exit
 if not exist %home%\run.cmd exit
+echo.unknown>%home%\bin\agent_status
 set /a s0=0
 set /a s1=0
 
@@ -30,13 +31,13 @@ if %errorlevel% neq 0 (
 goto:@loop
 
 :@start
-if %s1% equ 0 start "start" %cmd_run%
+if %s1% equ 0 start "s1" %cmd_run%
 set /a s1=1
 set /a s0=0
 goto:@ping
 
 :@stop
-if %s0% equ 0 start "stop" %home%\run.cmd stop
+if %s0% equ 0 start "s0" %home%\run.cmd stop
 set /a s1=0
 set /a s0=1
 goto:@ping

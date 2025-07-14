@@ -3,7 +3,6 @@ chcp 1251 >nul
 set "home=%~1"
 if "x%home%"=="x" exit
 if not exist %home%\run.cmd exit
-echo.start>%home%\bin\agent_mode
 set /a s0=0
 set /a s1=0
 

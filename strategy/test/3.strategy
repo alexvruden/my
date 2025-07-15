@@ -1,0 +1,20 @@
+#udp443
+
+#udp: 443
+--wf-udp=443
+
+#rule 1: hostlist
+--hostlist=
+--dpi-desync=fake
+--dpi-desync-repeats=6
+--dpi-desync-fake-quic=quic_initial_www_google_com.bin
+
+--new
+
+#rule 2: ipset
+--ipset=
+--dpi-desync=fake
+--dpi-desync-repeats=6
+--dpi-desync-fake-quic=quic_initial_www_google_com.bin
+
+# rule 0

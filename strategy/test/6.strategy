@@ -1,0 +1,16 @@
+#udp: user, profile #1: ipset
+
+#udp: user
+--wf-udp=
+
+#rule 1: ipset
+
+--ipset=
+--dpi-desync=fake
+--dpi-desync-autottl=2
+--dpi-desync-repeats=12
+--dpi-desync-any-protocol=1
+--dpi-desync-fake-unknown-udp=quic_initial_www_google_com.bin
+--dpi-desync-cutoff=n2
+
+# rule 0

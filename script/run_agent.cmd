@@ -17,8 +17,8 @@ if "x%home%"=="x" exit
 if not exist %home%\run.cmd exit
 if %debug% equ 1 echo.неизвестное состояние...
 echo.неизвестное состояние...>%home%\bin\agent_status
-set /a s0=0
-set /a s1=0
+set /a start_trigger=0
+set /a stop_trigger=0
 set /a ping_change=0
 set /a ping_status_i=0
 set /a ping_status_e=0
@@ -37,12 +37,12 @@ if exist %home%\bin\agent_update_status (
 	set /p update_status=<%home%\bin\agent_update_status
 )
 if "x%update_status%"=="xupdate" (
+	echo.получен сигнал 'update'>>%home%\bin\agent_status
 	set /a ping_ok=0
 	set /a ping_err=0
 	set /a start_ok=0
 	set /a start_err=0
 	set /a ping_err_count=0
-	set /a manual=0
 )
 set mode=%mode: =%
 set /p cmd_run=<%home%\bin\agent_start_cmd
@@ -58,7 +58,6 @@ if "x%mode%"=="xstart" goto:@start
 
 :@ping
 timeout /T %loop_period% /NOBREAK >nul
-rem set /a ping_count=%loop_period% * %start_after_num_err_ping%
 ping /n 1 %host_i% >nul
 set /a ping_status_i=%errorlevel%
 set /a ping_change=%ping_change%+1
@@ -86,35 +85,34 @@ if %foo% neq 0 (
 		if !ping_err! equ 1 (
 			set /a foo=%loop_period% * %start_after_num_err_ping%
 			if %debug% equ 1 echo.нет интернета, рестарт через !foo! сек.
-			if %s1% equ 1 echo.нет интернета, рестарт через !foo! сек.>%home%\bin\agent_status
+			if %start_trigger% equ 1 echo.нет интернета, рестарт через !foo! сек.>>%home%\bin\agent_status
 		)
 		set /a ping_err_count=!ping_err_count!+1
 		if !ping_err_count! equ %start_after_num_err_ping% (
 			if %debug% equ 1 echo.рестарт
-			set /a s1=0
+			rem  set /a start_trigger=0
+			set /a manual=1
 		)
 	) else (
 		if !ping_err! equ 1 (
 			if %debug% equ 1 echo.остановлен, нет интернета
-			echo.остановлен, нет интернета>%home%\bin\agent_status
+			echo.остановлен, нет интернета>>%home%\bin\agent_status
 		)
 	)
 ) else (
 	set /a ping_err=0
 	set /a ping_ok=!ping_ok!+1
-	if "x%mode%"=="xstart" set /a s1=1
-	if !s0! equ 1 (
+	if "x%mode%"=="xstart" set /a start_trigger=1
+	if !stop_trigger! equ 1 (
 		if !ping_ok! equ 1 (
 			if %debug% equ 1 echo.остановлен, есть интернет
-			echo.остановлен, есть интернет>%home%\bin\agent_status
+			echo.остановлен, есть интернет>>%home%\bin\agent_status
 		)
 	)
-	if !s1! equ 1 (
+	if !start_trigger! equ 1 (
 		if !ping_ok! equ 1 (
-			if %manual% equ 0 (
-				if %debug% equ 1 echo.работает '..%cmd_run_short%', есть интернет
-				echo.работает '..%cmd_run_short%', есть интернет>%home%\bin\agent_status
-			)
+			if %debug% equ 1 echo.работает '..%cmd_run_short%', есть интернет
+			echo.работает '..%cmd_run_short%', есть интернет>>%home%\bin\agent_status
 		)
 	)
 )
@@ -124,65 +122,63 @@ if "x%update_status%"=="xupdate" (
 goto:@loop
 
 :@start
-if %s1% equ 0 (
+if %start_trigger% equ 0 (
+	echo.получен сигнал 'start'>>%home%\bin\agent_status
 	set /a ping_err_count=0
-	start "s1" %cmd_run%
-	set /a s0=0
+	start "x" %cmd_run%
+	set /a stop_trigger=0
 )
-for /l %%i in (1,1,10) do (
-	timeout /T 1 /NOBREAK >nul
-	tasklist /FI "IMAGENAME eq winws.exe" | find /I "winws.exe" > nul
-	if !errorlevel! neq 0 (
-		set /a start_ok=0
-		set /a start_err=!start_err!+1
-		if !start_err! equ 1 (
-			if %debug% equ 1 echo.ошибка запуска или работает пользователь
-			echo.ошибка запуска или работает пользователь>%home%\bin\agent_status
-			set /a manual=1
+if %manual% equ 1 (
+	echo.рестарт>>%home%\bin\agent_status
+	set /a ping_err_count=0
+	start "x" %cmd_run%
+	set /a stop_trigger=0
+	set /a manual=0
+)
+timeout /T 5 /NOBREAK >nul
+tasklist /FI "IMAGENAME eq winws.exe" | find /I "winws.exe" > nul
+if !errorlevel! neq 0 (
+	set /a start_ok=0
+	set /a start_err=!start_err!+1
+	if !start_err! equ 1 (
+		if %debug% equ 1 echo.ошибка запуска или работает пользователь
+		echo.ошибка запуска или работает пользователь>>%home%\bin\agent_status
+		set /a ping_ok=0
+		set /a ping_err=0
+	)
+) else (
+	set /a start_err=0
+	set /a start_ok=!start_ok!+1
+	if %start_trigger% equ 0 (
+		if !start_ok! equ 1 (
+			if %debug% equ 1 echo.работает '..%cmd_run_short%', проверка интернета...
+			echo.работает '..%cmd_run_short%', проверка интернета...>>%home%\bin\agent_status
 			set /a ping_ok=0
 			set /a ping_err=0
 		)
-	) else (
-		set /a start_err=0
-		set /a start_ok=!start_ok!+1
-		if %s1% equ 0 (
-			if !start_ok! equ 1 (
-				if %debug% equ 1 echo.работает '..%cmd_run_short%', проверка интернета...
-				echo.работает '..%cmd_run_short%', проверка интернета...>%home%\bin\agent_status
-				set /a ping_ok=0
-				set /a ping_err=0
-			)
-			set /a s1=1
-		)
-		goto:@start_break
+		set /a start_trigger=1
 	)
 )
-
-:@start_break
 goto:@ping
 
 :@stop
-if %s0% equ 0 (
-	start "s0" %home%\run.cmd stop
-	set /a s1=0
+if %stop_trigger% equ 0 (
+	echo.получен сигнал 'stop'>>%home%\bin\agent_status
+	start "x" %home%\run.cmd stop
+	set /a start_trigger=0
 	set /a ping_ok=0
 	set /a ping_err=0
 	set /a start_ok=0
 	set /a start_err=0
 	set /a ping_err_count=0
-	set /a manual=0
-	for /l %%i in (1,1,10) do (
-		timeout /T 1 /NOBREAK >nul
-		tasklist /FI "IMAGENAME eq winws.exe" | find /I "winws.exe" > nul
-		if !errorlevel! neq 0 ( 
-			set /a s0 = 1
-			if %debug% equ 1 echo.остановлен
-		) else (
-			set /a s0 = 1
-			if %debug% equ 1 echo.остановлен, работает пользователь
-		)
-		goto:@stop_break
+	timeout /T 5 /NOBREAK >nul
+	tasklist /FI "IMAGENAME eq winws.exe" | find /I "winws.exe" > nul
+	if !errorlevel! neq 0 ( 
+		set /a stop_trigger = 1
+		if %debug% equ 1 echo.остановлен
+	) else (
+		set /a stop_trigger = 1
+		if %debug% equ 1 echo.остановлен, работает пользователь
 	)
 )
-:@stop_break
 goto:@ping

@@ -52,7 +52,6 @@ for /l %%a in (1,1,1000) do (
 		goto:@break
 	)
 )
-
 :@break
 if "x%mode%"=="xstop" goto:@stop
 if "x%mode%"=="xstart" goto:@start

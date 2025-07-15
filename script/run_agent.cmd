@@ -3,7 +3,7 @@ setlocal EnableDelayedExpansion
 chcp 1251 >nul
 
 rem ----------settings-------------------
-set /a debug = 1
+set /a debug = 0
 rem 192.168.1.1 - router
 set "host_i=192.168.1.1"
 set "host_e=one.one.one.one"

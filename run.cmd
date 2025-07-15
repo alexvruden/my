@@ -1,8 +1,6 @@
 @echo off
 chcp 1251 > nul
 setlocal EnableDelayedExpansion
-
-rem echo.]0;Bypassing Censorship
 set "PortFilterStatus=off"
 set "IPsetStatus=off"
 set "strategy_run="

@@ -1,8 +1,0 @@
-# one domain per line
-
-#amnezia.org
-#discord.com
-#...
-
-discord.com
-googlevideo.com

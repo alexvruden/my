@@ -1,11 +1,11 @@
 # Bypassing Censorship
 
-Download developers code, unzip and put in '..\bin\' from:
+«агрузить [отсюда](https://github.com/bol-van/zapret/releases) новую версию и извлечь в директорию '..\bin\'
 
-[https://github.com/bol-van/zapret/releases](https://github.com/bol-van/zapret/releases)
+≈сли хотите использовать 'blockcheck' то нужно [загрузить](https://github.com/bol-van/zapret-win-bundle/archive/refs/heads/master.zip) новую версию и извлечь в директорию '..\bin\'
 
-and for use blockcheck download developers code, unzip and put in '..\bin\' from:
-
-[https://github.com/bol-van/zapret-win-bundle/archive/refs/heads/master.zip](https://github.com/bol-van/zapret-win-bundle/archive/refs/heads/master.zip)
+ѕример:
+..\bin\zapret-v71.2
+..\bin\zapret-win-bundle-master
 
 <img src="https://github.com/alexvruden/my/blob/main/01.png" />

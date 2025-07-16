@@ -5,7 +5,7 @@
 
 #rule 1: ipset
 
---ipset=
+IPSET
 --dpi-desync=fake
 --dpi-desync-autottl=2
 --dpi-desync-repeats=12

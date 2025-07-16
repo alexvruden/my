@@ -5,7 +5,7 @@
 
 #rule 1: ipset
 
---ipset=
+IPSET
 --dpi-desync=split2
 --dpi-desync-split-seqovl=681
 --dpi-desync-split-pos=1

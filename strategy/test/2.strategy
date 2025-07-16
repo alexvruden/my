@@ -4,7 +4,8 @@
 --wf-tcp=443
 
 #rule 1: hostlist
---hostlist=
+
+HOSTLIST_NOAUTO
 --dpi-desync=split2
 --dpi-desync-repeats=2
 --dpi-desync-split-seqovl=681
@@ -15,7 +16,8 @@
 --new
 
 #rule 2: ipset
---ipset=
+
+IPSET
 --dpi-desync=split2
 --dpi-desync-split-seqovl=681
 --dpi-desync-split-pos=1

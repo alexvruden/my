@@ -8,7 +8,8 @@
 --wf-tcp=80
 
 ##rule 1: hostlist
---hostlist=
+
+HOSTLIST_NOAUTO
 --dpi-desync=fake,split2
 --dpi-desync-autottl=2
 --dpi-desync-fooling=md5sig
@@ -16,7 +17,8 @@
 --new
 
 ##rule 2: ipset
---ipset=
+
+IPSET
 --dpi-desync=fake,split2
 --dpi-desync-autottl=2
 --dpi-desync-fooling=md5sig

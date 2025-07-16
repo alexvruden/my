@@ -262,9 +262,9 @@ if %srv_trigger% equ 1 (
 			if exist %home%\bin\agent_status (
 				rem last status
 			 	for /f "delims=" %%i in (%home%\bin\agent_status) do set "foo=%%i"			
-			) else set "foo=неизвестное состояние..."
+			) else set "foo=.........неизвестное состояние..."
 			echo.[%c2%G[36m[[0m агент : [32mвключен[%c8%G[36m][0m
-			echo.[%c2%G[36m[[0m статус: [33m!foo![%c8%G[36m][0m
+			echo.[%c2%G[36m[[0m статус: [33m!foo:~9![%c8%G[36m][0m
 			set /a agent_work=1
 		) else (
 			echo.[%c2%G[36m[[0m агент : [31mвыключен[%c8%G[36m][0m

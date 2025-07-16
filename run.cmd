@@ -10,9 +10,11 @@ set /a socks5=0
 set /a blockcheck_menu_count=300
 set /a srv_menu_count=310
 set /a srv_trigger=0
+set /a term_trigger=0
 set /a ecode=0
 set /a ccall=0
 set /a rand=0
+set /a exp_str=0
 set "debug=off"
 set "daemon=on"
 set "home=%~dp0"
@@ -125,7 +127,7 @@ if %profile_count% GTR 0 (
 			echo.
 			echo.[%c1%GРаботает стратегия:[%c4%G'[33m!n%%i![0m'
 			if "x!daemon_status!"=="xon" ( set "offon=да" ) else ( set "offon=нет" )
-			echo.[%c4%G[33mСкрытое окно[0m: !offon!
+			echo.[%c4%G[33mЗапуск в скрытом окне[0m: !offon!
 			if "x!debug_status!"=="xon" ( set "offon=да" ) else ( set "offon=нет" )
 			echo.[%c4%G[33mПоказывать ход работы в окне[0m: !offon!
 			if "x!p%%i!"=="x0" (
@@ -145,6 +147,7 @@ if %profile_count% GTR 0 (
 	echo.
 	set "strategy_run=!n1!" 
 )
+echo.[%c2%G[33mПараметры запуска стратегии[0m
 echo.
 rem --------------------------------------
 if "x%arg_1%"=="xstart" (
@@ -170,7 +173,7 @@ if "x%daemon%"=="xon" (
 	set /a foo=1
 	set "offon=нет" 
 )
-echo.[%c1%G[37m1.[%c2%GСкрытое окно[%c5%G[[3%foo%m%offon%[0m]
+echo.[%c1%G[37m1.[%c2%GЗапуск в скрытом окне[%c5%G[[3%foo%m%offon%[0m]
 set /a menu_count=%menu_count%+1
 set "atten="
 set /a foo=7
@@ -202,27 +205,31 @@ echo.[%c1%G[37m4.[%c2%GИспользовать список IP[%c5%G[[3%fo
 set /a menu_count=%menu_count%+1
 for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
 echo.
-echo.[%c2%G[33mСтратегии[%c5%GОписание[0m
-echo.
-set "menu_choice="
-set "strategy_count_name="
-set /a foo=0
+set /a foo=%c1%-1
+if %exp_str% equ 0 (
+	echo.[%foo%G[33m[..][%c2%G[36mС[33mтратегии[0m
+) else ( 
+	echo.[%foo%G[33m[..][%c2%G[36mС[33mтратегии[%c5%GОписание[0m
+	echo.
+	set "strategy_count_name="
+	set /a foo=0
 
-for /f "delims=" %%I in ('2^>nul dir /b /a:d %home%\strategy\') do (
-	set /a fexist=0
-	for /f "delims=" %%a in ('2^>nul dir /b %home%\strategy\%%I\*.strategy') do set /a fexist=1
-	if !fexist! neq 0 (
-		if not exist %home%\strategy\%%I\about echo.нет описания>%home%\strategy\%%I\about
-		set /p about_strategy=<%home%\strategy\%%I\about
-		set /a menu_count=!menu_count!+1
-		if "x!strategy_run!"=="x%%~I" (
-			set /a c0=%c1% - 2
-			echo.[!c0!G[32m^>[%c1%G[37m!menu_count!.[%c2%G[32m%%I[%c5%G[36m!about_strategy![0m
-		) else ( 	
-			echo.[%c1%G[37m!menu_count!.[%c2%G%%I[%c5%G[36m!about_strategy![0m
-		) 
-		set "strategy_count_name!menu_count!=%%I"
-		set /a foo=1
+	for /f "delims=" %%I in ('2^>nul dir /b /a:d %home%\strategy\') do (
+		set /a fexist=0
+		for /f "delims=" %%a in ('2^>nul dir /b %home%\strategy\%%I\*.strategy') do set /a fexist=1
+		if !fexist! neq 0 (
+			if not exist %home%\strategy\%%I\about echo.нет описания>%home%\strategy\%%I\about
+			set /p about_strategy=<%home%\strategy\%%I\about
+			set /a menu_count=!menu_count!+1
+			if "x!strategy_run!"=="x%%~I" (
+				set /a c0=%c1% - 2
+				echo.[!c0!G[32m^>[%c1%G[37m!menu_count!.[%c2%G[32m%%I[%c5%G[36m!about_strategy![0m
+			) else ( 	
+				echo.[%c1%G[37m!menu_count!.[%c2%G%%I[%c5%G[36m!about_strategy![0m
+			) 
+			set "strategy_count_name!menu_count!=%%I"
+			set /a foo=1
+		)
 	)
 )
 if %foo% equ 0 ( 
@@ -234,20 +241,19 @@ if %foo% equ 0 (
 if defined strategy_run (
 	set /a terminate_count=%menu_count% + 1
 	set /a menu_count=!menu_count!+1
-	echo.[%c1%G[37m!menu_count!.[%c2%G[33mЗавершить мульти-стратегию '!strategy_run!' [0m
-	echo.[%c2%G[33mили отдельные профили ниже:
-	for /l %%i in (1,1,%profile_count%) do (
-		set /a menu_count=!menu_count!+1
-		echo.[%c2%G[37m!menu_count!.[%c3%G[36m!pr%%i![0m
+	if %term_trigger% equ 0 ( 
+		echo.[%c1%G[37m!menu_count!.[%c2%G[33mЗав[36mе[33mршить мульти-стратегию '!strategy_run!' [0m
+	) else (
+		echo.[%c1%G[37m!menu_count!.[%c2%G[33mЗав[36mе[33mршить мульти-стратегию '!strategy_run!' [0m
+		echo.[%c2%G[33mили отдельные профили ниже:
+		for /l %%i in (1,1,%profile_count%) do (
+			set /a menu_count=!menu_count!+1
+			echo.[%c2%G[37m!menu_count!.[%c3%G[36m!pr%%i![0m
+		)
 	)
 	for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
 	echo.
 )
-set /a menu_count=%menu_count%+1
-set /a srv_menu_count=%menu_count%
-set "foo="
-if %srv_trigger% equ 0 set "foo=[..]"
-echo.[%c1%G[37m!menu_count!.[%c2%GАвтоматизация [%c5%G[33m!foo![0m
 set /a task=100
 set /a agent_work=100
 schtasks /Query /TN dpiagent 1>nul 2>&1
@@ -255,7 +261,12 @@ if %errorlevel% EQU 0 set /a task=0
 if exist %home%\bin\agent_mode (
 	set /p agent_mode=<%home%\bin\agent_mode
 )
-if %srv_trigger% equ 1 (
+set /a foo=%c1%-1
+if %srv_trigger% equ 0 ( 
+	echo.[%foo%G[33m[..][%c2%G[36mА[33mвтоматизация [%c5%G[33m[..][0m
+) else (
+	echo.[%foo%G[33m[..][%c2%G[36mА[33mвтоматизация[0m
+	set /a srv_menu_count=%menu_count%+1
 	if %task% EQU 0 (
 		wmic process Where Name="cmd.exe" Get CommandLine,ProcessId /Format |find "run_agent.cmd" 1>nul 2>&1
 		if !errorlevel! EQU 0 (
@@ -303,19 +314,21 @@ if exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh (
 echo.
 echo.[%c1%G0.[%c2%GВыход
 echo.
-set "strchoice=0123456789r"
+set "strchoice=0123456789rcсafфаetеу"
 REM if exist ..... set "strchoice=0123456789rh"
 
 choice /N /C:%strchoice% /D r /T 60 /M "#:"
-if %errorlevel% EQU 255 call:cerror 233
-if %errorlevel% EQU 0 call:cerror 234
+if %errorlevel% EQU 255 call:cerror 316
+if %errorlevel% EQU 0 call:cerror 317
+if %errorlevel% GEQ 18 goto:terminate_trigger
+if %errorlevel% GEQ 14 goto:srv_menu_trigger
+if %errorlevel% GEQ 12 goto:expand_strategy
 if %errorlevel% EQU 11 goto:menu
-REM if %errorlevel% EQU 12 goto:help
 set /a first_digit=%errorlevel% - 1
 echo.[2F
 choice /N /C:0123456789z /D z /T 3 /M "#:"
-if %errorlevel% EQU 255 call:cerror 241
-if %errorlevel% EQU 0 call:cerror 242
+if %errorlevel% EQU 255 call:cerror 329
+if %errorlevel% EQU 0 call:cerror 330
 if %errorlevel% EQU 11 (
 	set /a menu_choice=%first_digit%
 ) else (
@@ -326,16 +339,10 @@ if %errorlevel% EQU 11 (
 echo.[1F[2K
 echo.
 if %menu_choice% EQU %blockcheck_menu_count% goto:blockcheck
-if %menu_choice% EQU %srv_menu_count% (
-	if %srv_trigger% equ 0 ( set /a srv_trigger=1 ) else ( set /a srv_trigger=0 )
-	goto:menu
-)
 if %menu_choice% GTR %menu_count% goto:menu
 
-if %menu_choice% GTR %srv_menu_count% goto:menu_srv
-if %menu_choice% GEQ %terminate_count% (
-	goto:terminate
-)
+if %menu_choice% GEQ %srv_menu_count% goto:menu_srv
+if %menu_choice% GEQ %terminate_count% goto:terminate
 if %menu_choice% LSS 5 goto:menu_%menu_choice%
 
 :strategy_choice
@@ -828,6 +835,17 @@ call:cecho 1 "Ошибка." 7 "Подробности смотри в" 3 "'%hom
 set /a ecode=1
 goto:strategy_list_end
 
+:expand_strategy
+if %exp_str% equ 0 ( set /a exp_str=1 ) else ( set /a exp_str=0 )
+goto:menu
+
+:srv_menu_trigger
+if %srv_trigger% equ 0 ( set /a srv_trigger=1 ) else ( set /a srv_trigger=0 )
+goto:menu
+:terminate_trigger
+if %term_trigger% equ 0 ( set /a term_trigger=1 ) else ( set /a term_trigger=0 )
+goto:menu
+
 :menu_0
 for /l %%x in (5,-1,1) do (
 	echo.[F
@@ -1036,18 +1054,15 @@ pause
 goto:menu
 
 :menu_srv
-set /a castart=1
-set /a castop=2
-set /a cadel=3
-if !agent_work! equ 1 (
-	if "x!agent_mode!"=="xstart" ( set /a castart=100 ) else ( set /a castart=1 )
-	if "x!agent_mode!"=="xstop" ( set /a castop=100 ) else ( set /a castop=1 )
-	set /a cadel=2
+if %agent_work% equ 1 (
+	if "x%agent_mode%"=="xstart" ( set /a castart=100 ) else ( set /a castart=0 )
+	if "x%agent_mode%"=="xstop" ( set /a castop=100 ) else ( set /a castop=0 )
+	set /a cadel=1
 )
-if !agent_work! equ 0 (
+if %agent_work% equ 0 (
 	set /a castart=101
 	set /a castop=102
-	set /a cadel=1
+	set /a cadel=0
 )
 schtasks /Query /TN dpiagent 1>nul 2>&1
 if %errorlevel% EQU 0 (

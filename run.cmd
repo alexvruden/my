@@ -453,7 +453,20 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 				if not "x!foo:~2!"=="x" set "psabout=!foo:~2!"
 			)
 		) else (
-			if "x!fletter!"=="x--hostlist-auto" (
+			rem есть маркеры <HOSTLIST_NOAUTO> и <HOSTLIST>
+			if "x!fletter!"=="xHOSTLIST" (
+				if not exist %home%\lists\hostlist\hostlist-auto.txt echo.#>%home%\lists\hostlist\hostlist-auto.txt
+				for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\hostlist\*.txt %home%\lists\hostlist\*.lst %home%\lists\hostlist\*.gz') do (
+					set "profile_param=!profile_param! --hostlist=%home%\lists\hostlist\%%X"
+				)
+				set "profile_param=!profile_param! --hostlist-auto=%home%\lists\hostlist\hostlist-auto.txt"
+				
+			) else if "x!fletter!"=="xHOSTLIST_NOAUTO" (
+				if not exist %home%\lists\hostlist\hostlist-auto.txt echo.#>%home%\lists\hostlist\hostlist-auto.txt
+				for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\hostlist\*.txt %home%\lists\hostlist\*.lst %home%\lists\hostlist\*.gz') do (
+					set "profile_param=!profile_param! --hostlist=%home%\lists\hostlist\%%X"
+				)
+			) else if "x!fletter!"=="x--hostlist-auto" (
 				if "x%%~N"=="x" (
 					if not exist %home%\lists\hostlist\hostlist-auto.txt echo.#>%home%\lists\hostlist\hostlist-auto.txt
 					set "profile_param=!profile_param! --hostlist-auto=%home%\lists\hostlist\hostlist-auto.txt"
@@ -461,10 +474,6 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 					if not exist %home%\lists\hostlist\%%~N echo.#>%home%\lists\hostlist\%%~N
 					set "profile_param=!profile_param! --hostlist-auto=%home%\lists\hostlist\%%~N"
 				)
-				REM Режим autohostlist включает в себя режим hostlist.???
-				REM for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\hostlist\*.txt %home%\lists\hostlist\*.lst %home%\lists\hostlist\*.gz') do (
-					REM set "profile_param=!profile_param! --hostlist=%home%\lists\hostlist\%%X"
-				REM )
 			) else if "x!fletter!"=="x--hostlist" (
 				if "x%%~N"=="x" (
 					set /a foo = 0

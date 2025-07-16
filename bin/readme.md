@@ -1,4 +1,4 @@
-﻿# ../bin
+п»ї# ../bin
 
 download developers code, unzip and put in '..\bin\' from:
 

@@ -1,10 +1,10 @@
 # Bypassing Censorship
 
-Загрузить [отсюда](https://github.com/bol-van/zapret/releases) новую версию и извлечь в директорию '..\bin\'
+Р—Р°РіСЂСѓР·РёС‚СЊ [РѕС‚СЃСЋРґР°](https://github.com/bol-van/zapret/releases) РЅРѕРІСѓСЋ РІРµСЂСЃРёСЋ Рё РёР·РІР»РµС‡СЊ РІ РґРёСЂРµРєС‚РѕСЂРёСЋ '..\bin\'
 
-Если хотите использовать 'blockcheck' то нужно [загрузить](https://github.com/bol-van/zapret-win-bundle/archive/refs/heads/master.zip) новую версию и извлечь в директорию '..\bin\'
+Р•СЃР»Рё С…РѕС‚РёС‚Рµ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ 'blockcheck' С‚Рѕ РЅСѓР¶РЅРѕ [Р·Р°РіСЂСѓР·РёС‚СЊ](https://github.com/bol-van/zapret-win-bundle/archive/refs/heads/master.zip) РЅРѕРІСѓСЋ РІРµСЂСЃРёСЋ Рё РёР·РІР»РµС‡СЊ РІ РґРёСЂРµРєС‚РѕСЂРёСЋ '..\bin\'
 
-Пример:
+РџСЂРёРјРµСЂ:
 ..\bin\zapret-v71.2
 ..\bin\zapret-win-bundle-master
 

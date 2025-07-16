@@ -124,12 +124,15 @@ if %profile_count% GTR 0 (
 			for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
 			echo.
 			echo.[%c1%GРаботает стратегия:[%c4%G'[33m!n%%i![0m'
-			echo.[%c4%G[33mДемон[0m: !daemon_status!
-			echo.[%c4%G[33mОтладка[0m: !debug_status!
+			if "x!daemon_status!"=="xon" ( set "offon=да" ) else ( set "offon=нет" )
+			echo.[%c4%G[33mСкрытое окно[0m: !offon!
+			if "x!debug_status!"=="xon" ( set "offon=да" ) else ( set "offon=нет" )
+			echo.[%c4%G[33mПоказывать ход работы в окне[0m: !offon!
 			if "x!p%%i!"=="x0" (
-				echo.[%c4%G[33mДиапазон портов для фильтрации[0m: off
+				echo.[%c4%G[33mДиапазон портов для фильтрации[0m: нет
 			) else echo.[%c4%G[33mДиапазон портов для фильтрации[0m: !p%%i!
-			echo.[%c4%G[33mСписок IPset[0m: !ip%%i!
+			if "x!ip%%i!"=="xon" ( set "offon=да" ) else ( set "offon=нет" )
+			echo.[%c4%G[33mИспользовать список IP[0m: !offon!
 			set /a foo=%c4%
 			set /a foo=!foo! - 1
 			for /l %%x in (1,1,!foo!) do <nul set /p =[30m-[0m
@@ -158,26 +161,44 @@ if "x%arg_1%"=="xstop" (
 	goto:terminate
 )
 
-set /a foo=1
 set /a menu_count=0
-if "x%daemon%"=="xon" set /a foo=2
-echo.[%c1%G[37m1.[%c2%GДемон[%c5%G[[3%foo%m%daemon%[0m]
-set /a menu_count=%menu_count%+1
-set /a foo=1
-set "atten="
-if "x%debug%"=="xon" set /a foo=2
-if "x%debug%"=="x@filename" (
-	set /a foo=7
-	set "atten=very slow"
+set /a foo=7
+if "x%daemon%"=="xon" ( 
+	set /a foo=2
+	set "offon=да " 
+) else ( 
+	set /a foo=1
+	set "offon=нет" 
 )
-echo.[%c1%G[37m2.[%c2%GОтладка[%c5%G[[3%foo%m%debug%[0m] [31m%atten%[0m
+echo.[%c1%G[37m1.[%c2%GСкрытое окно[%c5%G[[3%foo%m%offon%[0m]
+set /a menu_count=%menu_count%+1
+set "atten="
+set /a foo=7
+if "x%debug%"=="xon" ( 
+	set /a foo=2
+	set "offon=да " 
+) else ( 
+	set /a foo=1
+	set "offon=нет" 
+)
+REM if "x%debug%"=="x@filename" (
+	REM set /a foo=7
+	REM set "atten=very slow"
+REM )
+echo.[%c1%G[37m2.[%c2%GПоказывать ход работы в окне[%c5%G[[3%foo%m%offon%[0m] [31m%atten%[0m
 set /a menu_count=%menu_count%+1
 if "x%PortFilterStatus%"=="xon" echo.[%c1%G[37m3.[%c2%GДиапазон портов для фильтрации[%c5%G[%PortFilter%]
-if "x%PortFilterStatus%"=="xoff" echo.[%c1%G[37m3.[%c2%GДиапазон портов для фильтрации[%c5%G[[31m%PortFilterStatus%[0m]
+if "x%PortFilterStatus%"=="xoff" echo.[%c1%G[37m3.[%c2%GДиапазон портов для фильтрации[%c5%G[[31mнет[0m]
 set /a menu_count=%menu_count%+1
-set /a foo=1
-if "x%IPsetStatus%"=="xon" set /a foo=2
-echo.[%c1%G[37m4.[%c2%GСписок IPset[%c5%G[[3%foo%m%IPsetStatus%[0m]
+set /a foo=7
+if "x%IPsetStatus%"=="xon" ( 
+	set /a foo=2
+	set "offon=да " 
+) else ( 
+	set /a foo=1
+	set "offon=нет" 
+)
+echo.[%c1%G[37m4.[%c2%GИспользовать список IP[%c5%G[[3%foo%m%offon%[0m]
 set /a menu_count=%menu_count%+1
 for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
 echo.
@@ -213,7 +234,8 @@ if %foo% equ 0 (
 if defined strategy_run (
 	set /a terminate_count=%menu_count% + 1
 	set /a menu_count=!menu_count!+1
-	echo.[%c1%G[37m!menu_count!.[%c2%G[33mЗавершить мульти-стратегию '!strategy_run!' [0m^( или отдельные профили стратегии ^)
+	echo.[%c1%G[37m!menu_count!.[%c2%G[33mЗавершить мульти-стратегию '!strategy_run!' [0m
+	echo.[%c2%G[33mили отдельные профили ниже:
 	for /l %%i in (1,1,%profile_count%) do (
 		set /a menu_count=!menu_count!+1
 		echo.[%c2%G[37m!menu_count!.[%c3%G[36m!pr%%i![0m
@@ -225,7 +247,7 @@ set /a menu_count=%menu_count%+1
 set /a srv_menu_count=%menu_count%
 set "foo="
 if %srv_trigger% equ 0 set "foo=[..]"
-echo.[%c1%G[37m!menu_count!.[%c2%GАвтоматизация [%c4%G[33m!foo![0m
+echo.[%c1%G[37m!menu_count!.[%c2%GАвтоматизация [%c5%G[33m!foo![0m
 set /a task=100
 set /a agent_work=100
 schtasks /Query /TN dpiagent 1>nul 2>&1
@@ -394,9 +416,10 @@ if exist %home%\strategy\%strategy_name%\about set /p about_strategy=<%home%\str
 if not exist %home%\strategy\%strategy_name%\log md %home%\strategy\%strategy_name%\log >nul
 del /F /Q %home%\strategy\%strategy_name%\log\* >nul
 set "zapret_hosts_user_exclude=--hostlist-exclude=%winwsdir:~0,-24%\ipset\zapret-hosts-user-exclude.txt.default"
+set "zapret_hosts_user_exclude=%zapret_hosts_user_exclude% --ipset-exclude=%winwsdir:~0,-24%\ipset\zapret-hosts-user-exclude.txt.default"
 if not exist %home%\lists\exclude md %home%\lists\exclude >nul
 for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\exclude\*.txt') do (
-	set "zapret_hosts_user_exclude=%zapret_hosts_user_exclude% --hostlist-exclude=%home%\lists\exclude\%%X"
+	set "zapret_hosts_user_exclude=!zapret_hosts_user_exclude! --hostlist-exclude=%home%\lists\exclude\%%X"
 )
 set "daemon_bakup=%daemon%"
 set "debug_bakup=%debug%"
@@ -493,6 +516,21 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 						call:cecho 7 "Параметр" 3 "!fletter!=%%~N" 1 "отброшен"	
 					)
 				)
+			) else if "x!fletter!"=="xIPSET" (
+					if "x%IPsetStatus%"=="xon" (
+						set /a foo = 0
+						for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\ipset\*.txt %home%\lists\ipset\*.lst %home%\lists\ipset\*.gz') do (
+							set "profile_param=!profile_param! --ipset=%home%\lists\ipset\%%~X"
+							set /a foo = 1
+						)
+						if !foo! equ 0 (
+							call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'%home%\lists\ipset\*'"
+							call:cecho 7 "Параметр" 3 "IPSET" 1 "отброшен"	
+						)				
+					) else (
+						set "skip_profile=on"
+						call:cecho 1 "Исключен" 7 "WinWS фильтр с параметром" 3 "'IPset=off'"
+					)
 			) else if "x!fletter!"=="x--ipset" (
 				if "x%%~N"=="x" (
 					if "x%IPsetStatus%"=="xon" (
@@ -581,6 +619,42 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 						call:cecho 7 "Параметр" 3 "!fletter!=%%~N" 1 "отброшен"	
 					)
 				)
+ REM --dpi-desync=[<mode0>,]<mode>[,<mode2>]        ; try to desync dpi state. modes :
+                                                REM ; synack syndata fake fakeknown rst rstack hopbyhop destopt ipfrag1
+                                                REM ; multisplit multidisorder fakedsplit fakeddisorder ipfrag2 udplen tamper
+ REM --dpi-desync-ttl=<int>                         ; set ttl for fakes packets
+ REM --dpi-desync-ttl6=<int>                        ; set ipv6 hop limit for fake packet. by default --dpi-desync-ttl value is used.
+ REM --dpi-desync-autottl=[<delta>[:<min>[-<max>]]|-]  ; auto ttl mode for both ipv4 and ipv6. default: -1:3-20
+ REM --dpi-desync-autottl6=[<delta>[:<min>[-<max>]]|-] ; overrides --dpi-desync-autottl for ipv6 only
+ REM --dpi-desync-fooling=<mode>[,<mode>]           ; can use multiple comma separated values. modes : none md5sig badseq badsum datanoack hopbyhop hopbyhop2
+ REM --dpi-desync-repeats=<N>                       ; send every desync packet N times
+ REM --dpi-desync-skip-nosni=0|1                    ; 1(default)=do not act on ClientHello without SNI
+ REM --dpi-desync-split-pos=N|-N|marker+N|marker-N  ; comma separated list of split positions
+                                                REM ; markers: method,host,endhost,sld,endsld,midsld,sniext
+                                                REM ; full list is only used by multisplit and multidisorder
+                                                REM ; fakedsplit/fakeddisorder use first l7-protocol-compatible parameter if present, first abs value otherwise
+ REM --dpi-desync-split-seqovl=N|-N|marker+N|marker-N ; use sequence overlap before first sent original split segment
+ REM --dpi-desync-split-seqovl-pattern=<filename>|0xHEX ; pattern for the fake part of overlap
+ REM --dpi-desync-fakedsplit-pattern=<filename>|0xHEX ; fake pattern for fakedsplit/fakeddisorder
+ REM --dpi-desync-ipfrag-pos-tcp=<8..9216>          ; ip frag position starting from the transport header. multiple of 8, default 8.
+ REM --dpi-desync-ipfrag-pos-udp=<8..9216>          ; ip frag position starting from the transport header. multiple of 8, default 32.
+ REM --dpi-desync-badseq-increment=<int|0xHEX>      ; badseq fooling seq signed increment. default -10000
+ REM --dpi-desync-badack-increment=<int|0xHEX>      ; badseq fooling ackseq signed increment. default -66000
+ REM --dpi-desync-any-protocol=0|1                  ; 0(default)=desync only http and tls  1=desync any nonempty data packet --dpi-desync-fake-http=<filename>|0xHEX        ; file containing fake http request
+ REM --dpi-desync-fake-tls=<filename>|0xHEX|!       ; file containing fake TLS ClientHello (for https)
+ REM --dpi-desync-fake-tls-mod=mod[,mod]            ; comma separated list of TLS fake mods. available mods : none,rnd,rndsni,sni=<sni>,dupsid,padencap
+ REM --dpi-desync-fake-unknown=<filename>|0xHEX     ; file containing unknown protocol fake payload
+ REM --dpi-desync-fake-syndata=<filename>|0xHEX     ; file containing SYN data payload
+ REM --dpi-desync-fake-quic=<filename>|0xHEX        ; file containing fake QUIC Initial
+ REM --dpi-desync-fake-wireguard=<filename>|0xHEX   ; file containing fake wireguard handshake initiation
+ REM --dpi-desync-fake-dht=<filename>|0xHEX         ; file containing DHT protocol fake payload (d1...e)
+ REM --dpi-desync-fake-discord=<filename>|0xHEX     ; file containing discord protocol fake payload (Voice IP Discovery)
+ REM --dpi-desync-fake-stun=<filename>|0xHEX        ; file containing STUN protocol fake payload
+ REM --dpi-desync-fake-unknown-udp=<filename>|0xHEX ; file containing unknown udp protocol fake payload
+ REM --dpi-desync-udplen-increment=<int>            ; increase or decrease udp packet length by N bytes (default 2). negative values decrease length.
+ REM --dpi-desync-udplen-pattern=<filename>|0xHEX   ; udp tail fill pattern
+ REM --dpi-desync-start=[n|d|s]N                    ; apply dpi desync only to packet numbers (n, default), data packet numbers (d), relative sequence (s) greater or equal than N
+ REM --dpi-desync-cutoff=[n|d|s]N                   ; apply dpi desync only to packet numbers (n, default), data packet numbers (d), relative sequence (s) less than N
 			REM ) else if "x!fletter!"=="x--dpi-desync-split-seqovl-pattern" (
 			REM ) else if "x!fletter!"=="x--dpi-desync-fakedsplit-pattern" (
 			REM ) else if "x!fletter!"=="x--dpi-desync-fake-tls" (
@@ -763,7 +837,14 @@ for /l %%x in (5,-1,1) do (
 exit /b %ecode%
 
 :menu_1
-if "x%daemon%"=="xon" ( set "daemon=off" ) else ( set "daemon=on" )
+set "debug=%debug%"
+if "x%daemon%"=="xon" ( 
+	set "daemon=off" 
+) else ( 
+	set "daemon=on"
+	set "debug=off"
+)
+echo.%debug%>%home%\bin\debugpar
 echo.%daemon%>%home%\bin\daemonpar
 goto:menu
 
@@ -773,7 +854,7 @@ rem debug=@filename - very slow :(
 if "x%debug%"=="xon" (
 	set "debug=off"
 ) else if "x%debug%"=="xoff" (
-	set "debug=on"
+	if "x%daemon%"=="xon" ( set "debug=off" ) else ( set "debug=on" )
 ) 
 REM if "x%debug%"=="xon" (
 	REM set "debug=@filename"

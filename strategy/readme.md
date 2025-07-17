@@ -27,10 +27,14 @@
 <code>--hostlist-auto=</code> - скрипт сам назначит файл 'hostlist-auto.txt' из директории 'hostlist'<br>
 <code>--hostlist-auto=my_auto_file.txt</code> - пользователь указал имя файла (если такого файла нет в директории 'hostlist' , то он его создаст)<br>
 <br>
+Аналогично и с параметром <code>--ipset</code>
+<code>--ipset=</code> - укажет скрипту включить аргумент <code>--ipset</code> со всеми списками из директории 'ipset' (с расширениями .txt, .lst, .gz)<br>
+<code>--ipset=ip.txt</code> - укажет скрипту включить аргумент <code>--ipset</code> с одним списком из директории 'ipset'<br>
+<br>
 <code>--dpi-desync-fake-quic=quic_initial_www_google_com.bin</code> - пишем имя файла 'quic_initial_www_google_com.bin' без указания пути, скрипт знает, где он должен лежать, если файла нет, то он предупредит.<br>
-
+<br>
 Параметры <code>--hostlist-exclude</code> и <code>--ipset-exclude</code> автоматически добавляются ко всем профилям, по умолчанию используется стандартный 'zapret-hosts-user-exclude.txt.default', свои списки исключений можно создать в директории 'lists\exclude'<br>
-
+<br>
 ------------------------------------------------------------------------------<br>
 '\my\strategy\test\2.strategy'<br>
 

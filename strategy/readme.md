@@ -40,10 +40,13 @@
 
 <code>#blabla</code>
 <br>
+<br>
 <code>##tcp: 443
 --wf-tcp=443</code>
 <br>
+<br>
 <code>##rule 1: hostlist</code>
+<br>
 <br>
 <code>HOSTLIST_NOAUTO
 --dpi-desync=split2
@@ -53,9 +56,12 @@
 --dpi-desync-fooling=badseq,hopbyhop2
 --dpi-desync-split-seqovl-pattern=tls_clienthello_www_google_com.bin</code>
 <br>
+<br>
 <code>--new</code>
 <br>
+<br>
 <code>##rule 2: ipset</code>
+<br>
 <br>
 <code>IPSET
 --dpi-desync=split2

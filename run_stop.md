@@ -1,16 +1,8 @@
-rem Stop 
-
-rem 
-
-rem Example to run: 
-
-rem  
-
-rem run.cmd stop
-
-rem  
-
-rem run.cmd stop
+rem Stop  <br>
+rem  <br>
+rem Example to run:  <br>
+rem   <br>
+rem run.cmd stop <br>
 
 
 

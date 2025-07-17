@@ -22,7 +22,7 @@
 <code>IPSET</code> - этот маркер укажет скрипту включить аргумент <code>--ipset</code> со всеми списками из директории 'ipset'<br>
 <br>
 Можно писать в стратегии без маркера:<br>
-<code>--hostlist=</code>   укажет скрипту включить аргумент --hostlist со всеми списками из директории 'hostlist' (с расширениями .txt, .lst, .gz)<br>
+<code>--hostlist=</code> - укажет скрипту включить аргумент <code>--hostlist</code> со всеми списками из директории 'hostlist' (с расширениями .txt, .lst, .gz)<br>
 <code>--hostlist=host.txt</code> - укажет скрипту включить аргумент --hostlist с одним списком из директории 'hostlist'<br>
 <code>--hostlist-auto=</code> - скрипт сам назначит файл 'hostlist-auto.txt' из директории 'hostlist'<br>
 <code>--hostlist-auto=my_auto_file.txt</code> - пользователь указал имя файла (если такого файла нет в директории 'hostlist' , то он его создаст)<br>

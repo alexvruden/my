@@ -39,6 +39,7 @@
 '\my\strategy\test\2.strategy'<br>
 
 <code>
+
 #blabla
 
 ##tcp: 443
@@ -65,5 +66,5 @@ IPSET
 --dpi-desync-fooling=badseq,hopbyhop2
 --dpi-desync-split-seqovl-pattern=tls_clienthello_www_google_com.bin
 
-# rule 0
+
 </code>

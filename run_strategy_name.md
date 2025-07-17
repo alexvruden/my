@@ -20,4 +20,6 @@ rem
 
 
 
-run.cmd start test 1011
+rem run.cmd start test 0011
+rem run.cmd start "n a m e spases" 1001
+rem run.cmd start "всем добра" 0100

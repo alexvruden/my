@@ -65,10 +65,11 @@ for /l %%a in (1,1,1000) do (
 )
 :@break
 set /a mesme = %mesme% + 1
-if %mesme% gtr 100 (
+set /a foo = %loop_period% * 300 / 60
+if %mesme% gtr 300 (
 	set "curtime=!TIME:~0,2!.!TIME:~3,2!.!TIME:~6,2!"
 	set "curtime=!curtime: =0!"
-	echo.!curtime! я еще жив >>%home%\bin\agent_status
+	echo.!curtime! я еще жив, маякну через %foo% мин., наверное ... >>%home%\bin\agent_status
 	echo.!curtime! !lastmesm!>>%home%\bin\agent_status
 	set /a mesme = 0
 )

@@ -28,7 +28,8 @@ set "arg_1=%~1"
 set "arg_2=%~2"
 set "arg_3=%~3"
 
->nul dism ||( 
+net session >nul 2>&1
+if %errorLevel% neq 0 ( 
 	echo.Для некоторых действий сценария необходимы высокие привилегии, запустите скрипт с правами 'Администратора'.
 	echo.Выход.
 	echo.
@@ -151,6 +152,9 @@ if %profile_count% GTR 0 (
 	for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
 	echo.
 	set "strategy_run=!n1!" 
+) else (
+	for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
+	echo.
 )
 rem --------------------------------------
 if "x%arg_1%"=="xstart" (
@@ -338,6 +342,8 @@ if defined strategy_run (
 )
 rem ------------------------------------------------------------------------------------
 if exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh (
+	for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
+	echo.
 	set /a menu_count=!menu_count!+1
 	set /a blockcheck_menu_count=!menu_count!
 	echo.[%c1%G[37m!menu_count!.[%c2%GBlockcheck[0m

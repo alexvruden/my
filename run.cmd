@@ -114,7 +114,7 @@ if %foo% GTR 0 (
 		)
 	)
 )
-
+set /a about_pid_strsize=%c8%-%c4%
 if %profile_count% GTR 0 ( 
 	for /l %%i in (1,1,%profile_count%) do (
 		if %%i EQU 1 (
@@ -136,7 +136,7 @@ if %profile_count% GTR 0 (
 			for /l %%x in (%c4%,1,%c8%) do <nul set /p =[%%xG-
 			echo.
 		)
-		echo.[%c1%GPID: !pid%%i![%c4%G!pr%%i!
+		echo.[%c1%GPID: !pid%%i![%c4%G !pr%%i:~0,%about_pid_strsize%!
 	)
 	for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
 	echo.
@@ -215,6 +215,8 @@ REM echo.
 rem ------------------------------------------------------------------------------------
 set /a strategy_menu_count=1000
 set /a foo=%c1%-1
+set /a about_strategy_strsize=%c8%-%c5%
+
 if %exp_str% equ 0 (
 	echo.[%foo%G[33m[..][%c2%G[36mС[33mтратегии[0m
 ) else ( 
@@ -237,9 +239,9 @@ if %exp_str% equ 0 (
 				if !strategy_menu_count! equ 1000 set /a strategy_menu_count=!menu_count!
 				if "x!strategy_run!"=="x%%~I" (
 					set /a c0=%c1% - 2
-					echo.[!c0!G[32m^>[%c1%G[37m!menu_count!.[%c2%G[32m%%~I [%c5%G[36m!about_strategy![0m
+					echo.[!c0!G[32m^>[%c1%G[37m!menu_count!.[%c2%G[32m%%~I [%c5%G[36m !about_strategy:~0,%about_strategy_strsize%! [0m
 				) else ( 	
-					echo.[%c1%G[37m!menu_count!.[%c2%G%%~I [%c5%G[36m!about_strategy![0m
+					echo.[%c1%G[37m!menu_count!.[%c2%G%%~I [%c5%G[36m !about_strategy:~0,%about_strategy_strsize%! [0m
 				) 
 				set "strategy_count_name!menu_count!=%%~I"
 				set "strategy_name_spath!menu_count!=!sfoo!"
@@ -312,6 +314,7 @@ REM for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
 REM echo.
 rem ------------------------------------------------------------------------------------
 set /a terminate_count=1000
+set /a about_kill_strsize=%c8%-%c3%
 if defined strategy_run (
 	set /a terminate_count=%menu_count% + 1
 	set /a menu_count=!menu_count!+1
@@ -320,7 +323,7 @@ if defined strategy_run (
 		echo.[%c2%G[33mили отдельные профили ниже:
 		for /l %%i in (1,1,%profile_count%) do (
 			set /a menu_count=!menu_count!+1
-			echo.[%c2%G[37m!menu_count!.[%c3%G[36m!pr%%i![0m
+			echo.[%c2%G[37m!menu_count!.[36m[%c3%G !pr%%i:~0,%about_kill_strsize%! [0m
 		)
 		echo.
 	)

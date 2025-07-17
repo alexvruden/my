@@ -23,7 +23,7 @@
 <br>
 Можно писать в стратегии без маркера:<br>
 <code>--hostlist=</code> - укажет скрипту включить аргумент <code>--hostlist</code> со всеми списками из директории 'hostlist' (с расширениями .txt, .lst, .gz)<br>
-<code>--hostlist=host.txt</code> - укажет скрипту включить аргумент --hostlist с одним списком из директории 'hostlist'<br>
+<code>--hostlist=host.txt</code> - укажет скрипту включить аргумент <code>--hostlist</code> с одним списком из директории 'hostlist'<br>
 <code>--hostlist-auto=</code> - скрипт сам назначит файл 'hostlist-auto.txt' из директории 'hostlist'<br>
 <code>--hostlist-auto=my_auto_file.txt</code> - пользователь указал имя файла (если такого файла нет в директории 'hostlist' , то он его создаст)<br>
 <br>
@@ -32,7 +32,7 @@
 Параметры <code>--hostlist-exclude</code> и <code>--ipset-exclude</code> автоматически добавляются ко всем профилям, по умолчанию используется стандартный 'zapret-hosts-user-exclude.txt.default', свои списки исключений можно создать в директории 'lists\exclude'<br>
 
 ------------------------------------------------------------------------------<br>
-'\my\strategy\test\2.strategy'
+'\my\strategy\test\2.strategy'<br>
 
 <code>
 #blabla

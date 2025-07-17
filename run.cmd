@@ -23,7 +23,7 @@ set "agent_mode="
 set "winwsdir="
 set "fakedir="
 set /a profile_count=0
-set /a blkc=0
+REM set /a blkc=0
 set "arg_1=%~1"
 set "arg_2=%~2"
 set "arg_3=%~3"
@@ -39,7 +39,7 @@ for /f "skip=2 delims=" %%i in ('2^>nul powershell -Command "Get-CimInstance Win
 if "x%arch:~0,2%"=="x32" ( set "arch=windows-x86" ) else ( set "arch=windows-x86_64" )
 set "foo="
 for /f "delims=" %%I in ('2^>nul dir /b /s /a:d %home%\bin\%arch%') do set "winwsdir=%%~I"
-for %%i in ("%winwsdir%") do set "winwsdir=%%~si"
+REM for %%i in ("%winwsdir%") do set "winwsdir=%%~si"
 if not exist %winwsdir%\winws.exe (
 	set "winwsdir="
 ) else (
@@ -136,7 +136,8 @@ if %profile_count% GTR 0 (
 			for /l %%x in (%c4%,1,%c8%) do <nul set /p =[%%xG-
 			echo.
 		)
-		echo.[%c1%GPID: !pid%%i![%c4%G !pr%%i:~0,%about_pid_strsize%!
+		rem echo.[%c1%GPID: !pid%%i![%c4%G !pr%%i:~0,%about_pid_strsize%!
+		echo.[%c1%GPID: !pid%%i![%c4%G!pr%%i!
 	)
 	for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
 	echo.
@@ -239,9 +240,9 @@ if %exp_str% equ 0 (
 				if !strategy_menu_count! equ 1000 set /a strategy_menu_count=!menu_count!
 				if "x!strategy_run!"=="x%%~I" (
 					set /a c0=%c1% - 2
-					echo.[!c0!G[32m^>[%c1%G[37m!menu_count!.[%c2%G[32m%%~I [%c5%G[36m !about_strategy:~0,%about_strategy_strsize%! [0m
+					echo.[!c0!G[32m^>[%c1%G[37m!menu_count!.[%c2%G[32m%%~I [%c5%G[36m!about_strategy:~0,%about_strategy_strsize%![0m
 				) else ( 	
-					echo.[%c1%G[37m!menu_count!.[%c2%G%%~I [%c5%G[36m !about_strategy:~0,%about_strategy_strsize%! [0m
+					echo.[%c1%G[37m!menu_count!.[%c2%G%%~I [%c5%G[36m!about_strategy:~0,%about_strategy_strsize%![0m
 				) 
 				set "strategy_count_name!menu_count!=%%~I"
 				set "strategy_name_spath!menu_count!=!sfoo!"
@@ -323,7 +324,8 @@ if defined strategy_run (
 		echo.[%c2%G[33mили отдельные профили ниже:
 		for /l %%i in (1,1,%profile_count%) do (
 			set /a menu_count=!menu_count!+1
-			echo.[%c2%G[37m!menu_count!.[36m[%c3%G !pr%%i:~0,%about_kill_strsize%! [0m
+			rem echo.[%c2%G[37m!menu_count!.[36m[%c3%G !pr%%i:~0,%about_kill_strsize%! [0m
+			echo.[%c2%G[37m!menu_count!.[36m[%c3%G!pr%%i![0m
 		)
 		echo.
 	)
@@ -403,6 +405,7 @@ for /l %%i in (1,1,%profile_count%) do (
 		powershell -NoP -sta -NonI -Command "Stop-Process -Id !pid%%i! -Force" 1>nul 2>&1
 	)
 )
+set "strategy_run="
 if "x%arg_1%"=="xstart" goto:terminate_done
 if "x%arg_1%"=="xstop" goto:terminate_done
 if %menu_choice% EQU %terminate_count% (
@@ -416,7 +419,8 @@ if %menu_choice% EQU %terminate_count% (
 	)
 	goto:menu
 )
-if %blkc% equ 1 goto:terminate_done
+rem if %blkc% equ 1 goto:terminate_done
+if %menu_choice% EQU %blockcheck_menu_count% goto:terminate_done
 if %menu_choice% LSS %terminate_count% goto:terminate_done
 
 :terminate_one
@@ -438,7 +442,8 @@ if %errorlevel% EQU 0 (
 	sc delete windivert 1>nul 2>&1
 )
 if "x%arg_1%"=="xstop" exit
-if %blkc% equ 1 goto:blockcheck
+REM if %blkc% equ 1 goto:blockcheck
+if %menu_choice% EQU %blockcheck_menu_count% goto:blockcheck
 
 if not defined winwsdir (
 	for /f "delims=" %%I in ('2^>nul dir /b /s /a:d %home%\bin\%arch%') do set "winwsdir=%%~I"
@@ -961,9 +966,9 @@ if not exist %home%\lists\blockcheck.txt (
 	pause
 	goto:menu
 )
-set /a blkc=1
+REM set /a blkc=1
 if defined strategy_run goto:terminate_all
-set /a blkc=0
+REM set /a blkc=0
 
 rem - https://github.com/bol-van/zapret?tab=readme-ov-file#%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%B0-%D0%BF%D1%80%D0%BE%D0%B2%D0%B0%D0%B9%D0%B4%D0%B5%D1%80%D0%B0
 REM CURL - замена программы curl

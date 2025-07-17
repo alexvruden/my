@@ -7,10 +7,9 @@ set "IPsetStatus=off"
 set "strategy_run="
 set "arch="
 set /a socks5=0
-set /a blockcheck_menu_count=300
-set /a srv_menu_count=310
 set /a srv_trigger=0
 set /a term_trigger=0
+set /a param_trigger=0
 set /a ecode=0
 set /a ccall=0
 set /a rand=0
@@ -36,11 +35,11 @@ set "arg_3=%~3"
 	pause
 	exit
 )
-
-for /f "tokens=2 delims==" %%i in ('2^>nul wmic os get osarchitecture /Format:Textvaluelist') do set "arch=%%i"
+for /f "skip=2 delims=" %%i in ('2^>nul powershell -Command "Get-CimInstance Win32_operatingsystem ^| select OSArchitecture"') do set "arch=%%i"
 if "x%arch:~0,2%"=="x32" ( set "arch=windows-x86" ) else ( set "arch=windows-x86_64" )
 set "foo="
 for /f "delims=" %%I in ('2^>nul dir /b /s /a:d %home%\bin\%arch%') do set "winwsdir=%%~I"
+for %%i in ("%winwsdir%") do set "winwsdir=%%~si"
 if not exist %winwsdir%\winws.exe (
 	set "winwsdir="
 ) else (
@@ -60,7 +59,7 @@ set /a c1=5
 set /a c2=9
 set /a c3=13
 set /a c4=30
-set /a c5=50
+set /a c5=55
 set /a c6=80
 set /a c7=100
 set /a c8=115
@@ -89,7 +88,6 @@ for /f "tokens=2 delims=," %%i in ('2^>nul tasklist /FI "IMAGENAME eq winws.exe"
 	set "winws_pid!foo!=!a:"=!"
 )
 set "strategy_run="
-set /a terminate_count=100
 set /a profile_count=0
 set "n="
 set "p="
@@ -98,12 +96,9 @@ set "pr="
 set "pid="
 set "daemon_status=on"
 set "debug_status="
-
-rem WMIC PROCESS Where Name="winws.exe" Get CommandLine,ProcessId /Format |find "--comment "
 if %foo% GTR 0 ( 
 	for /l %%i in (1,1,%foo%) do (
-		for /f "skip=1 tokens=2,3,4,5,6,7 delims=[]" %%M in ('2^>nul wmic process where Processid^="!winws_pid%%i!" get commandline') do (
-		
+		for /f "skip=2 tokens=2,3,4,5,6,7 delims=[]" %%M in ('2^>nul powershell -Command "Get-WmiObject win32_process -Filter 'ProcessId ^= !winws_pid%%i!' ^| select commandline"') do (
 			if "x%%~M"=="x" (
 				set "foo="
 			) else (
@@ -131,8 +126,8 @@ if %profile_count% GTR 0 (
 			if "x!debug_status!"=="xon" ( set "offon=да" ) else ( set "offon=нет" )
 			echo.[%c4%G[33mПоказывать ход работы в окне[0m: !offon!
 			if "x!p%%i!"=="x0" (
-				echo.[%c4%G[33mДиапазон портов для фильтрации[0m: нет
-			) else echo.[%c4%G[33mДиапазон портов для фильтрации[0m: !p%%i!
+				echo.[%c4%G[33mИспользовать стратегию для диапазона портов[0m: нет
+			) else echo.[%c4%G[33mИспользовать стратегию для диапазона портов[0m: !p%%i!
 			if "x!ip%%i!"=="xon" ( set "offon=да" ) else ( set "offon=нет" )
 			echo.[%c4%G[33mИспользовать список IP[0m: !offon!
 			set /a foo=%c4%
@@ -147,16 +142,16 @@ if %profile_count% GTR 0 (
 	echo.
 	set "strategy_run=!n1!" 
 )
-echo.[%c2%G[33mПараметры запуска стратегии[0m
-echo.
 rem --------------------------------------
 if "x%arg_1%"=="xstart" (
 	if "x%arg_2%"=="x" ( 
 		set /a ecode=1
-		echo.[5G[31mПустой аргумент: [37m'[33m%arg_2%[37m'[0m]
+		echo.[5G[31mПустой аргумент #2: [37m'[33m%arg_2%[37m'[0m]
 		goto:strategy_list_end
 	) else ( 
 		set "strategy_name=%arg_2%" 
+		for %%i in ("%home%\strategy\!strategy_name!") do set "foo=%%~sni"
+		set "strategy_apath=%home%\strategy\!foo!"
 	)
 	goto:terminate
 )
@@ -165,46 +160,60 @@ if "x%arg_1%"=="xstop" (
 )
 
 set /a menu_count=0
-set /a foo=7
-if "x%daemon%"=="xon" ( 
-	set /a foo=2
-	set "offon=да " 
-) else ( 
-	set /a foo=1
-	set "offon=нет" 
+rem ------------------------------------------------------------------------------------
+set /a parameter_menu_count=1000
+set /a foo=%c1%-1
+echo.[%foo%G[33m[..][%c2%G[33mПара[36mм[33mетры запуска стратегии[0m
+if %param_trigger% neq 0 (
+	echo.
+	set /a foo=7
+	if "x%daemon%"=="xon" ( 
+		set /a foo=2
+		set "offon=да " 
+	) else ( 
+		set /a foo=1
+		set "offon=нет" 
+	)
+	set /a menu_count=!menu_count!+1
+	set /a parameter_menu_count=!menu_count!
+	echo.[%c1%G[37m!menu_count!.[%c2%GЗапуск в скрытом окне[%c5%G[[3!foo!m!offon![0m]
+	set "atten="
+	set /a foo=7
+	if "x%debug%"=="xon" ( 
+		set /a foo=2
+		set "offon=да " 
+	) else ( 
+		set /a foo=1
+		set "offon=нет" 
+	)
+	REM if "x%debug%"=="x@filename" (
+		REM set /a foo=7
+		REM set "atten=very slow"
+	REM )
+	set /a menu_count=!menu_count!+1
+	echo.[%c1%G[37m!menu_count!.[%c2%GПоказывать ход работы в окне[%c5%G[[3!foo!m!offon![0m] [31m!atten![0m
+	set /a menu_count=!menu_count!+1
+	if "x%PortFilterStatus%"=="xon" (
+		echo.[%c1%G[37m!menu_count!.[%c2%GИспользовать стратегию для диапазона портов[%c5%G[%PortFilter%]
+	) else (
+		echo.[%c1%G[37m!menu_count!.[%c2%GИспользовать стратегию для диапазона портов[%c5%G[[31mнет[0m]
+	)
+	set /a foo=7
+	if "x%IPsetStatus%"=="xon" ( 
+		set /a foo=2
+		set "offon=да " 
+	) else ( 
+		set /a foo=1
+		set "offon=нет" 
+	)
+	set /a menu_count=!menu_count!+1
+	echo.[%c1%G[37m!menu_count!.[%c2%GИспользовать список IP[%c5%G[[3!foo!m!offon![0m]
+	echo.
 )
-echo.[%c1%G[37m1.[%c2%GЗапуск в скрытом окне[%c5%G[[3%foo%m%offon%[0m]
-set /a menu_count=%menu_count%+1
-set "atten="
-set /a foo=7
-if "x%debug%"=="xon" ( 
-	set /a foo=2
-	set "offon=да " 
-) else ( 
-	set /a foo=1
-	set "offon=нет" 
-)
-REM if "x%debug%"=="x@filename" (
-	REM set /a foo=7
-	REM set "atten=very slow"
-REM )
-echo.[%c1%G[37m2.[%c2%GПоказывать ход работы в окне[%c5%G[[3%foo%m%offon%[0m] [31m%atten%[0m
-set /a menu_count=%menu_count%+1
-if "x%PortFilterStatus%"=="xon" echo.[%c1%G[37m3.[%c2%GДиапазон портов для фильтрации[%c5%G[%PortFilter%]
-if "x%PortFilterStatus%"=="xoff" echo.[%c1%G[37m3.[%c2%GДиапазон портов для фильтрации[%c5%G[[31mнет[0m]
-set /a menu_count=%menu_count%+1
-set /a foo=7
-if "x%IPsetStatus%"=="xon" ( 
-	set /a foo=2
-	set "offon=да " 
-) else ( 
-	set /a foo=1
-	set "offon=нет" 
-)
-echo.[%c1%G[37m4.[%c2%GИспользовать список IP[%c5%G[[3%foo%m%offon%[0m]
-set /a menu_count=%menu_count%+1
-for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
-echo.
+REM for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
+REM echo.
+rem ------------------------------------------------------------------------------------
+set /a strategy_menu_count=1000
 set /a foo=%c1%-1
 if %exp_str% equ 0 (
 	echo.[%foo%G[33m[..][%c2%G[36mС[33mтратегии[0m
@@ -212,63 +221,57 @@ if %exp_str% equ 0 (
 	echo.[%foo%G[33m[..][%c2%G[36mС[33mтратегии[%c5%GОписание[0m
 	echo.
 	set "strategy_count_name="
+	set "strategy_name_spath="
 	set /a foo=0
 
 	for /f "delims=" %%I in ('2^>nul dir /b /a:d %home%\strategy\') do (
 		set /a fexist=0
-		for /f "delims=" %%a in ('2^>nul dir /b %home%\strategy\%%I\*.strategy') do set /a fexist=1
-		if !fexist! neq 0 (
-			if not exist %home%\strategy\%%I\about echo.нет описания>%home%\strategy\%%I\about
-			set /p about_strategy=<%home%\strategy\%%I\about
-			set /a menu_count=!menu_count!+1
-			if "x!strategy_run!"=="x%%~I" (
-				set /a c0=%c1% - 2
-				echo.[!c0!G[32m^>[%c1%G[37m!menu_count!.[%c2%G[32m%%I[%c5%G[36m!about_strategy![0m
-			) else ( 	
-				echo.[%c1%G[37m!menu_count!.[%c2%G%%I[%c5%G[36m!about_strategy![0m
-			) 
-			set "strategy_count_name!menu_count!=%%I"
-			set /a foo=1
+		set "sfoo="
+		for %%m in ("%home%\strategy\%%~I") do set "sfoo=%%~snm"
+		if not "x!sfoo!"=="x" (
+			for /f "delims=" %%a in ('2^>nul dir /x /b %home%\strategy\!sfoo!\*.strategy') do set /a fexist=1
+			if !fexist! neq 0 (
+				if not exist %home%\strategy\!sfoo!\about echo.нет описания>%home%\strategy\!sfoo!\about
+				set /p about_strategy=<%home%\strategy\!sfoo!\about
+				set /a menu_count=!menu_count!+1
+				if !strategy_menu_count! equ 1000 set /a strategy_menu_count=!menu_count!
+				if "x!strategy_run!"=="x%%~I" (
+					set /a c0=%c1% - 2
+					echo.[!c0!G[32m^>[%c1%G[37m!menu_count!.[%c2%G[32m%%~I [%c5%G[36m!about_strategy![0m
+				) else ( 	
+					echo.[%c1%G[37m!menu_count!.[%c2%G%%~I [%c5%G[36m!about_strategy![0m
+				) 
+				set "strategy_count_name!menu_count!=%%~I"
+				set "strategy_name_spath!menu_count!=!sfoo!"
+				set /a foo=1
+			)
 		)
 	)
+	echo.
 )
 if %foo% equ 0 ( 
-	<nul set /p =[1F[2K[1F[2K[1F[2K 
-) else (
-	for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
-	echo.
-)
-if defined strategy_run (
-	set /a terminate_count=%menu_count% + 1
-	set /a menu_count=!menu_count!+1
-	if %term_trigger% equ 0 ( 
-		echo.[%c1%G[37m!menu_count!.[%c2%G[33mЗав[36mе[33mршить мульти-стратегию '!strategy_run!' [0m
-	) else (
-		echo.[%c1%G[37m!menu_count!.[%c2%G[33mЗав[36mе[33mршить мульти-стратегию '!strategy_run!' [0m
-		echo.[%c2%G[33mили отдельные профили ниже:
-		for /l %%i in (1,1,%profile_count%) do (
-			set /a menu_count=!menu_count!+1
-			echo.[%c2%G[37m!menu_count!.[%c3%G[36m!pr%%i![0m
-		)
-	)
-	for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
-	echo.
-)
+	echo.[%c2%G[31mСтратегии не найдены. [0m
+	echo.[%c2%G[33mДобавьте файлы стратегий в папку '[37m..\strategy\[0m'
+) 
+REM else (
+	REM for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
+	REM echo.
+REM )
+rem ------------------------------------------------------------------------------------
 set /a task=100
-set /a agent_work=100
+set /a agent_work=1000
 schtasks /Query /TN dpiagent 1>nul 2>&1
 if %errorlevel% EQU 0 set /a task=0
 if exist %home%\bin\agent_mode (
 	set /p agent_mode=<%home%\bin\agent_mode
 )
+set /a srv_menu_count=1000
 set /a foo=%c1%-1
-if %srv_trigger% equ 0 ( 
-	echo.[%foo%G[33m[..][%c2%G[36mА[33mвтоматизация [%c5%G[33m[..][0m
-) else (
-	echo.[%foo%G[33m[..][%c2%G[36mА[33mвтоматизация[0m
+echo.[%foo%G[33m[..][%c2%G[36mА[33mвтоматизация[0m
+if %srv_trigger% neq 0 ( 
 	set /a srv_menu_count=%menu_count%+1
 	if %task% EQU 0 (
-		wmic process Where Name="cmd.exe" Get CommandLine,ProcessId /Format |find "run_agent.cmd" 1>nul 2>&1
+		powershell -Command "Get-WmiObject win32_process -Filter 'name = \"cmd.exe\"' | select commandline" |find "run_agent.cmd" 1>nul 2>&1
 		if !errorlevel! EQU 0 (
 			if exist %home%\bin\agent_status (
 				rem last status
@@ -303,23 +306,48 @@ if %srv_trigger% equ 0 (
 			echo.[%c2%G[33mДля создания задачи в планировщике заданий запустите стратегию[0m
 		)
 	)
+	echo.
 )
-for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
-echo.
+REM for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
+REM echo.
+rem ------------------------------------------------------------------------------------
+set /a terminate_count=1000
+if defined strategy_run (
+	set /a terminate_count=%menu_count% + 1
+	set /a menu_count=!menu_count!+1
+	echo.[%c1%G[37m!menu_count!.[%c2%G[33mЗав[36mе[33mршить мульти-стратегию '[0m!strategy_run![33m'[0m
+	if %term_trigger% equ 0 ( 
+		echo.[%c2%G[33mили отдельные профили ниже:
+		for /l %%i in (1,1,%profile_count%) do (
+			set /a menu_count=!menu_count!+1
+			echo.[%c2%G[37m!menu_count!.[%c3%G[36m!pr%%i![0m
+		)
+		echo.
+	)
+	REM for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
+	REM echo.
+)
+rem ------------------------------------------------------------------------------------
+set /a blockcheck_menu_count=1000
 if exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh (
 	set /a menu_count=!menu_count!+1
 	set /a blockcheck_menu_count=!menu_count!
-	echo.[%c1%G[37m!menu_count!.[%c2%GBlockcheck
+	echo.[%c1%G[37m!menu_count!.[%c2%GBlockcheck[0m
 )
 echo.
 echo.[%c1%G0.[%c2%GВыход
 echo.
-set "strchoice=0123456789rcсafфаetеу"
-REM if exist ..... set "strchoice=0123456789rh"
+set "strchoice=0123456789rcсafфаetеуmьvм"
+REM cс		- 'С'тратегии
+REM afфа	- 'А'втоматизация
+REM etеу	- Зав'е'ршить стратегию
+REM mьvм	- Пара'м'етры
 
 choice /N /C:%strchoice% /D r /T 60 /M "#:"
 if %errorlevel% EQU 255 call:cerror 316
 if %errorlevel% EQU 0 call:cerror 317
+REM if %errorlevel% GEQ 26 goto:...
+if %errorlevel% GEQ 22 goto:param_trigger
 if %errorlevel% GEQ 18 goto:terminate_trigger
 if %errorlevel% GEQ 14 goto:srv_menu_trigger
 if %errorlevel% GEQ 12 goto:expand_strategy
@@ -338,16 +366,20 @@ if %errorlevel% EQU 11 (
 )
 echo.[1F[2K
 echo.
+if %menu_choice% equ 0 goto:menu_0
 if %menu_choice% EQU %blockcheck_menu_count% goto:blockcheck
 if %menu_choice% GTR %menu_count% goto:menu
-
-if %menu_choice% GEQ %srv_menu_count% goto:menu_srv
-if %menu_choice% GEQ %terminate_count% goto:terminate
-if %menu_choice% LSS 5 goto:menu_%menu_choice%
+if %terminate_count% neq 1000 if %menu_choice% GEQ %terminate_count% goto:terminate
+if %srv_menu_count% neq 1000 if %menu_choice% GEQ %srv_menu_count% goto:menu_srv
+if %strategy_menu_count% neq 1000 if %menu_choice% GEQ %strategy_menu_count% goto:strategy_choice
+if %parameter_menu_count% neq 1000 if %menu_choice% GEQ %parameter_menu_count% goto:menu_%menu_choice%
+goto:menu
 
 :strategy_choice
 if "x!strategy_count_name%menu_choice%!"=="x" goto:menu
-set strategy_name=!strategy_count_name%menu_choice%!
+set "strategy_name=!strategy_count_name%menu_choice%!"
+set "strategy_spath=!strategy_name_spath%menu_choice%!"
+set "strategy_apath=%home%\strategy\%strategy_spath%"
 :strategy_list
 if "x%strategy_name%"=="x" (
 	echo.strategy_name=none
@@ -417,11 +449,10 @@ if not exist %winwsdir%\winws.exe (
 	pause
 	goto:menu
 )
-for /f "delims=" %%I in ('2^>nul dir /b /s /a:d %home%\bin\fake') do set "fakedir=%%~I"
-
-if exist %home%\strategy\%strategy_name%\about set /p about_strategy=<%home%\strategy\%strategy_name%\about
-if not exist %home%\strategy\%strategy_name%\log md %home%\strategy\%strategy_name%\log >nul
-del /F /Q %home%\strategy\%strategy_name%\log\* >nul
+set "fakedir=%winwsdir:~0,-24%\files\fake"
+if exist %strategy_apath%\about set /p about_strategy=<%strategy_apath%\about
+if not exist %strategy_apath%\log md %strategy_apath%\log >nul
+del /F /Q %strategy_apath%\log\* >nul
 set "zapret_hosts_user_exclude=--hostlist-exclude=%winwsdir:~0,-24%\ipset\zapret-hosts-user-exclude.txt.default"
 set "zapret_hosts_user_exclude=%zapret_hosts_user_exclude% --ipset-exclude=%winwsdir:~0,-24%\ipset\zapret-hosts-user-exclude.txt.default"
 if not exist %home%\lists\exclude md %home%\lists\exclude >nul
@@ -462,10 +493,10 @@ if "x%arg_3:~3,1%"=="x0" (
 	) else goto:error_arg3
 )
 :arg_3_default
-call:cecho 7 "Парсинг параметров, см." 3 "%home%\strategy\%strategy_name%\log\"
+call:cecho 7 "Парсинг параметров, см." 3 "..\strategy\%strategy_name%\log\"
 set /a pcount=0
 set /a scount=0
-for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strategy') do (
+for /f "delims=" %%I in ('2^>nul dir /b %strategy_apath%\*.strategy') do (
 	set "skip_profile=off"
 	set "skip_WinDivert=off"
 	set "profile_param= "
@@ -473,9 +504,10 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 	set "sabout="
 	set "psabout="
 	set "sWinDivert="
-	for /F "skip=1 tokens=1* delims==" %%M in (%home%\strategy\%strategy_name%\%%~nxI) do (
+	for /F "skip=1 tokens=1* delims==" %%M in (%strategy_apath%\%%~nxI) do (
 		set "fletter=%%~M"
 		set "fletter=!fletter: =!"
+		set /a parse_desync = 0
 		
 		if "x!fletter:~0,1!"=="x#" (
 			if "x!fletter:~0,2!"=="x##" (
@@ -614,90 +646,31 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 					set "profile_param=!profile_param! --filter-tcp=%PortFilter%"
 				) else set "profile_param=!profile_param! --filter-tcp=%%~N"
 			) else if "x!fletter!"=="x--dpi-desync-split-seqovl-pattern" (
-				set "foo=%%~N"
-				set "foo=!foo: =!"
-				if "x!foo:~0,2!"=="x0x" (
-					set "profile_param=!profile_param! !fletter!=%%~N"
-				) else (
-					if exist %fakedir%\%%~N ( 
-						set "profile_param=!profile_param! !fletter!=%fakedir%\%%~N"
-					) else (
-						call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'%fakedir%\%%~N'"
-						call:cecho 7 "Параметр" 3 "!fletter!=%%~N" 1 "отброшен"	
-					)
-				)
- REM --dpi-desync=[<mode0>,]<mode>[,<mode2>]        ; try to desync dpi state. modes :
-                                                REM ; synack syndata fake fakeknown rst rstack hopbyhop destopt ipfrag1
-                                                REM ; multisplit multidisorder fakedsplit fakeddisorder ipfrag2 udplen tamper
- REM --dpi-desync-ttl=<int>                         ; set ttl for fakes packets
- REM --dpi-desync-ttl6=<int>                        ; set ipv6 hop limit for fake packet. by default --dpi-desync-ttl value is used.
- REM --dpi-desync-autottl=[<delta>[:<min>[-<max>]]|-]  ; auto ttl mode for both ipv4 and ipv6. default: -1:3-20
- REM --dpi-desync-autottl6=[<delta>[:<min>[-<max>]]|-] ; overrides --dpi-desync-autottl for ipv6 only
- REM --dpi-desync-fooling=<mode>[,<mode>]           ; can use multiple comma separated values. modes : none md5sig badseq badsum datanoack hopbyhop hopbyhop2
- REM --dpi-desync-repeats=<N>                       ; send every desync packet N times
- REM --dpi-desync-skip-nosni=0|1                    ; 1(default)=do not act on ClientHello without SNI
- REM --dpi-desync-split-pos=N|-N|marker+N|marker-N  ; comma separated list of split positions
-                                                REM ; markers: method,host,endhost,sld,endsld,midsld,sniext
-                                                REM ; full list is only used by multisplit and multidisorder
-                                                REM ; fakedsplit/fakeddisorder use first l7-protocol-compatible parameter if present, first abs value otherwise
- REM --dpi-desync-split-seqovl=N|-N|marker+N|marker-N ; use sequence overlap before first sent original split segment
- REM --dpi-desync-split-seqovl-pattern=<filename>|0xHEX ; pattern for the fake part of overlap
- REM --dpi-desync-fakedsplit-pattern=<filename>|0xHEX ; fake pattern for fakedsplit/fakeddisorder
- REM --dpi-desync-ipfrag-pos-tcp=<8..9216>          ; ip frag position starting from the transport header. multiple of 8, default 8.
- REM --dpi-desync-ipfrag-pos-udp=<8..9216>          ; ip frag position starting from the transport header. multiple of 8, default 32.
- REM --dpi-desync-badseq-increment=<int|0xHEX>      ; badseq fooling seq signed increment. default -10000
- REM --dpi-desync-badack-increment=<int|0xHEX>      ; badseq fooling ackseq signed increment. default -66000
- REM --dpi-desync-any-protocol=0|1                  ; 0(default)=desync only http and tls  1=desync any nonempty data packet --dpi-desync-fake-http=<filename>|0xHEX        ; file containing fake http request
- REM --dpi-desync-fake-tls=<filename>|0xHEX|!       ; file containing fake TLS ClientHello (for https)
- REM --dpi-desync-fake-tls-mod=mod[,mod]            ; comma separated list of TLS fake mods. available mods : none,rnd,rndsni,sni=<sni>,dupsid,padencap
- REM --dpi-desync-fake-unknown=<filename>|0xHEX     ; file containing unknown protocol fake payload
- REM --dpi-desync-fake-syndata=<filename>|0xHEX     ; file containing SYN data payload
- REM --dpi-desync-fake-quic=<filename>|0xHEX        ; file containing fake QUIC Initial
- REM --dpi-desync-fake-wireguard=<filename>|0xHEX   ; file containing fake wireguard handshake initiation
- REM --dpi-desync-fake-dht=<filename>|0xHEX         ; file containing DHT protocol fake payload (d1...e)
- REM --dpi-desync-fake-discord=<filename>|0xHEX     ; file containing discord protocol fake payload (Voice IP Discovery)
- REM --dpi-desync-fake-stun=<filename>|0xHEX        ; file containing STUN protocol fake payload
- REM --dpi-desync-fake-unknown-udp=<filename>|0xHEX ; file containing unknown udp protocol fake payload
- REM --dpi-desync-udplen-increment=<int>            ; increase or decrease udp packet length by N bytes (default 2). negative values decrease length.
- REM --dpi-desync-udplen-pattern=<filename>|0xHEX   ; udp tail fill pattern
- REM --dpi-desync-start=[n|d|s]N                    ; apply dpi desync only to packet numbers (n, default), data packet numbers (d), relative sequence (s) greater or equal than N
- REM --dpi-desync-cutoff=[n|d|s]N                   ; apply dpi desync only to packet numbers (n, default), data packet numbers (d), relative sequence (s) less than N
-			REM ) else if "x!fletter!"=="x--dpi-desync-split-seqovl-pattern" (
-			REM ) else if "x!fletter!"=="x--dpi-desync-fakedsplit-pattern" (
-			REM ) else if "x!fletter!"=="x--dpi-desync-fake-tls" (
-			REM ) else if "x!fletter!"=="x--dpi-desync-fake-unknown" (
-			REM ) else if "x!fletter!"=="x--dpi-desync-fake-syndata" (
-			REM ) else if "x!fletter!"=="x--dpi-desync-fake-wireguard" (
-			REM ) else if "x!fletter!"=="x--dpi-desync-fake-dht" (
-			REM ) else if "x!fletter!"=="x--dpi-desync-fake-discord" (
-			REM ) else if "x!fletter!"=="x--dpi-desync-fake-stun" (
-			REM ) else if "x!fletter!"=="x--dpi-desync-udplen-pattern" (
+				set /a parse_desync = 1
+			) else if "x!fletter!"=="x--dpi-desync-split-seqovl-pattern" (
+				set /a parse_desync = 1
+			) else if "x!fletter!"=="x--dpi-desync-fakedsplit-pattern" (
+				set /a parse_desync = 1
+			) else if "x!fletter!"=="x--dpi-desync-fake-tls" (
+				set /a parse_desync = 1
+			) else if "x!fletter!"=="x--dpi-desync-fake-unknown" (
+				set /a parse_desync = 1
+			) else if "x!fletter!"=="x--dpi-desync-fake-syndata" (
+				set /a parse_desync = 1
+			) else if "x!fletter!"=="x--dpi-desync-fake-wireguard" (
+				set /a parse_desync = 1
+			) else if "x!fletter!"=="x--dpi-desync-fake-dht" (
+				set /a parse_desync = 1
+			) else if "x!fletter!"=="x--dpi-desync-fake-discord" (
+				set /a parse_desync = 1
+			) else if "x!fletter!"=="x--dpi-desync-fake-stun" (
+				set /a parse_desync = 1
+			) else if "x!fletter!"=="x--dpi-desync-udplen-pattern" (
+				set /a parse_desync = 1
 			) else if "x!fletter!"=="x--dpi-desync-fake-quic" (
-				set "foo=%%~N"
-				set "foo=!foo: =!"
-				if "x!foo:~0,2!"=="x0x" (
-					set "profile_param=!profile_param! !fletter!=%%~N"
-				) else (
-					if exist %fakedir%\%%~N ( 
-						set "profile_param=!profile_param! !fletter!=%fakedir%\%%~N"
-					) else (
-						call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'%fakedir%\%%~N'"
-						call:cecho 7 "Параметр" 3 "!fletter!=%%~N" 1 "отброшен"	
-					)
-				)
+				set /a parse_desync = 1
 			) else if "x!fletter!"=="x--dpi-desync-fake-unknown-udp" (
-				set "foo=%%~N"
-				set "foo=!foo: =!"
-				if "x!foo:~0,2!"=="x0x" (
-					set "profile_param=!profile_param! !fletter!=%%~N"
-				) else (
-					if exist %fakedir%\%%~N ( 
-						set "profile_param=!profile_param! !fletter!=%fakedir%\%%~N"
-					) else (
-						call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'%fakedir%\%%~N'"
-						call:cecho 7 "Параметр" 3 "!fletter!=%%~N" 1 "отброшен"	
-					)
-				)
+				set /a parse_desync = 1
 			) else if "x!fletter!"=="x--new" (
 				if "x!skip_profile!"=="xoff" (
 					set /a scount=!scount! + 1
@@ -721,6 +694,22 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 			) else if "x%%~N"=="x" (
 				set "profile_param=!profile_param! %%~M"
 			) else set "profile_param=!profile_param! %%~M=%%~N"
+			
+			if !parse_desync! equ 1 (
+				set "foo=%%~N"
+				set "foo=!foo: =!"
+				if "x!foo:~0,2!"=="x0x" (
+					set "profile_param=!profile_param! !fletter!=%%~N"
+				) else (
+					if exist %fakedir%\%%~N ( 
+						set "profile_param=!profile_param! !fletter!=%fakedir%\%%~N"
+					) else (
+						call:cecho 1 "Ошибка." 7 "Файл не найден:" 3 "'..\files\fake\%%~N'"
+						call:cecho 7 "Параметр" 3 "!fletter!=%%~N" 1 "отброшен"	
+					)
+				)
+			)
+			
 		)
 	)
 	
@@ -747,7 +736,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%strategy_name%\*.strate
 			if "x!sabout!"=="x" ( 
 				set "sabout=no about" 
 			)
-			echo.!sabout!>>%home%\strategy\%strategy_name%\log\!pcount!-about.log
+			echo.!sabout!>>%strategy_apath%\log\!pcount!-about.log
 		)
 	)
 )
@@ -768,27 +757,25 @@ for /l %%i in (1,1,%pcount%) do (
 	) else if "x%debug%"=="xoff" (
 		set foo=!foo!
 	) else (
-		if not exist %home%\strategy\%strategy_name%\debug md %home%\strategy\%strategy_name%\debug >nul
-		del /F /Q %home%\strategy\%strategy_name%\debug\* >nul
-		set foo=--debug=@%home%\strategy\%strategy_name%\debug\%%i-debug.log !foo!
-		call:cecho 7 "Запись отладочных сообщений стратегии в файл" 3 "'%home%\strategy\%strategy_name%\debug\%%i-debug.log'"
+		if not exist %strategy_apath%\debug md %strategy_apath%\debug >nul
+		del /F /Q %strategy_apath%\debug\* >nul
+		set foo=--debug=@%strategy_apath%\debug\%%i-debug.log !foo!
+		call:cecho 7 "Запись отладочных сообщений стратегии в файл" 3 "'..\strategy\%strategy_name%\debug\%%i-debug.log'"
 	)
 	
 	if "x%daemon%"=="xon" set foo=--daemon !foo!
 	set "sabout=x"
-	if exist %home%\strategy\%strategy_name%\log\%%i-about.log set /p sabout=<%home%\strategy\%strategy_name%\log\%%i-about.log
+	if exist %strategy_apath%\log\%%i-about.log set /p sabout=<%strategy_apath%\log\%%i-about.log
 	set foo=--comment [%strategy_name%][%PortFilter%][%IPsetStatus%][!sabout!][%daemon%][%debug%] !foo!
-	rem echo.!foo!>%home%\strategy\%strategy_name%\log\%%i-dry-run.log
-	rem call:cecho 7 "Проверка параметров" 3 "'%strategy_name%' [!sabout!]"
-	%winwsdir%\winws.exe --dry-run !foo! 2>&1 1>%home%\strategy\%strategy_name%\log\%%i-status.log
+	%winwsdir%\winws.exe --dry-run !foo! 2>&1 1>%strategy_apath%\log\%%i-status.log
 	if %errorlevel% neq 0 goto:strategy_list_arg_error
 	call:cecho 3 "'!sabout!'"
 	if "x%daemon%"=="xoff" (
-		echo.start "%strategy_name%:[!sabout!] PortFilter:[%PortFilter%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !foo! >>%home%\strategy\%strategy_name%\log\%%i-run.log
+		echo.start "%strategy_name%:[!sabout!] PortFilter:[%PortFilter%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !foo! >>%strategy_apath%\log\%%i-run.log
 		start "%strategy_name%:[!sabout!] PortFilter:[%PortFilter%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !foo!
 	)
 	if "x%daemon%"=="xon" (
-		echo.%winwsdir%\winws.exe !foo! >>%home%\strategy\%strategy_name%\log\%%i-run.log
+		echo.%winwsdir%\winws.exe !foo! >>%strategy_apath%\log\%%i-run.log
 		%winwsdir%\winws.exe !foo! 1>nul 2>&1
 		if %errorlevel% neq 0 goto:strategy_list_arg_error
 	)
@@ -815,7 +802,7 @@ if "x%daemon%"=="xon" set /a foo=!foo!+1000
 if "x%debug%"=="xon" set /a foo=!foo!+100
 if "x%PortFilterStatus%"=="xon" set /a foo=!foo!+10
 if "x%IPsetStatus%"=="xon" set /a foo=!foo!+1
-echo.%home%\run.cmd start %strategy_name% %foo%>%home%\bin\agent_start_cmd
+echo.%home%\run.cmd start "%strategy_name%" %foo%>%home%\bin\agent_start_cmd
 echo.update>%home%\bin\agent_update_status
 
 REM for /l %%x in (5,-1,1) do (
@@ -831,7 +818,7 @@ set /a ecode=1
 echo.[5G[31mНеверный аргумент #3: [37m'[33m%arg_3%[37m'[0m]
 goto:strategy_list_end
 :strategy_list_arg_error
-call:cecho 1 "Ошибка." 7 "Подробности смотри в" 3 "'%home%\strategy\%strategy_name%\log\%scount%-status.log'"
+call:cecho 1 "Ошибка." 7 "Подробности смотри в" 3 "'..\strategy\%strategy_name%\log\%scount%-status.log'"
 set /a ecode=1
 goto:strategy_list_end
 
@@ -845,7 +832,9 @@ goto:menu
 :terminate_trigger
 if %term_trigger% equ 0 ( set /a term_trigger=1 ) else ( set /a term_trigger=0 )
 goto:menu
-
+:param_trigger
+if %param_trigger% equ 0 ( set /a param_trigger=1 ) else ( set /a param_trigger=0 )
+goto:menu
 :menu_0
 for /l %%x in (5,-1,1) do (
 	echo.[F
@@ -893,7 +882,7 @@ if "x%PortFilterStatus%"=="xon" (
     set /p PortFilter=<%home%\bin\port_filter
 	call:cecho 7 "Текущий диапазон портов:" 3 "[!PortFilter!]"
 	echo.
-    set /p "foo=Ввод диапазона портов [Enter не менять]: "
+    set /p "foo=Ввод диапазона портов [Enter - не менять]: "
 	echo.on>%home%\bin\port_filter.status
 )
 if defined foo (
@@ -1036,7 +1025,7 @@ rem ----------------- http://stackoverflow.com/a/6379861/1012053
 (set LF=^
 %=EMPTY=%
 )
-for /F "delims=" %%a in (d:\dpi\bin\zapret-win-bundle-master\blockcheck\zapret\config_win) do (
+for /F "delims=" %%a in (%home%\bin\zapret-win-bundle-master\blockcheck\zapret\config_win) do (
 	<nul set /p =%%a!LF!>>%home%\bin\zapret-win-bundle-master\blockcheck\zapret\config
 )
 rem ----------------- http://stackoverflow.com/a/6379861/1012053

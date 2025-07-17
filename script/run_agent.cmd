@@ -64,9 +64,8 @@ for /l %%a in (1,1,1000) do (
 	)
 )
 :@break
-set /a foo = %loop_period% * 12 * 10
 set /a mesme = %mesme% + 1
-if %mesme% equ %foo% (
+if %mesme% gtr 100 (
 	set "curtime=!TIME:~0,2!.!TIME:~3,2!.!TIME:~6,2!"
 	set "curtime=!curtime: =0!"
 	echo.!curtime! я еще жив >>%home%\bin\agent_status
@@ -85,7 +84,7 @@ if %ping_status_i% equ 0 (
 	if %debug% equ 1 ( echo.%curtime% ping %host_i% - ok )
 	if %ping_change% geq %start_after_num_err_ping% (
 		set /a ping_change=0
-		ping /n 1 %host_e% >nul
+		ping /n 4 %host_e% >nul
 		set /a ping_status_e=!errorlevel!
 		if !ping_status_e! equ 0 (
 			if %debug% equ 1 ( echo.%curtime% ping %host_e% - ok )

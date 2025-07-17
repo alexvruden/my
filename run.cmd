@@ -17,8 +17,8 @@ set /a exp_str=0
 set "debug=off"
 set "daemon=on"
 set "home=%~dp0"
-for %%i in ("%home%") do set "home=%%~si"
 set "home=%home:~0,-1%"
+for %%i in ("%home%") do set "home=%%~si"
 set "agent_mode="
 set "winwsdir="
 set "fakedir="
@@ -64,6 +64,15 @@ set /a c6=80
 set /a c7=100
 set /a c8=115
 echo.[32mAuto Refresh screen every 60 sec.[0m
+rem set /a magic_digit=(%random%*20000/32768)+10000
+set /a srv_menu_count=1000
+set /a strategy_menu_count=1000
+set /a parameter_menu_count=1000
+set /a agent_work=1000
+set /a terminate_count=1000
+set /a blockcheck_menu_count=1000
+set /a menu_choice=1000
+
 if exist %home%\bin\port_filter.status set /p PortFilterStatus=<%home%\bin\port_filter.status
 if exist %home%\bin\daemonpar set /p daemon=<%home%\bin\daemonpar
 if exist %home%\bin\debugpar set /p debug=<%home%\bin\debugpar
@@ -120,7 +129,7 @@ if %profile_count% GTR 0 (
 		if %%i EQU 1 (
 			for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
 			echo.
-			echo.[%c1%GРаботает стратегия:[%c4%G'[33m!n%%i![0m'
+			echo.[%c1%GРаботает стратегия:[%c4%G[33m'[0m!n%%i![33m'[0m
 			if "x!daemon_status!"=="xon" ( set "offon=да" ) else ( set "offon=нет" )
 			echo.[%c4%G[33mЗапуск в скрытом окне[0m: !offon!
 			if "x!debug_status!"=="xon" ( set "offon=да" ) else ( set "offon=нет" )
@@ -162,7 +171,6 @@ if "x%arg_1%"=="xstop" (
 
 set /a menu_count=0
 rem ------------------------------------------------------------------------------------
-set /a parameter_menu_count=1000
 set /a foo=%c1%-1
 echo.[%foo%G[33m[..][%c2%G[33mПара[36mм[33mетры запуска стратегии[0m
 if %param_trigger% neq 0 (
@@ -214,7 +222,6 @@ if %param_trigger% neq 0 (
 REM for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
 REM echo.
 rem ------------------------------------------------------------------------------------
-set /a strategy_menu_count=1000
 set /a foo=%c1%-1
 set /a about_strategy_strsize=%c8%-%c5%
 
@@ -262,13 +269,11 @@ REM else (
 REM )
 rem ------------------------------------------------------------------------------------
 set /a task=100
-set /a agent_work=1000
 schtasks /Query /TN dpiagent 1>nul 2>&1
 if %errorlevel% EQU 0 set /a task=0
 if exist %home%\bin\agent_mode (
 	set /p agent_mode=<%home%\bin\agent_mode
 )
-set /a srv_menu_count=1000
 set /a foo=%c1%-1
 echo.[%foo%G[33m[..][%c2%G[36mА[33mвтоматизация[0m
 if %srv_trigger% neq 0 ( 
@@ -314,7 +319,6 @@ if %srv_trigger% neq 0 (
 REM for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
 REM echo.
 rem ------------------------------------------------------------------------------------
-set /a terminate_count=1000
 set /a about_kill_strsize=%c8%-%c3%
 if defined strategy_run (
 	set /a terminate_count=%menu_count% + 1
@@ -333,7 +337,6 @@ if defined strategy_run (
 	REM echo.
 )
 rem ------------------------------------------------------------------------------------
-set /a blockcheck_menu_count=1000
 if exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh (
 	set /a menu_count=!menu_count!+1
 	set /a blockcheck_menu_count=!menu_count!
@@ -396,8 +399,8 @@ if "x%strategy_name%"=="x" (
 if not defined strategy_run goto:terminate_done
 if "x%arg_1%"=="xstart" goto:terminate_all
 if "x%arg_1%"=="xstop" goto:terminate_all
-if %menu_choice% EQU %terminate_count% goto:terminate_all
-if %menu_choice% GTR %terminate_count% goto:terminate_one
+if %menu_choice% neq 1000 if %menu_choice% EQU %terminate_count% goto:terminate_all
+if %menu_choice% neq 1000 if %menu_choice% GTR %terminate_count% goto:terminate_one
 :terminate_all
 call:cecho 7 "Завершаем работу стратегии" 3 "'%strategy_run%'"
 for /l %%i in (1,1,%profile_count%) do (
@@ -408,7 +411,7 @@ for /l %%i in (1,1,%profile_count%) do (
 set "strategy_run="
 if "x%arg_1%"=="xstart" goto:terminate_done
 if "x%arg_1%"=="xstop" goto:terminate_done
-if %menu_choice% EQU %terminate_count% (
+if %menu_choice% neq 1000 if %menu_choice% EQU %terminate_count% (
 	call:cecho 2 "Готово"
 	echo.
 	echo.update>%home%\bin\agent_update_status
@@ -419,9 +422,8 @@ if %menu_choice% EQU %terminate_count% (
 	)
 	goto:menu
 )
-rem if %blkc% equ 1 goto:terminate_done
-if %menu_choice% EQU %blockcheck_menu_count% goto:terminate_done
-if %menu_choice% LSS %terminate_count% goto:terminate_done
+if %menu_choice% neq 1000 if %menu_choice% EQU %blockcheck_menu_count% goto:terminate_done
+if %menu_choice% neq 1000 if %menu_choice% LSS %terminate_count% goto:terminate_done
 
 :terminate_one
 set /a cpofile=%menu_choice%-%terminate_count%
@@ -442,8 +444,7 @@ if %errorlevel% EQU 0 (
 	sc delete windivert 1>nul 2>&1
 )
 if "x%arg_1%"=="xstop" exit
-REM if %blkc% equ 1 goto:blockcheck
-if %menu_choice% EQU %blockcheck_menu_count% goto:blockcheck
+if %menu_choice% neq 1000 if %menu_choice% EQU %blockcheck_menu_count% goto:blockcheck
 
 if not defined winwsdir (
 	for /f "delims=" %%I in ('2^>nul dir /b /s /a:d %home%\bin\%arch%') do set "winwsdir=%%~I"

@@ -4,6 +4,7 @@ chcp 1251 >nul
 
 rem ----------settings-------------------
 set /a debug = 0
+set "log_debug=nul"
 rem 192.168.1.1 - router
 set "host_i=192.168.1.1"
 set "host_e=one.one.one.one"
@@ -18,7 +19,10 @@ if not exist %home%\run.cmd exit
 set "curtime=%TIME:~0,2%.%TIME:~3,2%.%TIME:~6,2%"
 set "curtime=%curtime: =0%"
 set "lastmesm=инициализация."
-if %debug% equ 1 echo.%curtime% неизвестное состояние...
+if %debug% equ 1 (
+	echo.%curtime% неизвестное состояние...
+	set log_debug=%home%\bin\agent_log_debug
+)
 echo.%curtime% %lastmesm%>%home%\bin\agent_status
 set /a start_trigger=0
 set /a stop_trigger=0
@@ -60,13 +64,14 @@ for /l %%a in (1,1,1000) do (
 	)
 )
 :@break
-set /a foo=%loop_period% * 12 * 10
-set /a mesme=%mesme% + 1
+set /a foo = %loop_period% * 12 * 10
+set /a mesme = %mesme% + 1
 if %mesme% equ %foo% (
 	set "curtime=!TIME:~0,2!.!TIME:~3,2!.!TIME:~6,2!"
 	set "curtime=!curtime: =0!"
 	echo.!curtime! я еще жив >>%home%\bin\agent_status
 	echo.!curtime! !lastmesm!>>%home%\bin\agent_status
+	set /a mesme = 0
 )
 if "x%mode%"=="xstop" goto:@stop
 if "x%mode%"=="xstart" goto:@start

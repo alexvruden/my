@@ -38,13 +38,10 @@
 ------------------------------------------------------------------------------<br>
 '\my\strategy\test\2.strategy'<br>
 
-<code>
-#blabla
-</code>
-<code>
-##tcp: 443
---wf-tcp=443
-</code>
+<code>#blabla</code>
+<code>##tcp: 443</code>
+<code>--wf-tcp=443</code>
+<code>    </code>
 <code>
 ##rule 1: hostlist
 </code>

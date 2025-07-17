@@ -27,7 +27,7 @@
 <code>--hostlist-auto=</code> - скрипт сам назначит файл 'hostlist-auto.txt' из директории 'hostlist'<br>
 <code>--hostlist-auto=my_auto_file.txt</code> - пользователь указал имя файла (если такого файла нет в директории 'hostlist' , то он его создаст)<br>
 <br>
-Аналогично и с параметром <code>--ipset</code>
+Аналогично и с параметром <code>--ipset</code>:<br>
 <code>--ipset=</code> - укажет скрипту включить аргумент <code>--ipset</code> со всеми списками из директории 'ipset' (с расширениями .txt, .lst, .gz)<br>
 <code>--ipset=ip.txt</code> - укажет скрипту включить аргумент <code>--ipset</code> с одним списком из директории 'ipset'<br>
 <br>

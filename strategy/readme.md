@@ -39,32 +39,28 @@
 '\my\strategy\test\2.strategy'<br>
 
 <code>#blabla</code>
-<code>##tcp: 443</code>
-<code>--wf-tcp=443</code>
-<code>    </code>
-<code>
-##rule 1: hostlist
-</code>
-<code>
-HOSTLIST_NOAUTO
+<br>
+<code>##tcp: 443
+--wf-tcp=443</code>
+<br>
+<code>##rule 1: hostlist</code>
+<br>
+<code>HOSTLIST_NOAUTO
 --dpi-desync=split2
 --dpi-desync-repeats=2
 --dpi-desync-split-seqovl=681
 --dpi-desync-split-pos=1
 --dpi-desync-fooling=badseq,hopbyhop2
---dpi-desync-split-seqovl-pattern=tls_clienthello_www_google_com.bin
-</code>
-<code>
---new
-</code>
-<code>
-##rule 2: ipset
-</code>
-<code>
-IPSET
+--dpi-desync-split-seqovl-pattern=tls_clienthello_www_google_com.bin</code>
+<br>
+<code>--new</code>
+<br>
+<code>##rule 2: ipset</code>
+<br>
+<code>IPSET
 --dpi-desync=split2
 --dpi-desync-split-seqovl=681
 --dpi-desync-split-pos=1
 --dpi-desync-fooling=badseq,hopbyhop2
---dpi-desync-split-seqovl-pattern=tls_clienthello_www_google_com.bin
-</code>
+--dpi-desync-split-seqovl-pattern=tls_clienthello_www_google_com.bin</code>
+<br>

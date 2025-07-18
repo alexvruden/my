@@ -1,29 +1,22 @@
 @echo off
 chcp 1251 > nul
 setlocal EnableDelayedExpansion
-rem echo.]0;Bypassing Censorship
-set "PortFilterStatus=off"
-set "IPsetStatus=off"
 set "strategy_run="
 set "arch="
 set /a socks5=0
 set /a srv_trigger=0
 set /a term_trigger=0
-set /a param_trigger=0
+set /a param_trigger=1
+set /a strategy_trigger=0
 set /a ecode=0
 set /a ccall=0
 set /a rand=0
-set /a exp_str=0
-set "debug=off"
-set "daemon=on"
 set "home=%~dp0"
 set "home=%home:~0,-1%"
 for %%i in ("%home%") do set "home=%%~si"
-set "agent_mode="
 set "winwsdir="
 set "fakedir="
 set /a profile_count=0
-REM set /a blkc=0
 set "arg_1=%~1"
 set "arg_2=%~2"
 set "arg_3=%~3"
@@ -48,11 +41,6 @@ if not exist %winwsdir%\winws.exe (
 )
 echo.]0;Bypassing Censorship %foo%
 echo.[39;49m
-if not exist %home%\bin\port_filter echo.1024-65535>%home%\bin\port_filter
-if not exist %home%\bin\port_filter.status echo.off>%home%\bin\port_filter.status
-if not exist %home%\bin\ipset.status echo.off>%home%\bin\ipset.status
-if not exist %home%\bin\daemonpar echo.on>%home%\bin\daemonpar
-if not exist %home%\bin\debugpar echo.off>%home%\bin\debugpar
 
 :menu
 cls
@@ -73,17 +61,21 @@ set /a agent_work=1000
 set /a terminate_count=1000
 set /a blockcheck_menu_count=1000
 set /a menu_choice=1000
-
-if exist %home%\bin\port_filter.status set /p PortFilterStatus=<%home%\bin\port_filter.status
-if exist %home%\bin\daemonpar set /p daemon=<%home%\bin\daemonpar
-if exist %home%\bin\debugpar set /p debug=<%home%\bin\debugpar
-if "x%PortFilterStatus%"=="xon" (
-    set /p PortFilter=<%home%\bin\port_filter
-) else (
-    set "PortFilter=0"
+if not exist %home%\run.config (
+	(
+	echo.# config
+	echo.daemon=on
+	echo.debug=off
+	echo.PortFilterStatus=off
+	echo.PortFilter=1024-65535
+	echo.IPsetStatus=off
+	echo.agent_mode=start
+	echo.agent_start_strategy="none"
+	echo.agent_start_params=1000
+	)>%home%\run.config
 )
+for /F "skip=1 eol=# tokens=1,2 delims==" %%a in (%home%\run.config) do set %%~a=%%~b
 set "PortFilter=%PortFilter: =%"
-set /p IPsetStatus=<%home%\bin\ipset.status
 set "winws_pid="
 set /a socks5=0
 tasklist /FI "IMAGENAME eq 3proxy.exe" | find /I "3proxy.exe" > nul
@@ -159,14 +151,12 @@ if %profile_count% GTR 0 (
 rem --------------------------------------
 if "x%arg_1%"=="xstart" (
 	if "x%arg_2%"=="x" ( 
-		set /a ecode=1
-		echo.[5G[31mПустой аргумент #2: [37m'[33m%arg_2%[37m'[0m]
-		goto:strategy_list_end
+		set "strategy_name=%agent_start_strategy%" 
 	) else ( 
 		set "strategy_name=%arg_2%" 
-		for %%i in ("%home%\strategy\!strategy_name!") do set "foo=%%~sni"
-		set "strategy_apath=%home%\strategy\!foo!"
 	)
+	for %%i in ("%home%\strategy\!strategy_name!") do set "foo=%%~sni"
+	set "strategy_apath=%home%\strategy\!foo!"
 	goto:terminate
 )
 if "x%arg_1%"=="xstop" (
@@ -229,7 +219,7 @@ rem ----------------------------------------------------------------------------
 set /a foo=%c1%-1
 set /a about_strategy_strsize=%c8%-%c5%
 
-if %exp_str% equ 0 (
+if %strategy_trigger% equ 0 (
 	echo.[%foo%G[33m[..][%c2%G[36mС[33mтратегии[0m
 ) else ( 
 	echo.[%foo%G[33m[..][%c2%G[36mС[33mтратегии[%c5%GОписание[0m
@@ -275,9 +265,6 @@ rem ----------------------------------------------------------------------------
 set /a task=100
 schtasks /Query /TN dpiagent 1>nul 2>&1
 if %errorlevel% EQU 0 set /a task=0
-if exist %home%\bin\agent_mode (
-	set /p agent_mode=<%home%\bin\agent_mode
-)
 set /a foo=%c1%-1
 echo.[%foo%G[33m[..][%c2%G[36mА[33mвтоматизация[0m
 if %srv_trigger% neq 0 ( 
@@ -285,9 +272,9 @@ if %srv_trigger% neq 0 (
 	if %task% EQU 0 (
 		powershell -Command "Get-WmiObject win32_process -Filter 'name = \"cmd.exe\"' | select commandline" |find "run_agent.cmd" 1>nul 2>&1
 		if !errorlevel! EQU 0 (
-			if exist %home%\bin\agent_status (
+			if exist %home%\agent.log (
 				rem last status
-			 	for /f "delims=" %%i in (%home%\bin\agent_status) do set "foo=%%i"			
+			 	for /f "delims=" %%i in (%home%\agent.log) do set "foo=%%i"			
 			) else set "foo=.........неизвестное состояние..."
 			echo.[%c2%G[36m[[0m агент : [32mвключен[%c8%G[36m][0m
 			echo.[%c2%G[36m[[0m статус: [33m!foo:~9![%c8%G[36m][0m
@@ -328,7 +315,7 @@ if defined strategy_run (
 	set /a terminate_count=%menu_count% + 1
 	set /a menu_count=!menu_count!+1
 	echo.[%c1%G[37m!menu_count!.[%c2%G[33mЗав[36mе[33mршить мульти-стратегию '[0m!strategy_run![33m'[0m
-	if %term_trigger% equ 0 ( 
+	if %term_trigger% neq 0 ( 
 		echo.[%c2%G[33mили отдельные профили ниже:
 		for /l %%i in (1,1,%profile_count%) do (
 			set /a menu_count=!menu_count!+1
@@ -420,7 +407,7 @@ if "x%arg_1%"=="xstop" goto:terminate_done
 if %menu_choice% neq 1000 if %menu_choice% EQU %terminate_count% (
 	call:cecho 2 "Готово"
 	echo.
-	echo.update>%home%\bin\agent_update_status
+	echo.>%home%\bin\agent_update_status
 	for /l %%x in (5,-1,1) do (
 		echo.[F
 		<nul set /p =[5G[37mВозврат в меню через [32m%%x[37m с.[0m
@@ -476,7 +463,7 @@ for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\exclude\*.txt') do (
 )
 set "daemon_bakup=%daemon%"
 set "debug_bakup=%debug%"
-set "PortFilter_bakup=%PortFilter%"
+set "PortFilterStatus_bakup=%PortFilterStatus%"
 set "IPsetStatus_bakup=%IPsetStatus%"
 if not defined arg_3 goto:arg_3_default
 if "x%arg_3:~0,1%"=="x0" (
@@ -494,10 +481,10 @@ if "x%arg_3:~1,1%"=="x0" (
 	) else goto:error_arg3
 )
 if "x%arg_3:~2,1%"=="x0" (
-	set "PortFilter=0"
+	set "PortFilterStatus=off"
 ) else (
 	if "x%arg_3:~2,1%"=="x1" (
-		set /p PortFilter=<%home%\bin\port_filter
+		set "PortFilterStatus=on"
 	) else goto:error_arg3
 )
 if "x%arg_3:~3,1%"=="x0" (
@@ -616,7 +603,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %strategy_apath%\*.strategy') do (
 				)
 			) else if "x!fletter!"=="x--wf-tcp" (
 				if "x%%~N"=="x" (
-					if "x%PortFilter%"=="x0" (
+					if "x%PortFilterStatus%"=="xoff" (
 						set "skip_WinDivert=on"
 						call:cecho 1 "Исключен" 7 "WinDivert фильтр с параметром" 3 "'PortFilter=0'"
 					)
@@ -631,7 +618,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %strategy_apath%\*.strategy') do (
 				)
 			) else if "x!fletter!"=="x--wf-udp" (
 				if "x%%~N"=="x" (
-					if "x%PortFilter%"=="x0" (
+					if "x%PortFilterStatus%"=="xoff" (
 						set "skip_WinDivert=on"
 						call:cecho 1 "Исключен" 7 "WinDivert фильтр с параметром" 3 "'PortFilter=0'"
 					)
@@ -646,7 +633,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %strategy_apath%\*.strategy') do (
 				)
 			) else if "x!fletter!"=="x--filter-udp" (
 				if "x%%~N"=="x" (
-					if "x%PortFilter%"=="x0" (
+					if "x%PortFilterStatus%"=="xoff" (
 						set "skip_profile=on"
 						call:cecho 1 "Исключен" 7 "WinWS фильтр с параметром" 3 "'PortFilter=0'"
 					)
@@ -654,7 +641,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %strategy_apath%\*.strategy') do (
 				) else set "profile_param=!profile_param! --filter-udp=%%~N"
 			) else if "x!fletter!"=="x--filter-tcp" (
 				if "x%%~N"=="x" (
-					if "x%PortFilter%"=="x0" (
+					if "x%PortFilterStatus%"=="xoff" (
 						set "skip_profile=on"
 						call:cecho 1 "Исключен" 7 "WinWS фильтр с параметром" 3 "'PortFilter=0'"
 					)
@@ -807,7 +794,7 @@ if %pcount% neq 0 (
 if "x%arg_1%"=="xstart" (
 	set "daemon=%daemon_bakup%"
 	set "debug=%debug_bakup%"
-	set "PortFilter=%PortFilter_bakup%"
+	set "PortFilterStatus=%PortFilterStatus_bakup%"
 	set "IPsetStatus=%IPsetStatus_bakup%"
 	exit %ecode%
 )
@@ -817,9 +804,10 @@ if "x%daemon%"=="xon" set /a foo=!foo!+1000
 if "x%debug%"=="xon" set /a foo=!foo!+100
 if "x%PortFilterStatus%"=="xon" set /a foo=!foo!+10
 if "x%IPsetStatus%"=="xon" set /a foo=!foo!+1
-echo.%home%\run.cmd start "%strategy_name%" %foo%>%home%\bin\agent_start_cmd
-echo.update>%home%\bin\agent_update_status
-
+set agent_start_strategy="%strategy_name%"
+set /a agent_start_params=%foo%
+call:sconfig
+echo.>%home%\bin\agent_update_status
 REM for /l %%x in (5,-1,1) do (
 	REM echo.[F
 	REM <nul set /p =[5G[37mВозврат в меню через [32m%%x[37m с.[0m
@@ -838,7 +826,7 @@ set /a ecode=1
 goto:strategy_list_end
 
 :expand_strategy
-if %exp_str% equ 0 ( set /a exp_str=1 ) else ( set /a exp_str=0 )
+if %strategy_trigger% equ 0 ( set /a strategy_trigger=1 ) else ( set /a strategy_trigger=0 )
 goto:menu
 
 :srv_menu_trigger
@@ -866,8 +854,7 @@ if "x%daemon%"=="xon" (
 	set "daemon=on"
 	set "debug=off"
 )
-echo.%debug%>%home%\bin\debugpar
-echo.%daemon%>%home%\bin\daemonpar
+call:sconfig
 goto:menu
 
 :menu_2
@@ -878,34 +865,25 @@ if "x%debug%"=="xon" (
 ) else if "x%debug%"=="xoff" (
 	if "x%daemon%"=="xon" ( set "debug=off" ) else ( set "debug=on" )
 ) 
-REM if "x%debug%"=="xon" (
-	REM set "debug=@filename"
-REM ) else if "x%debug%"=="xoff" (
-	REM set "debug=on"
-REM ) else if "x%debug%"=="x@filename" set "debug=off"
-echo.%debug%>%home%\bin\debugpar
+call:sconfig
 goto:menu
 
 :menu_3
 set "foo="
 if "x%PortFilterStatus%"=="xon" (
 	set "PortFilterStatus=off"
-    set "PortFilter=0"
-	echo.off>%home%\bin\port_filter.status
 ) else (
 	set "PortFilterStatus=on"
-    set /p PortFilter=<%home%\bin\port_filter
 	call:cecho 7 "Текущий диапазон портов:" 3 "[!PortFilter!]"
 	echo.
     set /p "foo=Ввод диапазона портов [Enter - не менять]: "
-	echo.on>%home%\bin\port_filter.status
 )
 if defined foo (
 	set "PortFilter=%foo%"
 	set "PortFilter=!PortFilter: =!"
-    echo.!PortFilter!>%home%\bin\port_filter
 )
 set "PortFilter=%PortFilter: =%"
+call:sconfig
 if defined strategy_run (
 	call:cecho 7 "Диапазон портов для фильтрации установлен:" 3 "[%PortFilter%]"
 	goto:restart_strategy_after_change_port_range_or_ip
@@ -914,12 +892,11 @@ goto:menu
 
 :menu_4
 if "x%IPsetStatus%"=="xon" (
-		set "IPsetStatus=off"
-		echo.off>%home%\bin\ipset.status
-	) else ( 
-		set "IPsetStatus=on"
-		echo.on>%home%\bin\ipset.status
-	)
+	set "IPsetStatus=off"
+) else ( 
+	set "IPsetStatus=on"
+)
+call:sconfig
 if defined strategy_run (
 	call:cecho 7 "Список IPset установлен:" 3 "[%IPsetStatus%]"
 	goto:restart_strategy_after_change_port_range_or_ip
@@ -973,9 +950,7 @@ if not exist %home%\lists\blockcheck.txt (
 	pause
 	goto:menu
 )
-REM set /a blkc=1
 if defined strategy_run goto:terminate_all
-REM set /a blkc=0
 
 rem - https://github.com/bol-van/zapret?tab=readme-ov-file#%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%B0-%D0%BF%D1%80%D0%BE%D0%B2%D0%B0%D0%B9%D0%B4%D0%B5%D1%80%D0%B0
 REM CURL - замена программы curl
@@ -1072,11 +1047,13 @@ schtasks /Query /TN dpiagent 1>nul 2>&1
 if %errorlevel% EQU 0 (
 	set /a foo=%menu_choice% - %srv_menu_count%
 	if !foo! equ !castart! (
-		echo.start>%home%\bin\agent_mode
+		set "agent_mode=start"
+		REM echo.start>%home%\bin\agent_mode
 		echo.[5G[37mСигнал '[32mstart[0m' отправлен
 	)
 	if !foo! equ !castop! (
-		echo.stop>%home%\bin\agent_mode
+		set "agent_mode=stop"
+		REM echo.stop>%home%\bin\agent_mode
 		echo.[5G[37mСигнал '[31mstop[0m' отправлен
 	)
 	if !foo! equ !cadel! (
@@ -1090,10 +1067,12 @@ if %errorlevel% EQU 0 (
 			echo.[5G[31mОшибка[0m
 		)
 	)
+	call:sconfig
 ) else (
-	echo.start>%home%\bin\agent_mode
-	if not exist %home%\bin\agent_status echo.#>%home%\bin\agent_status
-	if not exist %home%\bin\agent_update_status echo.#>%home%\bin\agent_update_status
+	set "agent_mode=start"
+	call:sconfig
+	REM echo.start>%home%\bin\agent_mode
+	if not exist %home%\agent.log echo.#>%home%\agent.log
 	schtasks /Create /F /TN dpiagent /NP /RU "SYSTEM" /SC onstart /TR "%home%\script\run_agent.cmd %home%" 1>nul 2>&1
 	if !errorlevel! EQU 0 (
 		echo.
@@ -1123,7 +1102,20 @@ if "x%~8"=="x" (
 	) else echo.[37m[%curtime%][0m[%c3%G[3%~1m%~2[0m [3%~3m%~4[0m [3%~5m%~6[0m
 ) else echo.[37m[%curtime%][0m[%c3%G[3%~1m%~2[0m [3%~3m%~4[0m [3%~5m%~6[0m [3%~7m%~8[0m
 exit /b
+:sconfig
+(
+echo.# config
+echo.daemon=%daemon%
+echo.debug=%debug%
+echo.PortFilterStatus=%PortFilterStatus%
+echo.PortFilter=%PortFilter%
+echo.IPsetStatus=%IPsetStatus%
+echo.agent_mode=%agent_mode%
+echo.agent_start_strategy="%strategy_name%"
+echo.agent_start_params=%agent_start_params%
+)>%home%\run.config
 
+exit /b
 :help
 cls
 echo.

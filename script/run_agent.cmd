@@ -36,7 +36,6 @@ set /a mesme=0
 set /a restart_from_agent=0
 
 :@loop
-for /F "skip=1 eol=# tokens=1,2 delims==" %%a in (%home%\run.config) do set %%~a=%%~b
 if exist %home%\bin\agent_update_status (
 	set "curtime=!TIME:~0,2!.!TIME:~3,2!.!TIME:~6,2!"
 	set "curtime=!curtime: =0!"
@@ -49,6 +48,7 @@ if exist %home%\bin\agent_update_status (
 	set /a ping_err_count=0
 	del /F /Q %home%\bin\agent_update_status >nul
 )
+for /F "skip=1 eol=# tokens=1,2 delims==" %%a in (%home%\run.config) do set %%~a=%%~b
 set agent_mode=%agent_mode: =%
 :@break
 set /a mesme = %mesme% + 1

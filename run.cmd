@@ -1,9 +1,6 @@
 @echo off
 chcp 1251 > nul
 setlocal EnableDelayedExpansion
-set "strategy_run="
-set "arch="
-set /a socks5=0
 set /a srv_trigger=0
 set /a term_trigger=0
 set /a param_trigger=1
@@ -21,7 +18,6 @@ if not exist %home%\script\run_agent.cmd (
 	pause
 	exit
 )
-set "winwsdir="
 set "fakedir="
 set /a profile_count=0
 set "arg_1=%~1"
@@ -36,14 +32,18 @@ if %errorLevel% neq 0 (
 	pause
 	exit
 )
+set "arch="
 for /f "skip=2 delims=" %%i in ('2^>nul powershell -Command "Get-CimInstance Win32_operatingsystem ^| select OSArchitecture"') do set "arch=%%i"
 if "x%arch:~0,2%"=="x32" ( set "arch=windows-x86" ) else ( set "arch=windows-x86_64" )
 set "foo="
+set "winwsdir="
 for /f "delims=" %%I in ('2^>nul dir /b /s /a:d %home%\bin\%arch%') do set "winwsdir=%%~I"
-if not exist %winwsdir%\winws.exe (
-	set "winwsdir="
-) else (
-	for /f "delims=" %%I in ('%winwsdir%\winws.exe --version') do set "foo=%%I"
+if defined winwsdir (
+	if not exist %winwsdir%\winws.exe (
+		set "winwsdir="
+	) else (
+		for /f "delims=" %%I in ('%winwsdir%\winws.exe --version') do set "foo=%%I"
+	)
 )
 echo.]0;Bypassing Censorship %foo%
 echo.[39;49m
@@ -91,24 +91,21 @@ if %errorlevel% equ 0 (
 ) else echo.
 echo.Секундочку...
 set /a foo=0
-for /f "tokens=2 delims=," %%i in ('2^>nul tasklist /FI "IMAGENAME eq winws.exe" /fo csv /nh') do (
-	set /a foo=!foo!+1
-	set "a=%%i"
-	set "winws_pid!foo!=!a:"=!"
+for /f "tokens=1,2 delims=," %%a in ('2^>nul tasklist /FI "IMAGENAME eq winws.exe" /fo csv /nh') do (
+	if "x%%~a"=="xwinws.exe" (
+		set /a foo=!foo!+1
+		set "winws_pid!foo!=%%~b"
+	)
 )
+
 set "strategy_run="
 set /a profile_count=0
 set "commandline="
-set "n="
-set "p="
-set "ip="
-set "pr="
-set "pid="
 set "daemon_status="
 set "debug_status="
 if %foo% GTR 0 ( 
 	for /l %%m in (1,1,%foo%) do (
-		for /f "tokens=* delims=" %%a in ('powershell -Command "Get-WmiObject win32_process -Filter 'ProcessId ^= !winws_pid%%m!' ^| select commandline ^| Format-List -Property *"') do (
+		for /f "tokens=* delims=" %%a in ('2^>nul powershell -Command "Get-WmiObject win32_process -Filter 'ProcessId ^= !winws_pid%%m!' ^| select commandline ^| Format-List -Property *"') do (
 			set "rtg=%%a"
 			set "rtg=!rtg:~14!"
 			set "commandline=!commandline!!rtg!"

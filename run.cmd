@@ -14,6 +14,7 @@ set /a rand=0
 set "home=%~dp0"
 set "home=%home:~0,-1%"
 for %%i in ("%home%") do set "home=%%~si"
+if not exist %home%\script\run_agent.cmd echo.Запуск из архива без распаковки? Выход. &pause &exit
 set "winwsdir="
 set "fakedir="
 set /a profile_count=0

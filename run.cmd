@@ -40,7 +40,6 @@ for /f "skip=2 delims=" %%i in ('2^>nul powershell -Command "Get-CimInstance Win
 if "x%arch:~0,2%"=="x32" ( set "arch=windows-x86" ) else ( set "arch=windows-x86_64" )
 set "foo="
 for /f "delims=" %%I in ('2^>nul dir /b /s /a:d %home%\bin\%arch%') do set "winwsdir=%%~I"
-REM for %%i in ("%winwsdir%") do set "winwsdir=%%~si"
 if not exist %winwsdir%\winws.exe (
 	set "winwsdir="
 ) else (
@@ -248,12 +247,12 @@ if %strategy_trigger% equ 0 (
 	for /f "delims=" %%I in ('2^>nul dir /b /a:d %home%\strategy\') do (
 		set /a fexist=0
 		set "sfoo="
-		for %%m in ("%home%\strategy\%%~I") do set "sfoo=%%~snm"
+		for %%m in ("%home%\strategy\%%~I") do set "sfoo=%%~sm"
 		if not "x!sfoo!"=="x" (
-			for /f "delims=" %%a in ('2^>nul dir /x /b %home%\strategy\!sfoo!\*.strategy') do set /a fexist=1
+			for /f "delims=" %%a in ('2^>nul dir /x /b "!sfoo!\*.strategy"') do set /a fexist=1
 			if !fexist! neq 0 (
-				if not exist %home%\strategy\!sfoo!\about echo.нет описания>%home%\strategy\!sfoo!\about
-				set /p about_strategy=<%home%\strategy\!sfoo!\about
+				if not exist !sfoo!\about echo.нет описания>!sfoo!\about
+				set /p about_strategy=<!sfoo!\about
 				set /a menu_count=!menu_count!+1
 				if !strategy_menu_count! equ 1000 set /a strategy_menu_count=!menu_count!
 				if "x!strategy_run!"=="x%%~I" (
@@ -396,8 +395,7 @@ goto:menu
 :strategy_choice
 if "x!strategy_count_name%menu_choice%!"=="x" goto:menu
 set "strategy_name=!strategy_count_name%menu_choice%!"
-set "strategy_spath=!strategy_name_spath%menu_choice%!"
-set "strategy_apath=%home%\strategy\%strategy_spath%"
+set "strategy_apath=!strategy_name_spath%menu_choice%!"
 :strategy_list
 if "x%strategy_name%"=="x" (
 	echo.strategy_name=none

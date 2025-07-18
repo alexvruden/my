@@ -1,0 +1,18 @@
+# general
+
+--wf-tcp=443
+
+HOSTLIST_NOAUTO
+--dpi-desync=fake,multidisorder
+--dpi-desync-split-pos=midsld
+--dpi-desync-repeats=8
+--dpi-desync-fooling=md5sig,badseq
+
+--new
+
+IPSET
+--dpi-desync=fake,multidisorder
+--dpi-desync-split-pos=midsld
+--dpi-desync-repeats=6
+--dpi-desync-fooling=md5sig,badseq
+

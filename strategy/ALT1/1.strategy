@@ -1,0 +1,16 @@
+# ALT1
+
+--wf-tcp=80
+
+HOSTLIST_NOAUTO
+--dpi-desync=fake,split2
+--dpi-desync-autottl=2
+--dpi-desync-fooling=md5sig
+
+--new
+
+IPSET
+--dpi-desync=fake,split2
+--dpi-desync-autottl=2
+--dpi-desync-fooling=md5sig
+

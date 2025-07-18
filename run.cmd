@@ -14,7 +14,13 @@ set /a rand=0
 set "home=%~dp0"
 set "home=%home:~0,-1%"
 for %%i in ("%home%") do set "home=%%~si"
-if not exist %home%\script\run_agent.cmd echo.Запуск из архива без распаковки? Выход. &pause &exit
+if not exist %home%\script\run_agent.cmd (
+	echo.Запуск из архива без распаковки? 
+	echo.Выход.
+	echo.
+	pause
+	exit
+)
 set "winwsdir="
 set "fakedir="
 set /a profile_count=0
@@ -84,6 +90,7 @@ if %errorlevel% equ 0 (
 	echo.[37mSOCKS[31m5 [32mON[0m
 	set /a socks5=1
 ) else echo.
+echo.Секундочку...
 set /a foo=0
 for /f "tokens=2 delims=," %%i in ('2^>nul tasklist /FI "IMAGENAME eq winws.exe" /fo csv /nh') do (
 	set /a foo=!foo!+1
@@ -92,38 +99,47 @@ for /f "tokens=2 delims=," %%i in ('2^>nul tasklist /FI "IMAGENAME eq winws.exe"
 )
 set "strategy_run="
 set /a profile_count=0
+set "commandline="
 set "n="
 set "p="
 set "ip="
 set "pr="
 set "pid="
-set "daemon_status=on"
+set "daemon_status="
 set "debug_status="
 if %foo% GTR 0 ( 
-	for /l %%i in (1,1,%foo%) do (
-		for /f "skip=2 tokens=2,3,4,5,6,7 delims=[]" %%M in ('2^>nul powershell -Command "Get-WmiObject win32_process -Filter 'ProcessId ^= !winws_pid%%i!' ^| select commandline"') do (
-			if "x%%~M"=="x" (
-				set "foo="
-			) else (
-				set /a profile_count=!profile_count!+1
-				set "n!profile_count!=%%~M"
-				set "p!profile_count!=%%~N"
-				set "ip!profile_count!=%%~O"
-				set "pr!profile_count!=%%~P"
-				set "pid!profile_count!=!winws_pid%%i!"
-				set "daemon_status=%%~Q"
-				set "debug_status=%%~R"
-			)
+	for /l %%m in (1,1,%foo%) do (
+		for /f "tokens=* delims=" %%a in ('powershell -Command "Get-WmiObject win32_process -Filter 'ProcessId ^= !winws_pid%%m!' ^| select commandline ^| Format-List -Property *"') do (
+			set "rtg=%%a"
+			set "rtg=!rtg:~14!"
+			set "commandline=!commandline!!rtg!"
+		)
+		set "commandline%%m=!commandline!"
+		set "commandline="
+	)
+	
+	for /l %%m in (1,1,%foo%) do (
+		for /f "tokens=2-7 delims=[]" %%a in ("!commandline%%m!") do (
+			set /a profile_count=!profile_count!+1
+			set "n!profile_count!=%%~a"
+			set "p!profile_count!=%%~b"
+			set "ip!profile_count!=%%~c"
+			set "pr!profile_count!=%%~d"
+			set "pid!profile_count!=!winws_pid%%m!"
+			set "daemon_status=%%~e"
+			set "debug_status=%%~f"
 		)
 	)
+	
 )
+echo.[1F[2K
 set /a about_pid_strsize=%c8%-%c4%
 if %profile_count% GTR 0 ( 
 	for /l %%i in (1,1,%profile_count%) do (
 		if %%i EQU 1 (
 			for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
 			echo.
-			echo.[%c1%GРаботает стратегия:[%c4%G[33m'[0m!n%%i![33m'[0m
+			echo.[%c1%GРаботает стратегия:[%c4%G[0m!n%%i!
 			if "x!daemon_status!"=="xon" ( set "offon=да" ) else ( set "offon=нет" )
 			echo.[%c4%G[33mЗапуск в скрытом окне[0m: !offon!
 			if "x!debug_status!"=="xon" ( set "offon=да" ) else ( set "offon=нет" )
@@ -518,7 +534,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %strategy_apath%\*.strategy') do (
 				if not "x!foo:~2!"=="x" set "psabout=!foo:~2!"
 			)
 		) else (
-			rem есть маркеры <HOSTLIST_NOAUTO> и <HOSTLIST>
+			rem есть маркеры <HOSTLIST_NOAUTO> и <HOSTLIST> <IPSET>
 			if "x!fletter!"=="xHOSTLIST" (
 				if not exist %home%\lists\hostlist\hostlist-auto.txt echo.#>%home%\lists\hostlist\hostlist-auto.txt
 				for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\hostlist\*.txt %home%\lists\hostlist\*.lst %home%\lists\hostlist\*.gz') do (
@@ -769,13 +785,20 @@ for /l %%i in (1,1,%pcount%) do (
 	if "x%daemon%"=="xon" set foo=--daemon !foo!
 	set "sabout=x"
 	if exist %strategy_apath%\log\%%i-about.log set /p sabout=<%strategy_apath%\log\%%i-about.log
-	set foo=--comment [%strategy_name%][%PortFilter%][%IPsetStatus%][!sabout!][%daemon%][%debug%] !foo!
+	if "x%PortFilterStatus%"=="xon" (
+		set foo=--comment [%strategy_name%][%PortFilter%][%IPsetStatus%][!sabout!][%daemon%][%debug%] !foo!
+	) else set foo=--comment [%strategy_name%][0][%IPsetStatus%][!sabout!][%daemon%][%debug%] !foo!
 	%winwsdir%\winws.exe --dry-run !foo! 2>&1 1>%strategy_apath%\log\%%i-status.log
 	if %errorlevel% neq 0 goto:strategy_list_arg_error
 	call:cecho 3 "'!sabout!'"
 	if "x%daemon%"=="xoff" (
-		echo.start "%strategy_name%:[!sabout!] PortFilter:[%PortFilter%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !foo! >>%strategy_apath%\log\%%i-run.log
-		start "%strategy_name%:[!sabout!] PortFilter:[%PortFilter%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !foo!
+		if "x%PortFilterStatus%"=="xon" (
+			echo.start "%strategy_name%:[!sabout!] PortFilter:[%PortFilter%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !foo! >>%strategy_apath%\log\%%i-run.log
+			start "%strategy_name%:[!sabout!] PortFilter:[%PortFilter%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !foo!
+		) else (
+			echo.start "%strategy_name%:[!sabout!] PortFilter:[0] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !foo! >>%strategy_apath%\log\%%i-run.log
+			start "%strategy_name%:[!sabout!] PortFilter:[0] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !foo!
+		)
 	)
 	if "x%daemon%"=="xon" (
 		echo.%winwsdir%\winws.exe !foo! >>%strategy_apath%\log\%%i-run.log

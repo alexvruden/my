@@ -1,0 +1,9 @@
+# FAKE TLS ALT
+
+--wf-tcp=
+
+IPSET
+--dpi-desync=fake
+--dpi-desync-fooling=md5sig
+--dpi-desync-fake-tls-mod=rnd,rndsni,padencap
+

@@ -1,0 +1,11 @@
+# ALT3
+
+--wf-tcp=
+
+IPSET
+--dpi-desync=split
+--dpi-desync-split-pos=1
+--dpi-desync-autottl
+--dpi-desync-fooling=badseq
+--dpi-desync-repeats=8
+

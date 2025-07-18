@@ -1,0 +1,20 @@
+# ALT3
+
+--wf-tcp=443
+
+HOSTLIST_NOAUTO
+--dpi-desync=split
+--dpi-desync-split-pos=1
+--dpi-desync-autottl
+--dpi-desync-fooling=badseq
+--dpi-desync-repeats=8
+
+--new
+
+IPSET
+--dpi-desync=split
+--dpi-desync-split-pos=1
+--dpi-desync-autottl
+--dpi-desync-fooling=badseq
+--dpi-desync-repeats=8
+

@@ -1,0 +1,10 @@
+# МГТС2
+
+--wf-tcp=
+
+IPSET
+--dpi-desync=fake
+--dpi-desync-repeats=6
+--dpi-desync-fooling=md5sig
+--dpi-desync-fake-tls=tls_clienthello_www_google_com.bin
+

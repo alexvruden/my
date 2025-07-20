@@ -10,9 +10,13 @@
 #rule 1: hostlist
 
 HOSTLIST
---dpi-desync=fake,split2
+--dpi-desync=fake,fakedsplit
 --dpi-desync-autottl=2
---dpi-desync-fooling=md5sig
+--dpi-desync-fooling=badseq
+
+#--dpi-desync=fake,split2
+#--dpi-desync-autottl=2
+#--dpi-desync-fooling=md5sig
 
 --new
 

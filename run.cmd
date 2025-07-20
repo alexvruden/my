@@ -24,10 +24,11 @@ for /L %%i in (1000,-1,1) do (
 )
 :@break_homestrsize
 if not exist %home%\script\run_agent.cmd (
-	echo.Запуск из архива без распаковки? 
-	echo.Выход.
 	echo.
-	pause
+	echo.[5GЗапуск из архива без распаковки? 
+	echo.
+	echo.[5GНажмите любую клавишу для выхода.
+	pause >nul
 	exit
 )
 set "fakedir="
@@ -38,10 +39,11 @@ set "arg_3=%~3"
 
 net session >nul 2>&1
 if %errorLevel% neq 0 ( 
-	echo.Для некоторых действий сценария необходимы высокие привилегии, запустите скрипт с правами 'Администратора'.
-	echo.Выход.
 	echo.
-	pause
+	echo.[5GДля некоторых действий сценария необходимы высокие привилегии, запустите скрипт с правами 'Администратора'.
+	echo.
+	echo.[5GНажмите любую клавишу для выхода.
+	pause >nul
 	exit
 )
 mode con: cols=%mode_con_cols% lines=%mode_con_lines%
@@ -424,7 +426,8 @@ set "strategy_apath=!strategy_name_spath%menu_choice%!"
 :strategy_list
 if "x%strategy_name%"=="x" (
 	echo.strategy_name=none
-	pause
+	echo.[5GНажмите любую клавишу для возврата в меню.
+	pause >nul
 	goto:menu
 )
 
@@ -488,7 +491,8 @@ if not exist %winwsdir%\winws.exe (
 	echo.
 	echo.[5Ghttps://github.com/bol-van/zapret/releases
 	echo.
-	pause
+	echo.[5GНажмите любую клавишу для возврата в меню.
+	pause >nul
 	goto:menu
 )
 set "fakedir=%winwsdir:~0,-24%\files\fake"
@@ -613,7 +617,8 @@ REM for /l %%x in (5,-1,1) do (
 REM )
 :strategy_list_exit
 echo.
-pause
+echo.[5GНажмите любую клавишу для возврата в меню.
+pause >nul
 goto:menu
 :error_arg3
 set /a ecode=1
@@ -697,7 +702,8 @@ goto:menu
 :cerror
 echo.
 echo.[5G[31mОшибка.[0m Line #%~1
-pause
+echo.[5GНажмите любую клавишу для выхода.
+pause >nul
 goto:menu_0
 
 :blockcheck
@@ -714,7 +720,8 @@ if not exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh
 	echo.
 	echo.[5Ghttps://github.com/bol-van/zapret-win-bundle/archive/refs/heads/master.zip
 	echo.
-	pause
+	echo.[5GНажмите любую клавишу для возврата в меню.
+	pause >nul
 	goto:menu
 )
 
@@ -729,7 +736,8 @@ if not exist %home%\lists\blockcheck.txt (
 		echo.#
 		echo.discord.com
 	)>%home%\lists\blockcheck.txt
-	pause
+	echo.[5GНажмите любую клавишу для возврата в меню.
+	pause >nul
 	goto:menu
 )
 if defined strategy_run goto:terminate_all
@@ -813,7 +821,8 @@ REM for /l %%x in (5,-1,1) do (
 	REM <nul set /p =[5G[37mВозврат в меню через [32m%%x[37m с.[0m
 	REM timeout /T 1 /NOBREAK >nul
 REM )
-pause
+echo.[5GНажмите любую клавишу для возврата в меню.
+pause >nul
 goto:menu
 
 :menu_srv
@@ -1196,5 +1205,6 @@ cls
 echo.
 echo.[5G[37mHelp[0m
 echo.
-pause
+echo.[5GНажмите любую клавишу для возврата в меню.
+pause >nul
 goto:menu

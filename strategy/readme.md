@@ -69,6 +69,7 @@
 --dpi-desync-split-pos=1
 --dpi-desync-fooling=badseq,hopbyhop2
 --dpi-desync-split-seqovl-pattern=tls_clienthello_www_google_com.bin</code>
+<br>
 <code>#--dpi-desync-split-seqovl-pattern=blabla</code> - закоменировали, скрипт проигнорирует строку
 <br>
 <br>

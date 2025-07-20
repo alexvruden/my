@@ -135,7 +135,6 @@ if %foo% GTR 0 (
 		for /f "tokens=2-7 delims=[]" %%a in ("!commandline%%m!") do (
 			set /a profile_count=!profile_count!+1
 			set "n!profile_count!=%%~a"
-			rem set "custom_str!profile_count!=%%~b"
 			set "custom_str=%%~b"
 			set "ip!profile_count!=%%~c"
 			set "pr!profile_count!=%%~d"
@@ -560,46 +559,22 @@ for /l %%i in (1,1,%pcount%) do (
 	set "wscomment="
 	set "wsarg=!winws_arg%%i!"
 	set /a scount=%%i
-	if "x%debug%"=="xon" (
-		set wsdebug=--debug=1
-	REM ) else if "x%debug%"=="xoff" (
-		REM set wsarg=!wsarg!
-	REM ) else (
-		REM if not exist %strategy_apath%\debug md %strategy_apath%\debug >nul
-		REM del /F /Q %strategy_apath%\debug\* >nul
-		REM set wsarg=--debug=@%strategy_apath%\debug\%%i-debug.log !wsarg!
-		REM call:cecho x3 "Запись отладочных сообщений стратегии в файл" "'..\strategy\%strategy_name%\debug\%%i-debug.log'"
-	)
-	
+	if "x%debug%"=="xon" set wsdebug=--debug=1
 	if "x%daemon%"=="xon" set wsdaemon=--daemon
 	set "sabout=x"
 	if exist %strategy_apath%\log\"!name_strategy_file_parse_ok%%i!"-about.log set /p sabout=<%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-about.log"
 	set wscomment=--comment [%strategy_name%][%custom_strategy%][%IPsetStatus%][!sabout!][%daemon%][%debug%]
-	if defined wf_raw%%i (
-		if "x!wf_raw%%i!"=="xon" (
-			call:@winws_wfraw "%strategy_apath%" "dry-run" "--dry-run"
-			if !errorlevel! neq 0 goto:strategy_list_arg_error
-		)
-	) else (
 		%winwsdir%\winws.exe --dry-run !wsdebug! !wsdaemon! !wscomment! !wsarg! 2>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-dry-run-status-err.log" 1>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-dry-run-status.log"
 		if !errorlevel! neq 0 goto:strategy_list_arg_error
 		%winwsdir%\winws.exe --wf-save="%strategy_apath%\log\!name_strategy_file_parse_ok%%i!-save.raw" !wsarg! 2>>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-wf-save-status-err.log" 1>>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-wf-save-status.log"
-	)
 	if "x%daemon%"=="xoff" (
 		echo.start "%strategy_name%:[!sabout!] Custom:[%custom_strategy%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !wsdebug! !wscomment! !wsarg! >>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-run-cmd.bat.example"
 		start "%strategy_name%:[!sabout!] Custom:[%custom_strategy%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !wsdebug! !wscomment! !wsarg!
 	)
 	if "x%daemon%"=="xon" (
-		if defined wf_raw%%i (
-			if "x!wf_raw%%i!"=="xon" (
-				call:@winws_wfraw "%strategy_apath%" "run"
-				if !errorlevel! neq 0 goto:strategy_list_arg_error
-			)
-		) else (
-			echo.%winwsdir%\winws.exe !wsdebug! !wsdaemon! !wscomment! !wsarg! >>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-run-cmd.bat.example"
-			%winwsdir%\winws.exe !wsdebug! !wsdaemon! !wscomment! !wsarg! 2>>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-run-status-err.log" 1>>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-run-status.log"
-			if !errorlevel! neq 0 goto:strategy_list_arg_error
-		)
+		echo.%winwsdir%\winws.exe !wsdebug! !wsdaemon! !wscomment! !wsarg! >>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-run-cmd.bat.example"
+		%winwsdir%\winws.exe !wsdebug! !wsdaemon! !wscomment! !wsarg! 2>>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-run-status-err.log" 1>>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-run-status.log"
+		if !errorlevel! neq 0 goto:strategy_list_arg_error
 	)
 	
 	call:cecho x6x2 "!name_strategy_for_cecho%%i! :" "[!sabout!]" "-" "ok"
@@ -687,7 +662,12 @@ rem debug=@filename - very slow :(
 if "x%debug%"=="xon" (
 	set "debug=off"
 ) else if "x%debug%"=="xoff" (
-	if "x%daemon%"=="xon" ( set "debug=off" ) else ( set "debug=on" )
+	if "x%daemon%"=="xon" ( 
+		set "daemon=off" 
+		set "debug=on" 
+	) else ( 
+		set "debug=on" 
+	)
 ) 
 call:sconfig
 goto:menu
@@ -698,73 +678,11 @@ set "foob="
 set "fooe="
 if "x%custom_strategy%"=="xon" (
 	set "custom_strategy=off"
-	rem call:kill_custom
 ) else (
 	set "custom_strategy=on"
-	rem call:run_custom
 )
 
-REM call:cecho x3 "Текущий диапазон портов:" "[!PortFilter!]"
-REM echo.
-REM set /p "foob=Начало диапазона портов [Enter - не менять]: "
-REM if defined foob (
-	REM set /p "fooe=Конец диапазона портов: "
-REM )
-REM set "foo1="
-REM set "foo2="
-REM set /a b0=10000
-REM set /a b1=1000
-REM set /a b2=100
-REM set /a b3=10
-REM set /a b4=1
-REM set /a e0=10000
-REM set /a e1=1000
-REM set /a e2=100
-REM set /a e3=10
-REM set /a e4=1
-
-REM if defined foob (
-	REM if defined fooe (
-		REM set /a foo1=0
-		REM set /a foo2=0
-		REM set /a delimb=1
-		REM set /a delime=1
-		REM for /L %%a in (4,-1,0) do (
-			REM if not "x!foob:~%%a,1!"=="x" (
-				REM set /a foo1=!b%%a!*!foob:~%%a,1!/!delimb!+!foo1!
-			REM ) else (
-				REM set /a delimb=!delimb!*10
-			REM )
-			REM if not "x!fooe:~%%a,1!"=="x" (
-				REM set /a foo2=!e%%a!*!fooe:~%%a,1!/!delime!+!foo2!
-			REM ) else (
-				REM set /a delime=!delime!*10
-			REM )
-		REM )
-		REM if !foo1! geq !foo2! (
-			REM call:cecho 1x31x3 "Ошибка." "Значение начала диапазона" "[!foo1!]" "больше" "значения конца диапазона" "[!foo2!]"
-			REM echo.
-			REM pause
-		REM ) else if !foo1! equ !foo2! ( 
-			REM call:cecho 1x32x3 "Ошибка." "Значение начала диапазона" "[!foo1!]" "равно" "значению конца диапазона" "[!foo2!]"
-			REM echo.
-			REM pause
-		REM ) else set /a foo=1
-	REM )
-REM )
-
-REM if %foo% equ 1 (
-	REM set "PortFilterBegin=%foo1%"
-	REM set "PortFilterEnd=%foo2%"
-	REM set "PortFilter=%foo1%-%foo2%"
-REM )
 call:sconfig
-
-
-REM if defined strategy_run (
-	REM REM call:cecho x3 "Диапазон портов для фильтрации установлен:" "[%PortFilter%]"
-	REM goto:restart_strategy_after_change_customstr_or_ip
-REM )
 goto:menu
 
 :menu_4
@@ -774,20 +692,7 @@ if "x%IPsetStatus%"=="xon" (
 	set "IPsetStatus=on"
 )
 call:sconfig
-REM if defined strategy_run (
-	REM REM call:cecho x3 "Список IPset установлен:" "[%IPsetStatus%]"
-	REM goto:restart_strategy_after_change_customstr_or_ip
-REM )
 goto:menu
-
-REM :restart_strategy_after_change_customstr_or_ip
-
-REM if defined strategy_run (
-	REM call:cecho x3x "Перезапуск стратегии" "'%strategy_run%'" "для применения изменений."
-	REM set "strategy_name=%strategy_run%"
-	REM goto:strategy_list
-REM )
-REM goto:menu
 
 :cerror
 echo.
@@ -927,15 +832,11 @@ if %errorlevel% EQU 0 (
 	set /a foo=%menu_choice% - %srv_menu_count%
 	if !foo! equ !castart! (
 		set "agent_mode=start"
-		REM echo.start>%home%\bin\agent_mode
 		echo.[5G[37mСигнал '[32mstart[0m' отправлен
-	)
-	if !foo! equ !castop! (
+	) else if !foo! equ !castop! (
 		set "agent_mode=stop"
-		REM echo.stop>%home%\bin\agent_mode
 		echo.[5G[37mСигнал '[31mstop[0m' отправлен
-	)
-	if !foo! equ !cadel! (
+	) else if !foo! equ !cadel! (
 		schtasks /End /TN dpiagent 1>nul 2>&1
 		schtasks /Delete /TN dpiagent /F 1>nul 2>&1
 		if !errorlevel! EQU 0 (
@@ -950,7 +851,6 @@ if %errorlevel% EQU 0 (
 ) else (
 	set "agent_mode=start"
 	call:sconfig
-	REM echo.start>%home%\bin\agent_mode
 	if not exist %home%\agent.log echo.#>%home%\agent.log
 	schtasks /Create /F /TN dpiagent /NP /RU "SYSTEM" /SC onstart /TR "%home%\script\run_agent.cmd %home%" 1>nul 2>&1
 	if !errorlevel! EQU 0 (
@@ -1023,8 +923,6 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 	set /a parse_mayok=0
 	set "psabout="
 	set "sWinDivert="
-	set "wf_raw=off"
-	set "wf_raw_proto="
 	for %%a in ("%parse_str_strategy_apath%\%%~I") do set "foo=%%~sa"
 	for /F "skip=1 tokens=1* delims==" %%M in (!foo!) do (
 		set "fletter=%%~M"
@@ -1129,36 +1027,25 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 				)
 				set /a parse_mayok=1
 			) else if "x!fletter!"=="x--wf-raw" (
-				REM if "x%custom_strategy%"=="xon" (
-					set "LN=%%N"
-					REM if "x!LN:~0,1!"=="x$" (
-						REM set "wf_raw=on"
-						REM rem https://ntc.party/t/%D0%BA%D0%B0%D1%81%D1%82%D0%BE%D0%BC%D0%BD%D1%8B%D0%B9-%D1%84%D0%B8%D0%BB%D1%8C%D1%82%D1%80-windivert-%D0%B4%D0%BB%D1%8F-%D0%B4%D0%B8%D1%81%D0%BA%D0%BE%D1%80%D0%B4%D0%B0/11390/8					
-						REM if "x!LN:~1,3!"=="xtcp" ( set "wf_raw_proto=tcp" )
-						REM if "x!LN:~1,3!"=="xudp" ( set "wf_raw_proto=udp" )
-					REM ) else if "x!LN:~0,1!"=="x@" (
-					if "x!LN:~0,1!"=="x@" (
-						if "x%custom_strategy%"=="xon" (
-							if exist %parse_str_strategy_apath%\!LN:~1! (
-								if "x!sWinDivert!"=="x" ( set "sWinDivert=--wf-raw=@%parse_str_strategy_apath%\!LN:~1!" ) else ( set "sWinDivert=!sWinDivert! --wf-raw=@%parse_str_strategy_apath%\!LN:~1!" )
-							) else (
-								set "skip_WinDivert=on"
-								if "x%custom_strategy%"=="xon" (
-									call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'..\strategy\%strategy_name%\custom\!LN:~0!'"
-								) else call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'..\strategy\%strategy_name%\!LN:~0!'"
-								call:cecho xx31 "%str_file_path_for_cecho%\%%~I :" "Параметр" "!fletter!=%%N" "отброшен"	
-							)
-						)
-					) else (
+				set "LN=%%N"
+				if "x!LN:~0,1!"=="x@" (
+					if "x%custom_strategy%"=="xon" (
+						if exist %parse_str_strategy_apath%\!LN:~1! (
+							if "x!sWinDivert!"=="x" ( set "sWinDivert=--wf-raw=@%parse_str_strategy_apath%\!LN:~1!" ) else ( set "sWinDivert=!sWinDivert! --wf-raw=@%parse_str_strategy_apath%\!LN:~1!" )
+						) else (
 							set "skip_WinDivert=on"
+							if "x%custom_strategy%"=="xon" (
+								call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'..\strategy\%strategy_name%\custom\!LN:~0!'"
+							) else call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'..\strategy\%strategy_name%\!LN:~0!'"
 							call:cecho xx31 "%str_file_path_for_cecho%\%%~I :" "Параметр" "!fletter!=%%N" "отброшен"	
-							call:cecho x1x "%str_file_path_for_cecho%\%%~I :" "Исключен" "WinDivert фильтр --wf-raw"
+						)
 					)
-					set "LN="
-				REM ) else (
-					REM set "skip_WinDivert=on"
-					REM call:cecho 1x3 "Исключен" "WinDivert фильтр --wf-raw с параметром" "'custom_strategy = off'"
-				REM )
+				) else (
+						set "skip_WinDivert=on"
+						call:cecho xx31 "%str_file_path_for_cecho%\%%~I :" "Параметр" "!fletter!=%%N" "отброшен"	
+						call:cecho x1x "%str_file_path_for_cecho%\%%~I :" "Исключен" "WinDivert фильтр --wf-raw"
+				)
+				set "LN="
 				set /a parse_mayok=1
 			) else if "x!fletter!"=="x--wf-tcp" (
 				if "x%%~N"=="x" (
@@ -1268,7 +1155,6 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 				)
 				set /a parse_mayok=1
 			)
-			
 		)
 	)
 	if !parse_mayok! equ 1 (
@@ -1298,25 +1184,12 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 					set "sabout=no about" 
 				)
 				echo.!sabout!>>%strategy_apath%\log\"%%~nI-about.log"
-				if "x!wf_raw!"=="xon" (
-					set "wf_raw!pcount!=on"
-					set "wf_raw_proto!pcount!=!wf_raw_proto!"
-				)
 			)
 		)
 	)
 )
 
 exit /b
-
-:@winws_wfraw
-set "winws_wfraw_strategy_apath=%~2"
-%winwsdir%\winws.exe %~3 %wsdebug% %wsdaemon% %wscomment% --wf-raw=!impostor and !loopback and ^
-((outbound and (!tcp or tcp.Syn or tcp.Rst or tcp.Fin or tcp.PayloadLength^>0) and ((tcp.DstPort ^>= 443 and tcp.DstPort ^<= 444) and tcp.DstPort != 444) and (((ip.DstAddr ^< 127.0.0.1 or ip.DstAddr ^> 127.255.255.255) and (ip.DstAddr ^< 10.0.0.0 or ip.DstAddr ^> 10.255.255.255) and (ip.DstAddr ^< 192.168.0.0 or ip.DstAddr ^> 192.168.255.255) and (ip.DstAddr ^< 172.16.0.0 or ip.DstAddr ^> 172.31.255.255) and (ip.DstAddr ^< 169.254.0.0 or ip.DstAddr ^> 169.254.255.255)) or ((ipv6.DstAddr ^> ::1) and (ipv6.DstAddr ^< 2001::0 or ipv6.DstAddr ^>= 2001:1::0) and (ipv6.DstAddr ^< fc00::0 or ipv6.DstAddr ^>= fe00::0) and (ipv6.DstAddr ^< fe80::0 or ipv6.DstAddr ^>= fec0::0) and (ipv6.DstAddr ^< ff00::0 or ipv6.DstAddr ^>= ffff::0)))) or ^
-(inbound and tcp and (tcp.Ack and tcp.Syn or tcp.Rst or tcp.Fin) and ((tcp.DstPort ^>= 443 and tcp.DstPort ^<= 444) and tcp.DstPort != 444) and (((ip.SrcAddr ^< 127.0.0.1 or ip.SrcAddr ^> 127.255.255.255) and (ip.SrcAddr ^< 10.0.0.0 or ip.SrcAddr ^> 10.255.255.255) and (ip.SrcAddr ^< 192.168.0.0 or ip.SrcAddr ^> 192.168.255.255) and (ip.SrcAddr ^< 172.16.0.0 or ip.SrcAddr ^> 172.31.255.255) and (ip.SrcAddr ^< 169.254.0.0 or ip.SrcAddr ^> 169.254.255.255)) or ((ipv6.SrcAddr ^> ::1) and (ipv6.SrcAddr ^< 2001::0 or ipv6.SrcAddr ^>= 2001:1::0) and (ipv6.SrcAddr ^< fc00::0 or ipv6.SrcAddr ^>= fe00::0) and (ipv6.SrcAddr ^< fe80::0 or ipv6.SrcAddr ^>= fec0::0) and (ipv6.SrcAddr ^< ff00::0 or ipv6.SrcAddr ^>= ffff::0))))) ^
-%wsarg% 2>>%winws_wfraw_strategy_apath%\log\!name_strategy_file_parse_ok%scount%!-%~1-status-err.log 1>>%winws_wfraw_strategy_apath%\log\!name_strategy_file_parse_ok%scount%!-%~1-status.log
-
-exit /b %errorlevel%
 
 :help
 cls

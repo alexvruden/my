@@ -1,0 +1,12 @@
+# FAKE TLS AUTO ALT
+
+--wf-tcp=1024-65535
+
+IPSET
+--dpi-desync=split
+--dpi-desync-split-pos=1
+--dpi-desync-autottl
+--dpi-desync-fooling=badseq
+--dpi-desync-repeats=8
+--dpi-desync-fake-tls-mod=rnd,dupsid,sni=www.google.com
+

@@ -1,0 +1,11 @@
+# Dronatar v3.5
+
+--wf-tcp=2050-2099
+
+# Discord Calls Extra 
+
+--hostlist-domains=discord.media
+--dpi-desync=rst,multidisorder
+--dpi-desync-fooling=badseq
+
+

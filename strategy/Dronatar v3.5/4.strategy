@@ -1,0 +1,20 @@
+# Dronatar v3.5
+
+--wf-udp=443
+
+# YouTube QUIC/QUIC 
+
+HOSTLIST_NOAUTO
+--dpi-desync=fake
+--dpi-desync-repeats=11
+--dpi-desync-fake-quic=quic_initial_www_google_com.bin
+
+--new
+
+# IP set 
+
+IPSET
+--dpi-desync=fake
+--dpi-desync-repeats=6
+
+

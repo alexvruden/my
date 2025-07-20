@@ -1,0 +1,64 @@
+# Dronatar v3.5
+
+--wf-tcp=443
+
+# Discord Calls Extra
+
+--hostlist-domains=discord.media
+--dpi-desync=rst,multidisorder
+--dpi-desync-fooling=badseq
+
+--new
+
+# Discord 
+
+--hostlist-domains=dis.gd,discord-attachments-uploads-prd.storage.googleapis.com,discord.app,discord.co,discord.com,discord.design,discord.dev,discord.gift,discord.gifts,discord.gg,gateway.discord.gg,discord.media,discord.new,discord.store,discord.status,discord-activities.com,discordactivities.com,discordapp.com,cdn.discordapp.com,discordapp.net,media.discordapp.net,images-ext-1.discordapp.net,stable.dl2.discordapp.net,discordcdn.com,discordmerch.com,discordpartygames.com,discordsays.com,discordsez.com
+--dpi-desync=fake
+--dpi-desync-repeats=6
+--dpi-desync-fooling=badseq
+--dpi-desync-badseq-increment=0
+
+--new
+
+# YouTube 
+
+--hostlist-domains=yt3.ggpht.com,yt4.ggpht.com,yt3.googleusercontent.com,googlevideo.com,jnn-pa.googleapis.com,wide-youtube.l.google.com,youtube-nocookie.com,youtube-ui.l.google.com,youtube.com,youtubeembeddedplayer.googleapis.com,youtubekids.com,youtubei.googleapis.com,youtu.be,yt-video-upload.l.google.com,ytimg.com,ytimg.l.google.com
+--dpi-desync=multisplit
+--dpi-desync-split-seqovl=675
+--dpi-desync-split-pos=1,midsld
+--dpi-desync-split-seqovl-pattern=tls_clienthello_www_google_com.bin
+
+--new
+
+# list-general+extra
+
+--hostlist-exclude-domains=dis.gd,discord-attachments-uploads-prd.storage.googleapis.com,discord.app,discord.co,discord.com,discord.design,discord.dev,discord.gift,discord.gifts,discord.gg,gateway.discord.gg,discord.media,discord.new,discord.store,discord.status,discord-activities.com,discordactivities.com,discordapp.com,cdn.discordapp.com,discordapp.net,media.discordapp.net,images-ext-1.discordapp.net,stable.dl2.discordapp.net,discordcdn.com,discordmerch.com,discordpartygames.com,discordsays.com,discordsez.com,yt3.ggpht.com,yt4.ggpht.com,yt3.googleusercontent.com,googlevideo.com,jnn-pa.googleapis.com,wide-youtube.l.google.com,youtube-nocookie.com,youtube-ui.l.google.com,youtube.com,youtubeembeddedplayer.googleapis.com,youtubekids.com,youtubei.googleapis.com,youtu.be,yt-video-upload.l.google.com,ytimg.com,ytimg.l.google.com
+HOSTLIST_NOAUTO
+--hostlist-domains=adguard.com,adguard-vpn.com,totallyacdn.com,whiskergalaxy.com,windscribe.com,windscribe.net,cloudflareclient.com,soundcloud.com,sndcdn.com,soundcloud.cloud,nexusmods.com,nexus-cdn.com,supporter-files.nexus-cdn.com,prostovpn.org,hitmotop.com
+--dpi-desync=fake,multisplit
+--dpi-desync-split-pos=1
+--dpi-desync-fooling=badseq
+
+--new
+
+# Cloudflare WARP Gateway
+
+--ipset-ip=162.159.36.1,162.159.46.1,2606:4700:4700::1111,2606:4700:4700::1001
+--filter-l7=tls
+--dpi-desync=fake
+--dpi-desync-fake-tls=0x00
+--dpi-desync-start=n2
+--dpi-desync-cutoff=n3
+--dpi-desync-fooling=badseq
+--dpi-desync-badseq-increment=0
+
+--new
+
+# IP set
+
+IPSET
+--dpi-desync=fake
+--dpi-desync-repeats=6
+--dpi-desync-fooling=badseq
+
+

@@ -1,0 +1,7 @@
+# ALT5
+
+--wf-tcp=1024-65535
+
+--filter-l3=ipv4
+--dpi-desync=syndata
+

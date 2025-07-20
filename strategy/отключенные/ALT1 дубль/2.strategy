@@ -1,0 +1,20 @@
+# ALT1
+
+--wf-tcp=443
+
+HOSTLIST_NOAUTO
+--dpi-desync=fake,split
+--dpi-desync-autottl=5
+--dpi-desync-repeats=6
+--dpi-desync-fooling=badseq
+--dpi-desync-fake-tls=tls_clienthello_www_google_com.bin
+
+--new
+
+IPSET
+--dpi-desync=fake,split
+--dpi-desync-autottl=5
+--dpi-desync-repeats=6
+--dpi-desync-fooling=badseq
+--dpi-desync-fake-tls=tls_clienthello_www_google_com.bin
+

@@ -1,0 +1,10 @@
+# ALT4
+
+--wf-tcp=1024-65535
+
+IPSET
+--dpi-desync=fake,split2
+--dpi-desync-repeats=6
+--dpi-desync-fooling=md5sig
+--dpi-desync-fake-tls=tls_clienthello_www_google_com.bin
+

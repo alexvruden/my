@@ -1,0 +1,12 @@
+# Dronatar v3.5
+
+--wf-udp=1024-65535
+
+# Games
+
+IPSET
+--dpi-desync=fake
+--dpi-desync-repeats=12
+--dpi-desync-any-protocol
+--dpi-desync-cutoff=n2
+

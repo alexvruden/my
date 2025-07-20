@@ -25,7 +25,7 @@ for /L %%i in (1000,-1,1) do (
 :@break_homestrsize
 if not exist %home%\script\run_agent.cmd (
 	echo.
-	echo.[5GЗапуск из архива без распаковки? 
+	echo.[5GЗапуск из архива без распаковки невозможен. 
 	echo.
 	echo.[5GНажмите любую клавишу для выхода.
 	pause >nul

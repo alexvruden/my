@@ -106,11 +106,13 @@ if /i "!CHOICE!" equ "1" (
                 echo.[31m[x][0m[8GНе удалось удалить[0m !dirPath!
             )
         ) else (
-            echo.[33m[i][0m[8G!dirPath! [33mне существует[0m
+            echo.[33m[i][0m[8G!dirPath! [33mуже и так пустой[0m
         )
     )
 	echo.
 )
+echo.[8GНажмите любую клавишу для выхода.
+pause >nul
 for /l %%x in (5,-1,1) do (
 	echo.[F
 	<nul set /p =[8G[37mВыход через [32m%%x[37m с.[0m

@@ -56,13 +56,15 @@
 <br>
 <br>
 <code>##tcp: 443</code> - скрипт прочтет строку и запомнит как описание этой стратегии
+<br>
 <code>--wf-tcp=443</code>
 <br>
 <br>
 <code>##rule 1: hostlist</code> - скрипт прочтет строку и добавит к предыдущуму описанию
 <br>
 <br>
-<code>HOSTLIST_NOAUTO</code> - добавит все хостлисты<br>
+<code>HOSTLIST_NOAUTO</code> - добавит все хостлисты
+<br>
 <code>--dpi-desync=split2
 --dpi-desync-repeats=2
 --dpi-desync-split-seqovl=681

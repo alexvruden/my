@@ -4,7 +4,7 @@
 Описание старатегии пишем в 'about'.<br>
 Файл стратегии должен быть с расширением '.strategy'<br>
 Остальные расширения игнорируются скриптом - можно задать другое расширение для отключения стратегии (аналог --skip)<br>
-Директория 'custom' используется при триггере 'Запуск 'custom' стратегий: да'. Остальные директории игнорируются.<br>
+Директория 'custom' используется при триггере 'Запуск custom стратегий: да'. Остальные директории игнорируются.<br>
 
 <br>
 Пример файла стратегии:<br>
@@ -13,7 +13,7 @@
 Строки, начинающиеся с символа # игнорируются - пометки для себя<br>
 Если строка начинается с двух символов ##, то скрипт обработает ее и добавит к описанию ПРОФИЛЯ стратегии, не путать с 'about'.<br>
 Если символы ## для описания профиля отсутствуют, то описание будет создано из имени 'windivert' фильтра <br>
-
+<br>
 'WINDIVERT FILTER':<br>
 <br>
 <code>--wf-tcp=45</code><br>
@@ -23,8 +23,8 @@
 'MULTI-STRATEGY':<br>
 <br>
 Можно указать<br>
-<code>--filter-tcp=</code>
-<code>--filter-udp=</code>
+<code>--filter-tcp=</code><br>
+<code>--filter-udp=</code><br>
 <br>
 'HOSTLIST FILTER':<br>
 <br>
@@ -52,29 +52,30 @@
 ------------------------------------------------------------------------------<br>
 '\my\strategy\test\2.strategy'<br>
 
-<code>#blabla</code>
+<code>#test strategy</code>
 <br>
 <br>
-<code>##tcp: 443
+<code>##tcp: 443 - скрипт прочтет строку и запомнит как описание этой стратегии
 --wf-tcp=443</code>
 <br>
 <br>
-<code>##rule 1: hostlist</code>
+<code>##rule 1: hostlist</code> - скрипт прочтет строку и добавит к предыдущуму описанию
 <br>
 <br>
-<code>HOSTLIST_NOAUTO
---dpi-desync=split2
+<code>HOSTLIST_NOAUTO</code> - добавит все хостлисты
+<code>--dpi-desync=split2
 --dpi-desync-repeats=2
 --dpi-desync-split-seqovl=681
 --dpi-desync-split-pos=1
 --dpi-desync-fooling=badseq,hopbyhop2
 --dpi-desync-split-seqovl-pattern=tls_clienthello_www_google_com.bin</code>
+<code>#--dpi-desync-split-seqovl-pattern=blabla</code> - закоменировали, скрипт проигнорирует строку
 <br>
 <br>
 <code>--new</code>
 <br>
 <br>
-<code>##rule 2: ipset</code>
+<code>##rule 2: ipset</code> - скрипт прочтет строку и добавит к предыдущуму описанию
 <br>
 <br>
 <code>IPSET

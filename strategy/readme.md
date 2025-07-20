@@ -62,7 +62,7 @@
 <code>##rule 1: hostlist</code> - скрипт прочтет строку и добавит к предыдущуму описанию
 <br>
 <br>
-<code>HOSTLIST_NOAUTO</code> - добавит все хостлисты
+<code>HOSTLIST_NOAUTO</code> - добавит все хостлисты<br>
 <code>--dpi-desync=split2
 --dpi-desync-repeats=2
 --dpi-desync-split-seqovl=681

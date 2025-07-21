@@ -84,7 +84,7 @@ set /a c5=55
 set /a c6=80
 set /a c7=100
 set /a c8=%mode_con_cols% - 5
-echo.[5G[32mAuto Refresh screen every 60 sec.[0m
+echo.[5G[36mОбновление меню скрипта каждые 60 сек.[0m
 set /a srv_menu_count=1000
 set /a strategy_menu_count=1000
 set /a parameter_menu_count=1000
@@ -213,7 +213,7 @@ if "x%arg_1%"=="xstop" (
 set /a menu_count=0
 rem ------------------------------------------------------------------------------------
 set /a foo=%c1%-1
-echo.[%foo%G[33m[..][%c2%G[33mПара[36mм[33mетры запуска стратегии[0m
+echo.[%foo%G[33m[..][%c2%G[33mПара[93mм[33mетры запуска стратегии[0m
 if %param_trigger% neq 0 (
 	echo.
 	set /a foo=7
@@ -270,9 +270,9 @@ set /a foo=%c1%-1
 set /a about_strategy_strsize=%c8%-%c5%
 
 if %strategy_trigger% equ 0 (
-	echo.[%foo%G[33m[..][%c2%G[36mС[33mтратегии[0m
+	echo.[%foo%G[33m[..][%c2%G[93mС[33mтратегии[0m
 ) else ( 
-	echo.[%foo%G[33m[..][%c2%G[36mС[33mтратегии[%c5%GОписание[0m
+	echo.[%foo%G[33m[..][%c2%G[93mС[33mтратегии[%c5%GОписание[0m
 	echo.
 	set "strategy_count_name="
 	set "strategy_name_spath="
@@ -301,12 +301,13 @@ if %strategy_trigger% equ 0 (
 			)
 		)
 	)
+	if !foo! equ 0 ( 
+		rem echo.[1F[2K
+		echo.[%c2%G[31mСтратегии не найдены. [0m
+		echo.[%c2%GДобавьте файлы стратегий в папку '[33m%homenc%\strategy\[0m'
+	) 
 	echo.
 )
-if %foo% equ 0 ( 
-	echo.[%c2%G[31mСтратегии не найдены. [0m
-	echo.[%c2%G[33mДобавьте файлы стратегий в папку '[37m%homenc%\strategy\[0m'
-) 
 REM else (
 	REM for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
 	REM echo.
@@ -316,7 +317,7 @@ set /a task=100
 schtasks /Query /TN dpiagent 1>nul 2>&1
 if %errorlevel% EQU 0 set /a task=0
 set /a foo=%c1%-1
-echo.[%foo%G[33m[..][%c2%G[36mА[33mвтоматизация[0m
+echo.[%foo%G[33m[..][%c2%G[93mА[33mвтоматизация[0m
 if %srv_trigger% neq 0 ( 
 	set /a srv_menu_count=%menu_count%+1
 	if %task% EQU 0 (
@@ -364,7 +365,7 @@ set /a about_kill_strsize=%c8%-%c3%
 if defined strategy_run (
 	set /a terminate_count=%menu_count% + 1
 	set /a menu_count=!menu_count!+1
-	echo.[%c1%G[37m!menu_count!.[%c2%G[33mЗав[36mе[33mршить мульти-стратегию '[0m!strategy_run![33m'[0m
+	echo.[%c1%G[37m!menu_count!.[%c2%G[33mЗав[93mе[33mршить мульти-стратегию '[0m!strategy_run![33m'[0m
 	if %term_trigger% neq 0 ( 
 		echo.[%c2%G[33mили отдельные профили ниже:
 		for /l %%i in (1,1,%profile_count%) do (
@@ -457,7 +458,6 @@ if "x%arg_1%"=="xstop" goto:terminate_done
 if %menu_choice% neq 1000 if %menu_choice% EQU %terminate_count% (
 	call:cecho 2 "Готово"
 	echo.
-	echo.>%home%\bin\agent_update_status
 	for /l %%x in (5,-1,1) do (
 		echo.[F
 		<nul set /p =[5G[37mВозврат в меню через [32m%%x[37m с.[0m
@@ -937,7 +937,7 @@ for /L %%a in (0,1,8) do (
 	if "x!bitmask:~%%a,1!"=="xx" set "bm!bmloc!=0"
 )
 <nul set /p =[%curtime%][%c3%G
-if not "x%~2"=="x" <nul set /p = [%bm2%m %~2
+if not "x%~2"=="x" <nul set /p = [%bm2%m%~2
 if not "x%~3"=="x" <nul set /p = [%bm3%m %~3
 if not "x%~4"=="x" <nul set /p = [%bm4%m %~4
 if not "x%~5"=="x" <nul set /p = [%bm5%m %~5

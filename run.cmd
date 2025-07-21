@@ -15,6 +15,7 @@ set /a rand=0
 set "home=%~dp0"
 set /a homestrsize=0
 set "home=%home:~0,-1%"
+set "homenc=%home%"
 for %%i in ("%home%") do set "home=%%~si"
 for /L %%i in (1000,-1,1) do (
 	if not "x!home:~%%i,1!"=="x" (
@@ -49,8 +50,11 @@ if %errorLevel% neq 0 (
 mode con: cols=%mode_con_cols% lines=%mode_con_lines%
 powershell -command "&{$H=get-host;$W=$H.ui.rawui;$B=$W.buffersize;$B.width=%mode_con_cols%;$B.height=9999;$W.buffersize=$B;}" 1>nul 2>&1
 set "arch="
-for /f "skip=2 delims=" %%i in ('2^>nul powershell -Command "Get-CimInstance Win32_operatingsystem ^| select OSArchitecture"') do set "arch=%%i"
-if "x%arch:~0,2%"=="x32" ( set "arch=windows-x86" ) else ( set "arch=windows-x86_64" )
+set "archd="
+for /f "tokens=2 delims=:" %%i in ('2^>nul powershell -Command "Get-CimInstance Win32_operatingsystem | select OSArchitecture | Format-List -Property *"') do set archd=%%i
+set archd=%archd: =%
+if "x%archd:~0,2%"=="x32" ( set "arch=windows-x86" ) else ( set "arch=windows-x86_64" )
+set archd=%archd:~0,2%
 set "foo="
 set "winwsdir="
 for /f "delims=" %%I in ('2^>nul dir /b /s /a:d %home%\bin\%arch%') do set "winwsdir=%%~I"
@@ -80,7 +84,7 @@ set /a c5=55
 set /a c6=80
 set /a c7=100
 set /a c8=%mode_con_cols% - 5
-echo.[32mAuto Refresh screen every 60 sec.[0m
+echo.[5G[32mAuto Refresh screen every 60 sec.[0m
 set /a srv_menu_count=1000
 set /a strategy_menu_count=1000
 set /a parameter_menu_count=1000
@@ -103,12 +107,7 @@ if not exist %home%\run.config (
 for /F "skip=1 eol=# tokens=1,2 delims==" %%a in (%home%\run.config) do set %%~a=%%~b
 set "winws_pid="
 set /a socks5=0
-tasklist /FI "IMAGENAME eq 3proxy.exe" | find /I "3proxy.exe" > nul
-if %errorlevel% equ 0 (
-	echo.[37mSOCKS[31m5 [32mON[0m
-	set /a socks5=1
-) else echo.
-echo.Секундочку...
+echo.[5GСекундочку...
 set /a foo=0
 for /f "tokens=1,2 delims=," %%a in ('2^>nul tasklist /FI "IMAGENAME eq winws.exe" /fo csv /nh') do (
 	if "x%%~a"=="xwinws.exe" (
@@ -124,7 +123,7 @@ set "daemon_status="
 set "debug_status="
 if %foo% GTR 0 ( 
 	for /l %%m in (1,1,%foo%) do (
-		for /f "tokens=* delims=" %%a in ('2^>nul powershell -Command "Get-WmiObject win32_process -Filter 'ProcessId ^= !winws_pid%%m!' ^| select commandline ^| Format-List -Property *"') do (
+		for /f "tokens=* delims=" %%a in ('2^>nul powershell -Command "Get-WmiObject win32_process -Filter 'ProcessId ^= !winws_pid%%m!' | select commandline | Format-List -Property *"') do (
 			set "rtg=%%a"
 			set "rtg=!rtg:~14!"
 			set "commandline=!commandline!!rtg!"
@@ -298,7 +297,7 @@ if %strategy_trigger% equ 0 (
 )
 if %foo% equ 0 ( 
 	echo.[%c2%G[31mСтратегии не найдены. [0m
-	echo.[%c2%G[33mДобавьте файлы стратегий в папку '[37m..\strategy\[0m'
+	echo.[%c2%G[33mДобавьте файлы стратегий в папку '[37m%homenc%\strategy\[0m'
 ) 
 REM else (
 	REM for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
@@ -388,8 +387,8 @@ REM etеу	- Зав'е'ршить стратегию
 REM mьvм	- Пара'м'етры
 
 choice /N /C:%strchoice% /D r /T 60 /M "#:"
-if %errorlevel% EQU 255 call:cerror 316
-if %errorlevel% EQU 0 call:cerror 317
+if %errorlevel% EQU 255 call:cerror 391
+if %errorlevel% EQU 0 call:cerror 392
 REM if %errorlevel% GEQ 26 goto:...
 if %errorlevel% GEQ 22 goto:param_trigger
 if %errorlevel% GEQ 18 goto:terminate_trigger
@@ -399,8 +398,8 @@ if %errorlevel% EQU 11 goto:menu
 set /a first_digit=%errorlevel% - 1
 echo.[2F
 choice /N /C:0123456789z /D z /T 3 /M "#:"
-if %errorlevel% EQU 255 call:cerror 329
-if %errorlevel% EQU 0 call:cerror 330
+if %errorlevel% EQU 255 call:cerror 402
+if %errorlevel% EQU 0 call:cerror 403
 if %errorlevel% EQU 11 (
 	set /a menu_choice=%first_digit%
 ) else (
@@ -485,16 +484,50 @@ if %menu_choice% neq 1000 if %menu_choice% EQU %blockcheck_menu_count% goto:bloc
 if not defined winwsdir (
 	for /f "delims=" %%I in ('2^>nul dir /b /s /a:d %home%\bin\%arch%') do set "winwsdir=%%~I"
 )
-if not exist %winwsdir%\winws.exe (
+if not exist %winwsdir%\cygwin1.dll (
 	echo.
-	echo.[5G[37mDownload developers code, unzip and put in '[33m%home%\bin\[37m' from: [0m
+	echo.[5G[37mДля работы скрипта скачать новую версию драйверов и извлечь в директорию '[33m%homenc%\bin\[37m' [0m
 	echo.
+	echo.[5GСкачать:
 	echo.[5Ghttps://github.com/bol-van/zapret/releases
 	echo.
 	echo.[5GНажмите любую клавишу для возврата в меню.
 	pause >nul
 	goto:menu
 )
+if not exist %winwsdir%\winws.exe (
+	echo.
+	echo.[5G[31mНе найден[0m файл [33m'%homenc%\!winwsdir:~%homestrsize%!\winws.exe'[0m.
+	goto:@txtmess
+) 
+if not exist %winwsdir%\WinDivert.dll (
+	echo.
+	echo.[5G[31mНе найден[0m файл [33m'%homenc%\!winwsdir:~%homestrsize%!\WinDivert.dll'[0m.
+	goto:@txtmess
+)
+if not exist %winwsdir%\WinDivert%archd%.sys (
+	echo.
+	echo.[5G[31mНе найден[0m файл [33m'%homenc%\!winwsdir:~%homestrsize%!\WinDivert%archd%.sys'[0m.
+	goto:@txtmess
+)
+goto:@skiptxtmess
+:@txtmess
+echo.
+echo.[5GВероятно Ваш антивирус счёл его опасным и поместил в карантин. 
+echo.
+echo.[5G[31mПРЕДУПРЕЖДЕНИЕ[0m : ВОЗМОЖНА ЭВРИСТИЧЕСКАЯ РЕАКЦИЯ АНТИВИРУСОВ НА [33mUPX[0m И [33mWINDIVERT[0m. 
+echo.[5G[33mWINDIVERT[0m - хакерский инструмент, потенциально нежелательное ПО, потенциально часть вируса, но сам по себе - не вирус. 
+echo.[5G[33mUPX[0m - не троян, а компрессор исполняемых файлов. 
+echo.
+echo.[5G[32mВирусов и майнеров здесь нет.[0m
+echo.
+echo.[5GДобавьте директорию в '[33m%homenc%[0m' исключения антивируса.
+echo.
+echo.[5GНажмите любую клавишу для возврата в меню.
+pause >nul
+goto:menu
+:@skiptxtmess
+
 set "fakedir=%winwsdir:~0,-24%\files\fake"
 if exist %strategy_apath%\about set /p about_strategy=<%strategy_apath%\about
 if not exist %strategy_apath%\log md %strategy_apath%\log >nul
@@ -540,13 +573,13 @@ if "x%arg_3:~3,1%"=="x0" (
 	) else goto:error_arg3
 )
 :arg_3_default
-call:cecho x3 "Парсинг параметров, см." "..\strategy\%strategy_name%\log\"
+call:cecho x3 "Парсинг параметров, см." "%homenc%\strategy\%strategy_name%\log\"
 set /a pcount=0
 set /a scount=0
-call:@parse_str "%strategy_apath%" "..\strategy\%strategy_name%"
+call:@parse_str "%strategy_apath%" "%homenc%\strategy\%strategy_name%"
 if "x%custom_strategy%"=="xon" (
 	if not exist %strategy_apath%\custom md %strategy_apath%\custom >nul
-	call:@parse_str "%strategy_apath%\custom" "..\strategy\%strategy_name%\custom"
+	call:@parse_str "%strategy_apath%\custom" "%homenc%\strategy\%strategy_name%\custom"
 )
 
 if %pcount% equ 0 goto:@nulpcount
@@ -617,7 +650,7 @@ REM for /l %%x in (5,-1,1) do (
 REM )
 :strategy_list_exit
 echo.
-echo.[5GНажмите любую клавишу для возврата в меню.
+echo.[%c3%GНажмите любую клавишу для возврата в меню.
 pause >nul
 goto:menu
 :error_arg3
@@ -625,7 +658,7 @@ set /a ecode=1
 echo.[5G[31mНеверный аргумент #3: [37m'[33m%arg_3%[37m'[0m]
 goto:strategy_list_end
 :strategy_list_arg_error
-call:cecho 1x3 "Ошибка." "Подробности смотри в" "'..\strategy\%strategy_name%\log\%scount%-%foo%-err.log'"
+call:cecho 1x3 "Ошибка." "Подробности смотри в" "'%homenc%\strategy\%strategy_name%\log\%scount%-%foo%-err.log'"
 set /a ecode=1
 goto:strategy_list_end
 
@@ -716,7 +749,7 @@ if not exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh
 	echo.[5G[31mОшибка. [37mФайл не найден: '[33m%home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh[37m'[0m
 :err_blockcheck
 	echo.
-	echo.[5G[37mfor use blockcheck download developers code, unzip and put in '[33m%home%\bin\[37m': [0m
+	echo.[5G[37mЕсли хотите использовать '[33mblockcheck[0m' то нужно его скачать и извлечь в директорию '[33m%homenc%\bin\[37m': [0m
 	echo.
 	echo.[5Ghttps://github.com/bol-van/zapret-win-bundle/archive/refs/heads/master.zip
 	echo.
@@ -790,7 +823,7 @@ for /F "eol=# skip=1 delims=" %%a in (%home%\lists\blockcheck.txt) do (
 	echo ENABLE_HTTPS_TLS12=1
 	echo ENABLE_HTTPS_TLS13=0
 	echo ENABLE_HTTP3=0
-	echo REPEATS=4
+	echo REPEATS=8
 	echo PARALLEL=0
 	rem echo SCANLEVEL=standard
 	echo SCANLEVEL=quick
@@ -975,14 +1008,14 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 						set /a foo = 1
 					)
 					if !foo! equ 0 (
-						call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'..\lists\hostlist\*'"
+						call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'%homenc%\lists\hostlist\*'"
 						call:cecho xx31 "%str_file_path_for_cecho%\%%~I :" "Параметр" "!fletter!=%%N" "отброшен"	
 					)				
 				) else (
 					if exist %home%\lists\hostlist\%%~N (
 						set "profile_param=!profile_param! --hostlist=%home%\lists\hostlist\%%~N"
 					) else (
-						call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'..\lists\hostlist\%%~N'"
+						call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'%homenc%\lists\hostlist\%%~N'"
 						call:cecho xx31 "%str_file_path_for_cecho%\%%~I :" "Параметр" "!fletter!=%%~N" "отброшен"	
 					)
 				)
@@ -995,7 +1028,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 							set /a foo = 1
 						)
 						if !foo! equ 0 (
-							call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'..\lists\ipset\*'"
+							call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'%homenc%\lists\ipset\*'"
 							call:cecho xx31 "%str_file_path_for_cecho%\%%~I :" "Параметр" "IPSET" "отброшен"	
 						)				
 					) else (
@@ -1012,7 +1045,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 							set /a foo = 1
 						)
 						if !foo! equ 0 (
-							call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'..\lists\ipset\*'"
+							call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'%homenc%\lists\ipset\*'"
 							call:cecho xx31 "%str_file_path_for_cecho%\%%~I :" "Параметр" "!fletter!=%%N" "отброшен"	
 						)				
 					) else (
@@ -1025,7 +1058,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 						if exist %home%\lists\ipset\%%~N (
 							set "profile_param=!profile_param! --ipset=%home%\lists\ipset\%%~N"
 						) else (
-							call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'..\lists\ipset\%%~N'"
+							call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'%homenc%\lists\ipset\%%~N'"
 							call:cecho xx31 "%str_file_path_for_cecho%\%%~I :" "Параметр" "!fletter!=%%~N" "отброшен"	
 						)
 					) else (
@@ -1044,8 +1077,8 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 						) else (
 							set "skip_WinDivert=on"
 							if "x%custom_strategy%"=="xon" (
-								call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'..\strategy\%strategy_name%\custom\!LN:~0!'"
-							) else call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'..\strategy\%strategy_name%\!LN:~0!'"
+								call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'%homenc%\strategy\%strategy_name%\custom\!LN:~0!'"
+							) else call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'%homenc%\strategy\%strategy_name%\!LN:~0!'"
 							call:cecho xx31 "%str_file_path_for_cecho%\%%~I :" "Параметр" "!fletter!=%%N" "отброшен"	
 						)
 					)
@@ -1158,7 +1191,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 					if exist %fakedir%\%%~N ( 
 						set "profile_param=!profile_param! !fletter!=%fakedir%\%%~N"
 					) else (
-						call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'..\!fakedir:~%homestrsize%!\%%~N'"
+						call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'%homenc%\!fakedir:~%homestrsize%!\%%~N'"
 						call:cecho xx31 "%str_file_path_for_cecho%\%%~I :" "Параметр" "!fletter!=%%~N" "отброшен"	
 					)
 				)

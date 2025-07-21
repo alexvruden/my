@@ -593,6 +593,7 @@ set foo=%foo:)=]%
 call:cecho x3x "Windivert" "'%foo%'" "initialized"
 set /a scount=0
 if %pcount% neq 0 call:cecho x3 "Запуск" "'%strategy_name%'"
+set "name_strategy_file_parse_ok_tmp="
 for /l %%i in (1,1,%pcount%) do (
 	set "wsdebug="
 	set "wsdaemon="
@@ -604,17 +605,27 @@ for /l %%i in (1,1,%pcount%) do (
 	set "sabout=x"
 	if exist %strategy_apath%\log\"!name_strategy_file_parse_ok%%i!"-about.log set /p sabout=<%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-about.log"
 	set wscomment=--comment [%strategy_name%][%custom_strategy%][%IPsetStatus%][!sabout!][%daemon%][%debug%]
-		%winwsdir%\winws.exe --dry-run !wsdebug! !wsdaemon! !wscomment! !wsarg! 2>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-dry-run-status-err.log" 1>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-dry-run-status.log"
-		if !errorlevel! neq 0 goto:strategy_list_arg_error
-		%winwsdir%\winws.exe --wf-save="%strategy_apath%\log\!name_strategy_file_parse_ok%%i!-save.raw" !wsarg! 2>>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-wf-save-status-err.log" 1>>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-wf-save-status.log"
+	%winwsdir%\winws.exe --dry-run !wsdebug! !wsdaemon! !wscomment! !wsarg! 2>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-dry-run-status-err.log" 1>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-dry-run-status.log"
+	if !errorlevel! neq 0 (
+		call:cecho 1x3 "Ошибка." "Подробности смотри в" "'%homenc%\strategy\%strategy_name%\log\!name_strategy_file_parse_ok%%i!-dry-run-status-err.log"
+		set /a ecode=1
+		goto:strategy_list_end
+	)
+	%winwsdir%\winws.exe --wf-save="%strategy_apath%\log\!name_strategy_file_parse_ok%%i!-save.raw" !wsarg! 2>>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-wf-save-status-err.log" 1>>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-wf-save-status.log"
 	if "x%daemon%"=="xoff" (
-		echo.start "%strategy_name%:[!sabout!] Custom:[%custom_strategy%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !wsdebug! !wscomment! !wsarg! >>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-run-cmd.bat.example"
-		start "%strategy_name%:[!sabout!] Custom:[%custom_strategy%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !wsdebug! !wscomment! !wsarg!
+		rem echo.start "%strategy_name%:[!sabout!] Custom:[%custom_strategy%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !wsdebug! !wscomment! !wsarg! >>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-run-cmd.bat.example"
+		rem start "%strategy_name%:[!sabout!] Custom:[%custom_strategy%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !wsdebug! !wscomment! !wsarg!
+		echo.start "[!sabout!] Custom:[%custom_strategy%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !wsdebug! !wscomment! !wsarg! >>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-run-cmd.bat.example"
+		start "[!sabout!] Custom:[%custom_strategy%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !wsdebug! !wscomment! !wsarg!
 	)
 	if "x%daemon%"=="xon" (
 		echo.%winwsdir%\winws.exe !wsdebug! !wsdaemon! !wscomment! !wsarg! >>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-run-cmd.bat.example"
 		%winwsdir%\winws.exe !wsdebug! !wsdaemon! !wscomment! !wsarg! 2>>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-run-status-err.log" 1>>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-run-status.log"
-		if !errorlevel! neq 0 goto:strategy_list_arg_error
+		if !errorlevel! neq 0 (
+			call:cecho 1x3 "Ошибка." "Подробности смотри в" "'%homenc%\strategy\%strategy_name%\log\!name_strategy_file_parse_ok%%i!-run-status-err.log"
+			set /a ecode=1
+			goto:strategy_list_end
+		)
 	)
 	
 	call:cecho x6x2 "!name_strategy_for_cecho%%i! :" "[!sabout!]" "-" "ok"
@@ -659,10 +670,6 @@ goto:menu
 :error_arg3
 set /a ecode=1
 echo.[5G[31mНеверный аргумент #3: [37m'[33m%arg_3%[37m'[0m]
-goto:strategy_list_end
-:strategy_list_arg_error
-call:cecho 1x3 "Ошибка." "Подробности смотри в" "'%homenc%\strategy\%strategy_name%\log\%scount%-%foo%-err.log'"
-set /a ecode=1
 goto:strategy_list_end
 
 :expand_strategy

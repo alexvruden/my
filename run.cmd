@@ -110,12 +110,13 @@ if not exist %home%\run.config (
 for /F "skip=1 eol=# tokens=1,2 delims==" %%a in (%home%\run.config) do set %%~a=%%~b
 set "winws_pid="
 set /a socks5=0
-echo.[5GСекундочку...
+<nul set /p =[5GСекундочку
 set /a foo=0
 for /f "tokens=1,2 delims=," %%a in ('2^>nul tasklist /FI "IMAGENAME eq winws.exe" /fo csv /nh') do (
 	if "x%%~a"=="xwinws.exe" (
 		set /a foo=!foo!+1
 		set "winws_pid!foo!=%%~b"
+		<nul set /p =.
 	)
 )
 
@@ -130,6 +131,7 @@ if %foo% GTR 0 (
 			set "rtg=%%a"
 			set "rtg=!rtg:~14!"
 			set "commandline=!commandline!!rtg!"
+			<nul set /p =.
 		)
 		set "commandline%%m=!commandline!"
 		set "commandline="
@@ -145,12 +147,14 @@ if %foo% GTR 0 (
 			set "pid!profile_count!=!winws_pid%%m!"
 			set "daemon_status=%%~e"
 			set "debug_status=%%~f"
+			<nul set /p =.
 		)
 	)
 	
 )
+echo.
 echo.[1F[2K
-set /a about_pid_strsize=%c8%-%c4%
+set /a about_profile_strsize=%c8%-%c4%
 set /a check_restart_str=0
 if %profile_count% GTR 0 ( 
 	for /l %%i in (1,1,%profile_count%) do (
@@ -181,7 +185,8 @@ if %profile_count% GTR 0 (
 			for /l %%x in (%c4%,1,%c8%) do <nul set /p =[%%xG-
 			echo.
 		)
-		echo.[%c1%GPID: !pid%%i![%c4%G[36m!pr%%i![0m
+		set "about_profile=!pr%%i!"
+		echo.[%c1%GPID: !pid%%i![%c4%G[36m!about_profile:~0,%about_profile_strsize%![0m
 	)
 	for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
 	echo.
@@ -364,8 +369,8 @@ if defined strategy_run (
 		echo.[%c2%G[33mили отдельные профили ниже:
 		for /l %%i in (1,1,%profile_count%) do (
 			set /a menu_count=!menu_count!+1
-			rem echo.[%c2%G[37m!menu_count!.[36m[%c3%G !pr%%i:~0,%about_kill_strsize%! [0m
-			echo.[%c2%G[37m!menu_count!.[36m[%c3%G!pr%%i![0m
+			set "about_profile_kill=!pr%%i!"
+			echo.[%c2%G[37m!menu_count!.[36m[%c3%G !about_profile_kill:~0,%about_kill_strsize%! [0m
 		)
 		echo.
 	)
@@ -1179,10 +1184,10 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 					)
 				) else (
 					if "x%IPsetStatus%"=="xoff" call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Исключен" "WinWS фильтр" "'Использовать список IP: нет'"
-					set "psabout=" 
 					set "profile_param= "
 					set "skip_profile=off"
 				)
+				set "psabout=" 
 				set /a parse_mayok=1
 			) else if "x%%~N"=="x" (
 				set "profile_param=!profile_param! %%~M"

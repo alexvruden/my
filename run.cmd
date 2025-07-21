@@ -661,7 +661,6 @@ if "x%IPsetStatus%"=="xon" set /a foo=!foo!+1
 set agent_start_strategy="%strategy_name%"
 set /a agent_start_params=%foo%
 call:sconfig
-echo.>%home%\bin\agent_update_status
 REM for /l %%x in (5,-1,1) do (
 	REM echo.[F
 	REM <nul set /p =[5G[37mВозврат в меню через [32m%%x[37m с.[0m

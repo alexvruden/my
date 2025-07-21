@@ -93,7 +93,7 @@ set /a terminate_count=1000
 set /a blockcheck_menu_count=1000
 set /a menu_choice=1000
 if not exist %winwsdir%\winws.exe (
-	echo.[5G[31mДля работы скрипта скачать новую версию драйверов и извлечь в директорию '[33m%homenc%\bin\[37m' [0m
+	echo.[5G[31mДля работы скрипта скачать новую версию драйверов и извлечь в директорию '[33m%homenc%\bin\[31m' [0m
 )
 if not exist %home%\run.config (
 	(
@@ -1071,7 +1071,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 				if "x!LN:~0,1!"=="x@" (
 					if "x%custom_strategy%"=="xon" (
 						if exist %parse_str_strategy_apath%\!LN:~1! (
-							if "x!sWinDivert!"=="x" ( set "sWinDivert=--wf-raw=@%parse_str_strategy_apath%\!LN:~1!" ) else ( set "sWinDivert=!sWinDivert! --wf-raw=@%parse_str_strategy_apath%\!LN:~1!" )
+							set sWinDivert=--wf-raw=@%parse_str_strategy_apath%\!LN:~1!
 						) else (
 							set "skip_WinDivert=on"
 							if "x%custom_strategy%"=="xon" (
@@ -1085,6 +1085,11 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 						call:cecho xx31 "%str_file_path_for_cecho%\%%~I :" "Параметр" "!fletter!=%%N" "отброшен"	
 						call:cecho x1x "%str_file_path_for_cecho%\%%~I :" "Исключен" "WinDivert фильтр --wf-raw"
 				)
+				if "x!sabout!"=="x" (
+					if "x!psabout!"=="x" ( set "sabout=!sWinDivert:~5!" ) else ( set "sabout=!psabout!" )
+				) else (
+					if "x!psabout!"=="x" ( set "sabout=!sabout! !sWinDivert:~5!" ) else ( set "sabout=!sabout! !psabout!" )
+				)
 				set "LN="
 				set /a parse_mayok=1
 			) else if "x!fletter!"=="x--wf-tcp" (
@@ -1092,7 +1097,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 					set "skip_WinDivert=on"
 					call:cecho xx31 "%str_file_path_for_cecho%\%%~I :" "Параметр" "!fletter!=%%N" "отброшен"	
 					call:cecho x1x "%str_file_path_for_cecho%\%%~I :" "Исключен" "WinDivert фильтр --wf-tcp"
-				) else if "x!sWinDivert!"=="x" ( set "sWinDivert=--wf-tcp=%%~N" ) else ( set "sWinDivert=!sWinDivert! --wf-tcp=%%~N" )
+				) else set sWinDivert=--wf-tcp=%%~N
 				if "x!sabout!"=="x" (
 					if "x!psabout!"=="x" ( set "sabout=!sWinDivert:~5!" ) else ( set "sabout=!psabout!" )
 				) else (
@@ -1104,7 +1109,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 					set "skip_WinDivert=on"
 					call:cecho xx31 "%str_file_path_for_cecho%\%%~I :" "Параметр" "!fletter!=%%N" "отброшен"	
 					call:cecho x1x "%str_file_path_for_cecho%\%%~I :" "Исключен" "WinDivert фильтр --wf-udp"
-				) else if "x!sWinDivert!"=="x" ( set "sWinDivert=--wf-udp=%%~N" ) else ( set "sWinDivert=!sWinDivert! --wf-udp=%%~N" )
+				) else set sWinDivert=--wf-udp=%%~N
 				if "x!sabout!"=="x" (
 					if "x!psabout!"=="x" ( set "sabout=!sWinDivert:~5!" ) else ( set "sabout=!psabout!" )
 				) else (

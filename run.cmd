@@ -917,26 +917,21 @@ set "curtime=%TIME:~0,2%.%TIME:~3,2%.%TIME:~6,2%"
 set "curtime=%curtime: =0%"
 set bitmask=%~1
 for /L %%a in (0,1,8) do (
-	if not "x!bitmask:~%%a,1!"=="x" set "bm%%a=3!bitmask:~%%a,1!"
-	if "x!bitmask:~%%a,1!"=="xx" set "bm%%a=0"
+	set /a bmloc = %%a + 2
+	if not "x!bitmask:~%%a,1!"=="x" set "bm!bmloc!=3!bitmask:~%%a,1!"
+	if "x!bitmask:~%%a,1!"=="xx" set "bm!bmloc!=0"
 )
-if not "x%~9"=="x" (
-	echo.[%curtime%][%c3%G[%bm0%m%~2 [%bm1%m%~3 [%bm2%m%~4 [%bm3%m%~5 [%bm4%m%~6 [%bm5%m%~7 [%bm6%m%~8 [%bm7%m%~9[0m
-) else if not "x%~8"=="x" (
-	echo.[%curtime%][%c3%G[%bm0%m%~2 [%bm1%m%~3 [%bm2%m%~4 [%bm3%m%~5 [%bm4%m%~6 [%bm5%m%~7 [%bm6%m%~8[0m
-) else if not "x%~7"=="x" (
-	echo.[%curtime%][%c3%G[%bm0%m%~2 [%bm1%m%~3 [%bm2%m%~4 [%bm3%m%~5 [%bm4%m%~6 [%bm5%m%~7[0m
-) else if not "x%~6"=="x" (
-	echo.[%curtime%][%c3%G[%bm0%m%~2 [%bm1%m%~3 [%bm2%m%~4 [%bm3%m%~5 [%bm4%m%~6[0m
-) else if not "x%~5"=="x" (
-	echo.[%curtime%][%c3%G[%bm0%m%~2 [%bm1%m%~3 [%bm2%m%~4 [%bm3%m%~5[0m
-) else if not "x%~4"=="x" (
-	echo.[%curtime%][%c3%G[%bm0%m%~2 [%bm1%m%~3 [%bm2%m%~4[0m
-) else if not "x%~3"=="x" (
-	echo.[%curtime%][%c3%G[%bm0%m%~2 [%bm1%m%~3[0m
-) else if not "x%~2"=="x" (
-	echo.[%curtime%][%c3%G[%bm0%m%~2[0m
-) 
+<nul set /p =[%curtime%][%c3%G
+if not "x%~2"=="x" <nul set /p = [%bm2%m %~2
+if not "x%~3"=="x" <nul set /p = [%bm3%m %~3
+if not "x%~4"=="x" <nul set /p = [%bm4%m %~4
+if not "x%~5"=="x" <nul set /p = [%bm5%m %~5
+if not "x%~6"=="x" <nul set /p = [%bm6%m %~6
+if not "x%~7"=="x" <nul set /p = [%bm7%m %~7
+if not "x%~8"=="x" <nul set /p = [%bm8%m %~8
+if not "x%~9"=="x" <nul set /p = [%bm9%m %~9
+echo.[0m
+
 exit /b
 
 :sconfig
@@ -1033,7 +1028,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 						)				
 					) else (
 						set "skip_profile=on"
-						call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Исключен" "WinWS фильтр с параметром" "'IPset=off'"
+						call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Исключен" "WinWS фильтр" "'Использовать список IP: нет'"
 					)
 				set /a parse_mayok=1
 			) else if "x!fletter!"=="x--ipset" (
@@ -1051,7 +1046,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 					) else (
 						set "skip_profile=on"
 						call:cecho xx31 "%str_file_path_for_cecho%\%%~I :" "Параметр" "!fletter!=%%N" "отброшен"	
-						call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Исключен" "WinWS фильтр --ipset с параметром" "'IPset=off'"
+						call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Исключен" "WinWS фильтр --ipset" "'Использовать список IP: нет'"
 					)
 				) else (
 					if "x%IPsetStatus%"=="xon" (
@@ -1064,7 +1059,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 					) else (
 						set "skip_profile=on"
 						call:cecho xx31 "%str_file_path_for_cecho%\%%~I :" "Параметр" "!fletter!=%%N" "отброшен"	
-						call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" x"Исключен" "WinWS фильтр --ipset с параметром" "'IPset=off'"
+						call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" x"Исключен" "WinWS фильтр --ipset" "'Использовать список IP: нет'"
 					)
 				)
 				set /a parse_mayok=1
@@ -1168,7 +1163,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 						if not "x!psabout!"=="x" set "sabout=!sabout! !psabout!" 
 					)
 				) else (
-					if "x%IPsetStatus%"=="xoff" call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Исключен" "WinWS фильтр с параметром" "'IPset=off'"
+					if "x%IPsetStatus%"=="xoff" call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Исключен" "WinWS фильтр" "'Использовать список IP: нет'"
 					set "psabout=" 
 					set "profile_param= "
 					set "skip_profile=off"

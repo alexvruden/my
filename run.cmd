@@ -92,6 +92,9 @@ set /a agent_work=1000
 set /a terminate_count=1000
 set /a blockcheck_menu_count=1000
 set /a menu_choice=1000
+if not exist %winwsdir%\winws.exe (
+	echo.[5G[31mДля работы скрипта скачать новую версию драйверов и извлечь в директорию '[33m%homenc%\bin\[37m' [0m
+)
 if not exist %home%\run.config (
 	(
 	echo.# config

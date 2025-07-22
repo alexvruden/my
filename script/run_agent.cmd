@@ -53,18 +53,19 @@ ping /n 1 %host_i% >nul
 set /a ping_status_i=%errorlevel%
 set /a ping_change=%ping_change%+1
 if %ping_status_i% equ 0 (
-	call:@message std "ping %host_i% - ok"
+	if %show_message_stdout% equ 1 echo.ping %host_i% - ok
 	if %ping_change% geq %stop_after_num_err_ping% (
 		set /a ping_change=0
 		ping /n 4 %host_e% >nul
 		set /a ping_status_e=!errorlevel!
 		if !ping_status_e! equ 0 (
-			call:@message std "ping %host_e% - ok"
+			if %show_message_stdout% equ 1 echo.ping %host_e% - ok
 		) else (
-			call:@message std "ping %host_e% - loss [проблема с роутером?]"
+			if %show_message_stdout% equ 1 echo.ping %host_e% - loss [проблема с роутером?]
 		)
 	)
-) else call:@message std "ping %host_i% - loss"
+) else if %show_message_stdout% equ 1 echo.ping %host_i% - loss
+	
 
 set /a foo=%ping_status_i%+%ping_status_e%
 if %foo% neq 0 (
@@ -92,7 +93,6 @@ if %foo% neq 0 (
 ) else (
 	set /a ping_err=0
 	set /a ping_ok=!ping_ok!+1
-	REM if "x%agent_mode%"=="xstart" set /a start_trigger=1
 	if !stop_trigger! equ 1 (
 		if !ping_ok! equ 1 (
 			call:@message log "остановлен пользователем, есть интернет"
@@ -110,7 +110,7 @@ if %foo% neq 0 (
 	)
 	if !start_trigger! equ 1 (
 		if !ping_ok! equ 1 (
-			call:@message log "работает стратегия '%agent_start_strategy%', есть интернет"
+			call:@message log "работает, есть интернет"
 		)
 	)
 )
@@ -130,13 +130,13 @@ if %start_trigger% equ 0 (
 	timeout /T 10 /NOBREAK >nul
 	tasklist /FI "IMAGENAME eq winws.exe" | find /I "winws.exe" > nul
 	if !errorlevel! neq 0 (
-		call:@message log "ошибка запуска или работает пользователь"
+		call:@message log "ошибка запуска 'winws.exe'"
 		set /a ping_ok=0
 		set /a ping_err=0
 		set /a start_ok=0
 		set /a start_err=1
 	) else (
-		call:@message log "работает стратегия '%agent_start_strategy%', проверка интернета..."
+		call:@message log "работает, проверка интернета"
 		set /a start_ok=1
 		set /a start_err=0
 		set /a ping_ok=0

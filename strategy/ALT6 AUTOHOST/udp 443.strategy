@@ -3,7 +3,7 @@
 #udp: 443
 --wf-udp=443
 
-#rule 1: hostlist
+$1:auto hostlist all
 
 HOSTLIST
 --dpi-desync=fake
@@ -12,7 +12,7 @@ HOSTLIST
 
 --new
 
-#rule 2: ipset
+$2:ipset all
 
 IPSET
 --dpi-desync=fake

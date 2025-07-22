@@ -979,12 +979,10 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 		set "fletter=%%~M"
 		set "fletter=!fletter: =!"
 		set /a parse_desync = 0
-		if "x!fletter:~0,1!"=="x#" (
-			if "x!fletter:~0,2!"=="x##" (
-				set "foo=%%~M"
-				if not "x!foo:~2!"=="x" set "psabout=!foo:~2!"
-			)
-		) else (
+		if "x!fletter:~0,1!"=="x$" (
+			set "foo=%%~M"
+			if not "x!foo:~1!"=="x" set "psabout=!foo:~1!"
+		) else if not "x!fletter:~0,1!"=="x#" (
 			rem есть маркеры <HOSTLIST_NOAUTO> и <HOSTLIST> <IPSET>
 			if "x!fletter!"=="xHOSTLIST" (
 				if not exist %home%\lists\hostlist\hostlist-auto.txt echo.#>%home%\lists\hostlist\hostlist-auto.txt

@@ -7,22 +7,24 @@
 #tcp 80
 --wf-tcp=80
 
-#rule 1: hostlist
-
 HOSTLIST
 --dpi-desync=fake,fakedsplit
 --dpi-desync-autottl=2
 --dpi-desync-fooling=badseq
 
+$1:hostlist
+
+#HOSTLIST
 #--dpi-desync=fake,split2
 #--dpi-desync-autottl=2
 #--dpi-desync-fooling=md5sig
 
---new
+#--new
 
-#rule 2: ipset
+#$2:ipset all
 
-IPSET
---dpi-desync=fake,split2
---dpi-desync-autottl=2
---dpi-desync-fooling=md5sig
+#IPSET
+#--dpi-desync=fake,split2
+#--dpi-desync-autottl=2
+#--dpi-desync-fooling=md5sig
+

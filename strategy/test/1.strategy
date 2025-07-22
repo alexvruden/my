@@ -2,12 +2,12 @@
 # if line begin # - comment this file, skip parsing
 # this user comments here blabla
 
-# if line begin ## - comment use in parsing for 'about' this strategy and rules
+# if line begin $ - comment use rules
 
 ##tcp=80
 --wf-tcp=80
 
-##rule 1: hostlist
+$1: hostlist
 
 HOSTLIST_NOAUTO
 --dpi-desync=fake,split2
@@ -16,7 +16,7 @@ HOSTLIST_NOAUTO
 
 --new
 
-##rule 2: ipset
+$2: ipset
 
 IPSET
 --dpi-desync=fake,split2

@@ -110,7 +110,7 @@ if %foo% neq 0 (
 	)
 	if !start_trigger! equ 1 (
 		if !ping_ok! equ 1 (
-			call:@message log "работает, есть интернет"
+			call:@message log "активирован, есть интернет"
 		)
 	)
 )
@@ -136,7 +136,7 @@ if %start_trigger% equ 0 (
 		set /a start_ok=0
 		set /a start_err=1
 	) else (
-		call:@message log "работает, проверка интернета"
+		call:@message log "активирован, проверка интернета"
 		set /a start_ok=1
 		set /a start_err=0
 		set /a ping_ok=0

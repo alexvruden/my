@@ -1,0 +1,16 @@
+github version v71.2 (c60f9c9027a6db533c84f90ebbad40c058b424e7)
+
+we have 2 user defined desync profile(s) and default low priority profile 0
+Loading hostlist D:\DB85~1\lists\hostlist\list-general.txt.gz
+zlib compression detected. uncompressed size : 2403310
+Loaded 156859 hosts from D:\DB85~1\lists\hostlist\list-general.txt.gz
+Loading hostlist D:\DB85~1\lists\hostlist\zapret-hosts-user.txt
+loading plain text list
+Loaded 1428 hosts from D:\DB85~1\lists\hostlist\zapret-hosts-user.txt
+Loading hostlist D:\DB85~1\lists\hostlist\zapret-hosts-google.txt
+loading plain text list
+Loaded 0 hosts from D:\DB85~1\lists\hostlist\zapret-hosts-google.txt
+Loading hostlist D:\DB85~1\lists\hostlist\hostlist-auto.txt
+loading plain text list
+Loaded 16 hosts from D:\DB85~1\lists\hostlist\hostlist-auto.txt
+command line parameters verified

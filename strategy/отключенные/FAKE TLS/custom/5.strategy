@@ -1,9 +1,0 @@
-# FAKE TLS
-
---wf-tcp=1024-65535
-
-IPSET
---dpi-desync=fake
---dpi-desync-ttl=4
---dpi-desync-fake-tls-mod=rnd,rndsni,padencap
-

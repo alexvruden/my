@@ -1,0 +1,28 @@
+#udp: user, profile #1: ipset
+
+
+--wf-udp=1024-65535
+
+$1: hostlist
+HOSTLIST_NOAUTO
+--dpi-desync=fake
+--dpi-desync-repeats=11
+--dpi-desync-fake-quic=quic_initial_www_google_com.bin
+
+--new
+
+$2: ipset
+
+IPSET
+--dpi-desync=fake
+--dpi-desync-repeats=11
+
+--new
+
+$3: hostlist-auto
+--dpi-desync=fake
+--dpi-desync-repeats=11
+--hostlist=hostlist-auto.txt
+
+
+# profile#0

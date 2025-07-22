@@ -1,0 +1,22 @@
+#zapret: tcp 443 
+
+
+--wf-tcp=443
+
+$1: hostlist
+HOSTLIST_NOAUTO
+--dpi-desync=fake,multidisorder
+--dpi-desync-split-pos=1,midsld
+--dpi-desync-repeats=11
+--dpi-desync-fooling=badseq
+--dpi-desync-fake-tls-mod=rnd,dupsid,sni=www.google.com
+
+--new
+
+$2: hostlist-auto
+--dpi-desync=fake,multidisorder
+--dpi-desync-split-pos=midsld
+--dpi-desync-repeats=6
+--dpi-desync-fooling=badseq
+--hostlist-auto=hostlist-auto.txt
+

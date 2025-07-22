@@ -113,7 +113,7 @@ set /a socks5=0
 set /a foo=0
 for /f "tokens=1,2 delims=," %%a in ('2^>nul tasklist /FI "IMAGENAME eq winws.exe" /fo csv /nh') do (
 	if "x%%~a"=="xwinws.exe" (
-		set /a foo=!foo!+1
+		set /a foo+=1
 		set "winws_pid!foo!=%%~b"
 		<nul set /p =.
 	)
@@ -138,7 +138,7 @@ if %foo% GTR 0 (
 	
 	for /l %%m in (1,1,%foo%) do (
 		for /f "tokens=2-7 delims=[]" %%a in ("!commandline%%m!") do (
-			set /a profile_count=!profile_count!+1
+			set /a profile_count+=1
 			set "n!profile_count!=%%~a"
 			set "custom_str=%%~b"
 			set "ip!profile_count!=%%~c"
@@ -160,10 +160,10 @@ if %profile_count% GTR 0 (
 		if %%i EQU 1 (
 			for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
 			echo.
-			if not "x%daemon_status%"=="x%daemon%" set /a check_restart_str=!check_restart_str!+1
-			if not "x%debug_status%"=="x%debug%" set /a check_restart_str=!check_restart_str!+1
-			if not "x%custom_str%"=="x%custom_strategy%" set /a check_restart_str=!check_restart_str!+1
-			if not "x%ip1%"=="x%IPsetStatus%" set /a check_restart_str=!check_restart_str!+1
+			if not "x%daemon_status%"=="x%daemon%" set /a check_restart_str+=1
+			if not "x%debug_status%"=="x%debug%" set /a check_restart_str+=1
+			if not "x%custom_str%"=="x%custom_strategy%" set /a check_restart_str+=1
+			if not "x%ip1%"=="x%IPsetStatus%" set /a check_restart_str+=1
 			if !check_restart_str! neq 0 (
 				echo.
 				echo.[%c1%G[31mПараметры изменены. [%c4%GДля применения новых параметров перезапустите стратегию[0m
@@ -223,7 +223,7 @@ if %param_trigger% neq 0 (
 		set /a foo=1
 		set "offon=нет" 
 	)
-	set /a menu_count=!menu_count!+1
+	set /a menu_count+=1
 	set /a parameter_menu_count=!menu_count!
 	echo.[%c1%G[37m!menu_count!.[%c2%GЗапуск в скрытом окне[%c5%G[[3!foo!m!offon![0m]
 	set "atten="
@@ -239,9 +239,9 @@ if %param_trigger% neq 0 (
 		REM set /a foo=7
 		REM set "atten=very slow"
 	REM )
-	set /a menu_count=!menu_count!+1
+	set /a menu_count+=1
 	echo.[%c1%G[37m!menu_count!.[%c2%GПоказывать ход работы в окне[%c5%G[[3!foo!m!offon![0m] [31m!atten![0m
-	set /a menu_count=!menu_count!+1
+	set /a menu_count+=1
 	if "x%custom_strategy%"=="xon" (
 		set /a foo=2
 		set "offon=да " 
@@ -258,7 +258,7 @@ if %param_trigger% neq 0 (
 		set /a foo=1
 		set "offon=нет" 
 	)
-	set /a menu_count=!menu_count!+1
+	set /a menu_count+=1
 	echo.[%c1%G[37m!menu_count!.[%c2%GИспользовать список IP[%c5%G[[3!foo!m!offon![0m]
 	echo.
 )
@@ -286,7 +286,7 @@ if %strategy_trigger% equ 0 (
 			if !fexist! neq 0 (
 				if not exist !sfoo!\about echo.нет описания>!sfoo!\about
 				set /p about_strategy=<!sfoo!\about
-				set /a menu_count=!menu_count!+1
+				set /a menu_count+=1
 				if !strategy_menu_count! equ 1000 set /a strategy_menu_count=!menu_count!
 				if "x!strategy_run!"=="x%%~I" (
 					set /a c0=%c1% - 2
@@ -336,20 +336,20 @@ if %srv_trigger% neq 0 (
 		)
 		if !agent_work! equ 1 (
 			if not "x!agent_mode!"=="xstart" (
-				set /a menu_count=!menu_count!+1
+				set /a menu_count+=1
 				echo.[%c2%G[37m!menu_count!.[%c3%GОтправить агенту сигнал '[32mстарт[37m'[0m
 			)
 			if not "x!agent_mode!"=="xstop" (
-				set /a menu_count=!menu_count!+1
+				set /a menu_count+=1
 				echo.[%c2%G[37m!menu_count!.[%c3%GОтправить агенту сигнал '[31mстоп[37m'[0m
 			)
 		)
-		set /a menu_count=!menu_count!+1
+		set /a menu_count+=1
 		echo.[%c2%G[37m!menu_count!.[%c3%G[31mУдалить автоматизацию[0m
 	) else (
 		echo.[%c2%G[36m[[0m задача в планировщике заданий: [31mотсутствует[%c8%G[36m][0m
 		if defined strategy_run (
-			set /a menu_count=!menu_count!+1
+			set /a menu_count+=1
 			echo.[%c2%G[37m!menu_count!.[%c3%G[32mУстановить автоматизацию[0m
 		) else (
 			echo.[%c2%G[33mДля создания задачи в планировщике заданий запустите стратегию[0m
@@ -362,13 +362,13 @@ REM echo.
 rem ------------------------------------------------------------------------------------
 set /a about_kill_strsize=%c8%-%c3%
 if defined strategy_run (
-	set /a terminate_count=%menu_count% + 1
-	set /a menu_count=!menu_count!+1
+	set /a menu_count+=1
+	set /a terminate_count=!menu_count!
 	echo.[%c1%G[37m!menu_count!.[%c2%G[33mЗав[93mе[33mршить мульти-стратегию '[0m!strategy_run![33m'[0m
 	if %term_trigger% neq 0 ( 
 		echo.[%c2%G[33mили отдельные профили ниже:
 		for /l %%i in (1,1,%profile_count%) do (
-			set /a menu_count=!menu_count!+1
+			set /a menu_count+=1
 			set "about_profile_kill=!pr%%i!"
 			echo.[%c2%G[37m!menu_count!.[36m[%c3%G !about_profile_kill:~0,%about_kill_strsize%! [0m
 		)
@@ -381,7 +381,7 @@ rem ----------------------------------------------------------------------------
 if exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh (
 	for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
 	echo.
-	set /a menu_count=!menu_count!+1
+	set /a menu_count+=1
 	set /a blockcheck_menu_count=!menu_count!
 	echo.[%c1%G[37m!menu_count!.[%c2%GBlockcheck[0m
 )
@@ -412,8 +412,7 @@ if %errorlevel% EQU 11 (
 	set /a menu_choice=%first_digit%
 ) else (
 	set /a second_digit=%errorlevel% - 1
-	set /a menu_choice=%first_digit% * 10
-	set /a menu_choice=!menu_choice! + !second_digit!
+	set /a menu_choice=%first_digit% * 10 + !second_digit!
 )
 echo.[1F[2K
 echo.
@@ -653,10 +652,10 @@ if "x%arg_1%"=="xstart" (
 )
 if %pcount% equ 0 goto:strategy_list_exit
 set /a foo=0
-if "x%daemon%"=="xon" set /a foo=!foo!+1000
-if "x%debug%"=="xon" set /a foo=!foo!+100
-if "x%custom_strategy%"=="xon" set /a foo=!foo!+10
-if "x%IPsetStatus%"=="xon" set /a foo=!foo!+1
+if "x%daemon%"=="xon" set /a foo+=1000
+if "x%debug%"=="xon" set /a foo+=100
+if "x%custom_strategy%"=="xon" set /a foo+=10
+if "x%IPsetStatus%"=="xon" set /a foo+=1
 set agent_start_strategy="%strategy_name%"
 set /a agent_start_params=%foo%
 call:sconfig
@@ -1194,7 +1193,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 				set /a parse_desync = 1
 			) else if "x!fletter!"=="x--new" (
 				if "x!skip_profile!"=="xoff" (
-					set /a scount=!scount! + 1
+					set /a scount+=1
 					if "x!tmp_profile_param!"=="x" ( 
 						set "tmp_profile_param=!profile_param! %zapret_hosts_user_exclude%" 
 					) else ( 
@@ -1241,7 +1240,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 	if !parse_mayok! equ 1 (
 		if "x!skip_WinDivert!"=="xoff" (
 			if "x!skip_profile!"=="xoff" (
-				set /a scount=!scount! + 1
+				set /a scount+=1
 				if "x!tmp_profile_param!"=="x" ( 
 					set "tmp_profile_param=!profile_param! %zapret_hosts_user_exclude%" 
 				) else (
@@ -1257,7 +1256,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 			)
 			
 			if not "x!tmp_profile_param!"=="x " (
-				set /a pcount=!pcount!+1
+				set /a pcount+=1
 				set "name_strategy_file_parse_ok!pcount!=%%~nI"
 				set "name_strategy_for_cecho!pcount!=%str_file_path_for_cecho%\%%~I"
 				set "winws_arg!pcount!=!sWinDivert! !tmp_profile_param!"
@@ -1267,6 +1266,75 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 				echo.!sabout!>>%strategy_apath%\log\"%%~nI-about.log"
 			)
 		)
+	)
+)
+
+exit /b
+:@progress_in_percent
+rem usage:
+
+REM set iteration=3000
+rem call:@progress_in_percent "begin" "%iteration%"
+REM for /l %%i in (1,1,%iteration%) do (
+	REM .
+	REM .
+	REM .
+	rem call:@progress_in_percent
+REM )
+rem call:@progress_in_percent "end" ("-CR")
+
+if "x%~1"=="xend" (
+	if %pinp% equ 0 (
+		<nul set /p =
+	) else if %pinp% equ 100 (
+		<nul set /p =
+	) else (
+		<nul set /p =
+	)
+	if "x%~2" equ "x-CR" (
+		<nul set /p =100%%
+	) else echo.100%%
+) else if "x%~1"=="xbegin" (
+	<nul set /p =0%%
+	set /a show_progress_in_percent_count=0
+	set /a temp_percent_count=0
+	set /a pinp=0
+    set /a temp_percent=%~2
+    set /a temp_percent=!temp_percent!/100
+    set /a pinp_count=1
+    if !temp_percent! equ 0 (
+        set /a temp_percent=%~2
+        set /a temp_percent=!temp_percent!/10
+        set /a pinp_count=10
+        if !temp_percent! equ 0 (
+            set /a temp_percent=%~2
+            set /a pinp_count=100/!temp_percent!
+        )
+    )
+	set /a temp_percent_1=!temp_percent!
+) else (
+	set /a show_progress_in_percent_count+=1
+	set /a temp_percent_count+=1
+	if %pinp% neq 100 (
+		if !temp_percent_count! equ 1 (
+			if %pinp% lss 10 (
+				if %pinp_count% equ 1 (
+				<nul set /p =
+				) else (
+					if %pinp% equ 0 (
+						<nul set /p =
+					) else (
+						<nul set /p =
+					)
+				)
+			) else (
+				<nul set /p =
+			)
+			set /a pinp+=%pinp_count%
+			<nul set /p =!pinp!%%
+			set /a temp_percent+=%temp_percent_1%
+		)
+		if !temp_percent_count! equ %temp_percent_1% set /a "temp_percent_count=0"
 	)
 )
 

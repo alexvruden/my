@@ -35,7 +35,7 @@ set /a stop_no_inet=0
 for /F "skip=1 eol=# tokens=1,2 delims==" %%a in (%home%\run.config) do set %%~a=%%~b
 set agent_mode=%agent_mode: =%
 :@break
-set /a mesme = %mesme% + 1
+set /a mesme+=1
 set /a foo = %loop_period% * 300 / 60
 if %mesme% gtr 300 (
 	set "curtime=!TIME:~0,2!.!TIME:~3,2!.!TIME:~6,2!"
@@ -51,7 +51,7 @@ if "x%agent_mode%"=="xstart" goto:@start
 timeout /T %loop_period% /NOBREAK >nul
 ping /n 1 %host_i% >nul
 set /a ping_status_i=%errorlevel%
-set /a ping_change=%ping_change%+1
+set /a ping_change+=1
 if %ping_status_i% equ 0 (
 	if %show_message_stdout% equ 1 echo.ping %host_i% - ok
 	if %ping_change% geq %stop_after_num_err_ping% (
@@ -70,7 +70,7 @@ if %ping_status_i% equ 0 (
 set /a foo=%ping_status_i%+%ping_status_e%
 if %foo% neq 0 (
 	set /a ping_ok=0
-	set /a ping_err=!ping_err!+1
+	set /a ping_err+=1
 	if "x%agent_mode%"=="xstart" (
 		if !ping_err! equ 1 (
 			set /a foo=%loop_period% * %stop_after_num_err_ping%
@@ -78,7 +78,7 @@ if %foo% neq 0 (
 				call:@message log "нет интернета, стоп через !foo! сек."
 			)
 		)
-		set /a ping_err_count=!ping_err_count!+1
+		set /a ping_err_count+=1
 		if !ping_err_count! equ %stop_after_num_err_ping% (
 			call:@message log "нет интернета, стоп 'winws.exe'"
 			if %stop_no_inet% equ 0 start "x" %home%\run.cmd stop
@@ -92,7 +92,7 @@ if %foo% neq 0 (
 	)
 ) else (
 	set /a ping_err=0
-	set /a ping_ok=!ping_ok!+1
+	set /a ping_ok+=1
 	if !stop_trigger! equ 1 (
 		if !ping_ok! equ 1 (
 			call:@message log "остановлен пользователем, есть интернет"

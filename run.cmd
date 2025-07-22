@@ -67,7 +67,6 @@ if defined winwsdir (
 )
 echo.]0;Bypassing Censorship %foo%
 echo.[39;49m
-
 :menu
 cls
 for /f "skip=4 tokens=2 delims=:" %%a in ('mode') do (
@@ -756,11 +755,11 @@ goto:menu_0
 :blockcheck
 echo.
 if not exist %home%\bin\zapret-win-bundle-master\cygwin\bin\bash.exe (
-	echo.[5G[31mОшибка. [37mФайл не найден: '[33m%home%\bin\zapret-win-bundle-master\cygwin\bin\bash[37m'[0m
+	echo.[5G[31mОшибка. [37mФайл не найден: '[33m%homenc%\bin\zapret-win-bundle-master\cygwin\bin\bash[37m'[0m
 	goto:err_blockcheck
 )
 if not exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh (
-	echo.[5G[31mОшибка. [37mФайл не найден: '[33m%home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh[37m'[0m
+	echo.[5G[31mОшибка. [37mФайл не найден: '[33m%homenc%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh[37m'[0m
 :err_blockcheck
 	echo.
 	echo.[5G[37mЕсли хотите использовать '[33mblockcheck[0m' то нужно его скачать и извлечь в директорию '[33m%homenc%\bin\[37m': [0m
@@ -771,63 +770,42 @@ if not exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh
 	pause >nul
 	goto:menu
 )
-
-if not exist %home%\lists\blockcheck.txt (
-	echo.[5G[37mДобавьте в '[33m%home%\lists\blockcheck.txt[37m' домены для сканирования.[0m
-	(
-		echo.# one domain per line
-		echo.#
-		echo.#amnezia.org
-		echo.#discord.com
-		echo.#...
-		echo.#
-		echo.discord.com
-	)>%home%\lists\blockcheck.txt
-	echo.[5GНажмите любую клавишу для возврата в меню.
-	pause >nul
-	goto:menu
-)
 if defined strategy_run goto:terminate_all
-
-rem - https://github.com/bol-van/zapret?tab=readme-ov-file#%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%B0-%D0%BF%D1%80%D0%BE%D0%B2%D0%B0%D0%B9%D0%B4%D0%B5%D1%80%D0%B0
-REM CURL - замена программы curl
-REM CURL_MAX_TIME - время таймаута curl в секундах
-REM CURL_MAX_TIME_QUIC - время таймаута curl для quic. если не задано, используется значение CURL_MAX_TIME
-REM CURL_MAX_TIME_DOH - время таймаута curl для DoH серверов
-REM CURL_CMD=1 - показывать команды curl
-REM CURL_OPT - дополнительные параметры curl. `-k` - игнор сертификатов. `-v` - подробный вывод протокола
-REM DOMAINS - список тестируемых доменов через пробел
-REM IPVS=4|6|46 - тестируемые версии ip протокола
-REM ENABLE_HTTP=0|1 - включить тест plain http
-REM ENABLE_HTTPS_TLS12=0|1 - включить тест https TLS 1.2
-REM ENABLE_HTTPS_TLS13=0|1 - включить тест https TLS 1.3
-REM ENABLE_HTTP3=0|1 - включить тест QUIC
-REM REPEATS - количество попыток тестирования
-REM PARALLEL=0|1 - включить параллельные попытки. может обидеть сайт из-за долбежки и привести к неверному результату
-REM SCANLEVEL=quick|standard|force - уровень сканирования
-REM BATCH=1 - пакетный режим без вопросов и ожидания ввода в консоли
-REM HTTP_PORT, HTTPS_PORT, QUIC_PORT - номера портов для соответствующих протоколов
-REM SKIP_DNSCHECK=1 - отказ от проверки DNS
-REM SKIP_IPBLOCK=1 - отказ от тестов блокировки по порту или IP
-REM SKIP_TPWS=1 - отказ от тестов tpws
-REM SKIP_PKTWS=1 - отказ от тестов nfqws/dvtws/winws
-REM PKTWS_EXTRA, TPWS_EXTRA - дополнительные параметры nfqws/dvtws/winws и tpws, указываемые после основной стратегии
-REM PKTWS_EXTRA_1 .. PKTWS_EXTRA_9, TPWS_EXTRA_1 .. TPWS_EXTRA_9 - отдельно дополнительные параметры, содержащие пробелы
-REM PKTWS_EXTRA_PRE - дополнительные параметры для nfqws/dvtws/winws, указываемые перед основной стратегией
-REM PKTWS_EXTRA_PRE_1 .. PKTWS_EXTRA_PRE_9 - отдельно дополнительные параметры, содержащие пробелы
-REM SECURE_DNS=0|1 - принудительно выключить или включить DoH
-REM DOH_SERVERS - список URL DoH через пробел для автоматического выбора работающего сервера
-REM DOH_SERVER - конкретный DoH URL, отказ от поиска
-REM UNBLOCKED_DOM - незаблокированный домен, который используется для тестов IP block
 chcp 65001 >nul
-set "foo="
-for /F "eol=# skip=1 delims=" %%a in (%home%\lists\blockcheck.txt) do (
-	set "ta=%%~a"
-	set "ta=!ta: =!"
-	if "x!foo!"=="x" ( set "foo=!ta!" ) else ( set "foo=!foo! !ta!" )
-)
-
-(
+rem https://github.com/bol-van/zapret?tab=readme-ov-file#%D0%BF%D1%80%D0%BE%D0%B2%D0%B5%D1%80%D0%BA%D0%B0-%D0%BF%D1%80%D0%BE%D0%B2%D0%B0%D0%B9%D0%B4%D0%B5%D1%80%D0%B0
+if not exist %home%\blockcheck.config.txt (
+	(
+	echo.# CURL - Р·Р°РјРµРЅР° РїСЂРѕРіСЂР°РјРјС‹ curl 
+	echo.# CURL_MAX_TIME - РІСЂРµРјСЏ С‚Р°Р№РјР°СѓС‚Р° curl РІ СЃРµРєСѓРЅРґР°С…
+	echo.# CURL_MAX_TIME_QUIC - РІСЂРµРјСЏ С‚Р°Р№РјР°СѓС‚Р° curl РґР»СЏ quic. РµСЃР»Рё РЅРµ Р·Р°РґР°РЅРѕ, РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ Р·РЅР°С‡РµРЅРёРµ CURL_MAX_TIME
+	echo.# CURL_MAX_TIME_DOH - РІСЂРµРјСЏ С‚Р°Р№РјР°СѓС‚Р° curl РґР»СЏ DoH СЃРµСЂРІРµСЂРѕРІ
+	echo.# CURL_CMD=1 - РїРѕРєР°Р·С‹РІР°С‚СЊ РєРѕРјР°РЅРґС‹ curl
+	echo.# CURL_OPT - РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ curl. `-k` - РёРіРЅРѕСЂ СЃРµСЂС‚РёС„РёРєР°С‚РѕРІ. `-v` - РїРѕРґСЂРѕР±РЅС‹Р№ РІС‹РІРѕРґ РїСЂРѕС‚РѕРєРѕР»Р°
+	echo.# DOMAINS - СЃРїРёСЃРѕРє С‚РµСЃС‚РёСЂСѓРµРјС‹С… РґРѕРјРµРЅРѕРІ С‡РµСЂРµР· РїСЂРѕР±РµР»
+	echo.# IPVS=4^|6^|46 - С‚РµСЃС‚РёСЂСѓРµРјС‹Рµ РІРµСЂСЃРёРё ip РїСЂРѕС‚РѕРєРѕР»Р°
+	echo.# ENABLE_HTTP=0^|1 - РІРєР»СЋС‡РёС‚СЊ С‚РµСЃС‚ plain http
+	echo.# ENABLE_HTTPS_TLS12=0^|1 - РІРєР»СЋС‡РёС‚СЊ С‚РµСЃС‚ https TLS 1.2
+	echo.# ENABLE_HTTPS_TLS13=0^|1 - РІРєР»СЋС‡РёС‚СЊ С‚РµСЃС‚ https TLS 1.3
+	echo.# ENABLE_HTTP3=0^|1 - РІРєР»СЋС‡РёС‚СЊ С‚РµСЃС‚ QUIC
+	echo.# REPEATS - РєРѕР»РёС‡РµСЃС‚РІРѕ РїРѕРїС‹С‚РѕРє С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ
+	echo.# PARALLEL=0^|1 - РІРєР»СЋС‡РёС‚СЊ РїР°СЂР°Р»Р»РµР»СЊРЅС‹Рµ РїРѕРїС‹С‚РєРё. РјРѕР¶РµС‚ РѕР±РёРґРµС‚СЊ СЃР°Р№С‚ РёР·-Р·Р° РґРѕР»Р±РµР¶РєРё Рё РїСЂРёРІРµСЃС‚Рё Рє РЅРµРІРµСЂРЅРѕРјСѓ СЂРµР·СѓР»СЊС‚Р°С‚Сѓ
+	echo.# SCANLEVEL=quick^|standard^|force - СѓСЂРѕРІРµРЅСЊ СЃРєР°РЅРёСЂРѕРІР°РЅРёСЏ
+	echo.# BATCH=1 - РїР°РєРµС‚РЅС‹Р№ СЂРµР¶РёРј Р±РµР· РІРѕРїСЂРѕСЃРѕРІ Рё РѕР¶РёРґР°РЅРёСЏ РІРІРѕРґР° РІ РєРѕРЅСЃРѕР»Рё
+	echo.# HTTP_PORT, HTTPS_PORT, QUIC_PORT - РЅРѕРјРµСЂР° РїРѕСЂС‚РѕРІ РґР»СЏ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёС… РїСЂРѕС‚РѕРєРѕР»РѕРІ
+	echo.# SKIP_DNSCHECK=1 - РѕС‚РєР°Р· РѕС‚ РїСЂРѕРІРµСЂРєРё DNS
+	echo.# SKIP_IPBLOCK=1 - РѕС‚РєР°Р· РѕС‚ С‚РµСЃС‚РѕРІ Р±Р»РѕРєРёСЂРѕРІРєРё РїРѕ РїРѕСЂС‚Сѓ РёР»Рё IP
+	echo.# SKIP_TPWS=1 - РѕС‚РєР°Р· РѕС‚ С‚РµСЃС‚РѕРІ tpws
+	echo.# SKIP_PKTWS=1 - РѕС‚РєР°Р· РѕС‚ С‚РµСЃС‚РѕРІ nfqws/dvtws/winws
+	echo.# PKTWS_EXTRA, TPWS_EXTRA - РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ nfqws/dvtws/winws Рё tpws, СѓРєР°Р·С‹РІР°РµРјС‹Рµ РїРѕСЃР»Рµ РѕСЃРЅРѕРІРЅРѕР№ СЃС‚СЂР°С‚РµРіРёРё
+	echo.# PKTWS_EXTRA_1 .. PKTWS_EXTRA_9, TPWS_EXTRA_1 .. TPWS_EXTRA_9 - РѕС‚РґРµР»СЊРЅРѕ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹, СЃРѕРґРµСЂР¶Р°С‰РёРµ РїСЂРѕР±РµР»С‹
+	echo.# PKTWS_EXTRA_PRE - РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ РґР»СЏ nfqws/dvtws/winws, СѓРєР°Р·С‹РІР°РµРјС‹Рµ РїРµСЂРµРґ РѕСЃРЅРѕРІРЅРѕР№ СЃС‚СЂР°С‚РµРіРёРµР№
+	echo.# PKTWS_EXTRA_PRE_1 .. PKTWS_EXTRA_PRE_9 - РѕС‚РґРµР»СЊРЅРѕ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹, СЃРѕРґРµСЂР¶Р°С‰РёРµ РїСЂРѕР±РµР»С‹
+	echo.# SECURE_DNS=0^|1 - РїСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕ РІС‹РєР»СЋС‡РёС‚СЊ РёР»Рё РІРєР»СЋС‡РёС‚СЊ DoH
+	echo.# DOH_SERVERS - СЃРїРёСЃРѕРє URL DoH С‡РµСЂРµР· РїСЂРѕР±РµР» РґР»СЏ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРѕРіРѕ РІС‹Р±РѕСЂР° СЂР°Р±РѕС‚Р°СЋС‰РµРіРѕ СЃРµСЂРІРµСЂР°
+	echo.# DOH_SERVER - РєРѕРЅРєСЂРµС‚РЅС‹Р№ DoH URL, РѕС‚РєР°Р· РѕС‚ РїРѕРёСЃРєР°
+	echo.# UNBLOCKED_DOM - РЅРµР·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅРЅС‹Р№ РґРѕРјРµРЅ, РєРѕС‚РѕСЂС‹Р№ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ С‚РµСЃС‚РѕРІ IP block
+	echo.# 
+	echo.# 
 	echo SKIP_TPWS=0
 	echo SKIP_DNSCHECK=0
 	echo SECURE_DNS=1
@@ -839,29 +817,34 @@ for /F "eol=# skip=1 delims=" %%a in (%home%\lists\blockcheck.txt) do (
 	echo ENABLE_HTTP3=0
 	echo REPEATS=8
 	echo PARALLEL=0
-	rem echo SCANLEVEL=standard
-	echo SCANLEVEL=quick
+	echo SCANLEVEL=standard
+	echo #SCANLEVEL=quick
 	echo BATCH=1
-	rem echo PKTWS_EXTRA='user strategy for test'
-	rem echo PKTWS_EXTRA='--wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig'
-	echo DOMAINS="!foo!"
-)>%home%\bin\zapret-win-bundle-master\blockcheck\zapret\config_win
+	echo #PKTWS_EXTRA='user strategy for test'
+	echo #PKTWS_EXTRA='--wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig'
+	echo DOMAINS="rutracker.net ntc.party"
+	)>%home%\blockcheck.config.txt
+)
 chcp 1251 >nul
-if exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\config del /F /Q %home%\bin\zapret-win-bundle-master\blockcheck\zapret\config
+echo.[5GПауза.
+echo.[5G[37mОтредактируйте/Добавьте в '[33m%homenc%\blockcheck.config.txt[37m' параметры для сканирования.[0m
+echo.
+echo.[5GЕсли отредактировали, то нажмите любую клавишу для продолжения.
+pause >nul
 
+if exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\config del /f /q %home%\bin\zapret-win-bundle-master\blockcheck\zapret\config 1>nul 2>&1
 rem CRLF to LF
 rem ----------------- http://stackoverflow.com/a/6379861/1012053
 (set LF=^
 %=EMPTY=%
 )
-for /F "delims=" %%a in (%home%\bin\zapret-win-bundle-master\blockcheck\zapret\config_win) do (
+for /F "delims=" %%a in (%home%\blockcheck.config.txt) do (
 	<nul set /p =%%a!LF!>>%home%\bin\zapret-win-bundle-master\blockcheck\zapret\config
 )
 rem ----------------- http://stackoverflow.com/a/6379861/1012053
 
 start %home%\bin\zapret-win-bundle-master\cygwin\bin\bash -i "%home%\bin\zapret-win-bundle-master\blockcheck\zapret\blog.sh"
-echo.[5G[37mСканирование доменов из листа '[33m%home%\lists\blockcheck.txt[37m' запущено.[0m
-echo.[5G[37mОтчет работы сохраняется в файл '[33m%home%\zapret-win-bundle-master\blockcheck\blockcheck.log[37m'[0m
+echo.[5G[37mОтчет работы сохраняется в файл '[33m%homenc%\bin\zapret-win-bundle-master\blockcheck\blockcheck.log[37m'[0m
 echo.
 REM for /l %%x in (5,-1,1) do (
 	REM echo.[F
@@ -870,6 +853,8 @@ REM for /l %%x in (5,-1,1) do (
 REM )
 echo.[5GНажмите любую клавишу для возврата в меню.
 pause >nul
+echo.more /e /p /s %home%\bin\zapret-win-bundle-master\blockcheck\blockcheck.log>%home%\blockcheck.log.cmd
+
 goto:menu
 
 :menu_srv

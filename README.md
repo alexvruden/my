@@ -11,6 +11,7 @@
 <br>
 <img src="https://github.com/alexvruden/my/blob/main/01.png" />
 <br> 
-Поиск стратегий<br>
+Поиск стратегий
+<br>
 <img src="https://github.com/alexvruden/my/blob/main/02.png" />
 <br>

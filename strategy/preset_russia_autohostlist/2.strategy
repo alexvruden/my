@@ -3,6 +3,23 @@
 
 --wf-tcp=443
 
+--dpi-desync=fake 
+--dpi-desync-fooling=md5sig
+--dup=1
+--dup-cutoff=n2
+--dup-fooling=md5sig
+
+--new
+
+#--hostlist-domains=rutracker.net
+#--dpi-desync=fake
+#--dpi-desync-fooling=badseq
+#--dpi-desync-fake-tls=0x00000000
+#--dpi-desync-fake-tls=!
+#--dpi-desync-fake-tls-mod=rnd,rndsni,dupsid
+
+#--new
+
 $1: hostlist
 HOSTLIST_NOAUTO
 --dpi-desync=fake,multidisorder

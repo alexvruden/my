@@ -1,1 +1,0 @@
-D:\DB85~1\bin\zapret-v71.2\binaries\windows-x86_64\winws.exe  --daemon --comment [preset_russia_autohostlist][off][on][udp=50000-50099 1: discord,stun][on][off] --wf-udp=50000-50099     --filter-l7=discord,stun --dpi-desync=fake  

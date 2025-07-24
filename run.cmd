@@ -163,8 +163,8 @@ set /a check_restart_str=0
 if %profile_count% GTR 0 ( 
 	for /l %%i in (1,1,%profile_count%) do (
 		if %%i EQU 1 (
-			for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
-			echo.
+			REM for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
+			REM echo.
 			if not "x%daemon_status%"=="x%daemon%" set /a check_restart_str+=1
 			if not "x%debug_status%"=="x%debug%" set /a check_restart_str+=1
 			if not "x%custom_str%"=="x%custom_strategy%" set /a check_restart_str+=1
@@ -175,6 +175,7 @@ if %profile_count% GTR 0 (
 				echo.
 			)
 			echo.[%c1%GРаботает стратегия:[%c4%G[0m!n%%i!
+			echo.
 			if "x!daemon_status!"=="xon" ( set "offon=да" ) else ( set "offon=нет" )
 			echo.[%c4%G[33mЗапуск в скрытом окне[0m: !offon!
 			if "x!debug_status!"=="xon" ( set "offon=да" ) else ( set "offon=нет" )
@@ -183,20 +184,22 @@ if %profile_count% GTR 0 (
 			echo.[%c4%G[33mЗапуск 'custom' стратегий[0m: !offon!
 			if "x!ip%%i!"=="xon" ( set "offon=да" ) else ( set "offon=нет" )
 			echo.[%c4%G[33mИспользовать список IP[0m: !offon!
-			set /a foo=%c4%
-			set /a foo=!foo! - 1
-			for /l %%x in (1,1,!foo!) do <nul set /p =[30m-[0m
-			for /l %%x in (%c4%,1,%c8%) do <nul set /p =[%%xG-
+			REM set /a foo=%c4%
+			REM set /a foo=!foo! - 1
+			REM for /l %%x in (1,1,!foo!) do <nul set /p =[30m-[0m
+			REM for /l %%x in (%c4%,1,%c8%) do <nul set /p =[%%xG-
+			REM echo.
 			echo.
 		)
 		set "about_profile=!pr%%i!"
 		echo.[%c1%GPID: !pid%%i![%c4%G[36m!about_profile:~0,%about_profile_strsize%![0m
 	)
-	for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
-	echo.
+	REM for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
+	REM echo.
 	set "strategy_run=!n1!" 
-) else (
-	for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
+REM ) else (
+	REM for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
+	REM echo.
 	echo.
 )
 rem --------------------------------------
@@ -218,8 +221,18 @@ set /a menu_count=1
 set /a find_strategy_menu_count=!menu_count!
 echo.[%c1%G[37m!menu_count!.[%c2%GПоиск стратегий[0m
 rem ------------------------------------------------------------------------------------
+if exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh (
+	REM for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
+	REM echo.
+	set /a menu_count+=1
+	set /a blockcheck_menu_count=!menu_count!
+	echo.[%c1%G[37m!menu_count!.[%c2%GBlockcheck[0m
+)
+rem ------------------------------------------------------------------------------------
 set /a foo=%c1%-1
-echo.[%foo%G[33m[..][%c2%G[33mПара[93mм[33mетры запуска стратегии[0m
+set "a1="
+if %param_trigger% equ 0 set "a1=[..]"
+echo.[%foo%G[33m%a1%[%c2%G[33mПара[93mм[33mетры запуска стратегии[0m
 if %param_trigger% neq 0 (
 	echo.
 	set /a foo=7
@@ -278,7 +291,7 @@ set /a about_strategy_strsize=%c8%-%c5%
 if %strategy_trigger% equ 0 (
 	echo.[%foo%G[33m[..][%c2%G[93mС[33mтратегии[0m
 ) else ( 
-	echo.[%foo%G[33m[..][%c2%G[93mС[33mтратегии[%c5%GОписание[0m
+	echo.[%c2%G[93mС[33mтратегии[%c5%GОписание[0m
 	echo.
 	set "strategy_count_name="
 	set "strategy_name_spath="
@@ -323,7 +336,9 @@ set /a task=100
 schtasks /Query /TN dpiagent 1>nul 2>&1
 if %errorlevel% EQU 0 set /a task=0
 set /a foo=%c1%-1
-echo.[%foo%G[33m[..][%c2%G[93mА[33mвтоматизация[0m
+set "a1="
+if %srv_trigger% equ 0 set "a1=[..]"
+echo.[%foo%G[33m%a1%[%c2%G[93mА[33mвтоматизация[0m
 if %srv_trigger% neq 0 ( 
 	set /a srv_menu_count=%menu_count%+1
 	if %task% EQU 0 (
@@ -379,20 +394,12 @@ if defined strategy_run (
 			set "about_profile_kill=!pr%%i!"
 			echo.[%c2%G[37m!menu_count!.[36m[%c3%G !about_profile_kill:~0,%about_kill_strsize%! [0m
 		)
-		echo.
+		REM echo.
 	)
 	REM for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
 	REM echo.
 )
 
-rem ------------------------------------------------------------------------------------
-if exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh (
-	for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
-	echo.
-	set /a menu_count+=1
-	set /a blockcheck_menu_count=!menu_count!
-	echo.[%c1%G[37m!menu_count!.[%c2%GBlockcheck[0m
-)
 echo.
 echo.[%c1%G0.[%c2%GВыход
 echo.
@@ -1349,11 +1356,11 @@ for /L %%i in (1,1,50) do (
 :@break_DOMAINS
 if %foo% equ 1 (
 	echo.
-	echo.[1G[[31mx[0m][%pos%GDOMAINS=%DOMAINSFULL%[0m
+	echo.[%pos%G[31mDOMAINS=%DOMAINSFULL%[0m
 	echo.
 	echo.[1G[[33mi[0m][%pos%GТолько один домен проверим
 )
-<nul set /p =[1G[[33mi[0m][%pos%GDOMAINS=%DOMAINS%[0m[E
+<nul set /p =[%pos%G[36mDOMAINS=%DOMAINS%[0m[E
 if not defined CURL_MAX_TIME set CURL_MAX_TIME=2
 REM if not defined IPVS set IPVS=4
 set IPVS=4
@@ -1379,7 +1386,7 @@ if "x%ENABLE_HTTPS_TLS12%"=="x1" (
 if %foo% equ 0 set ENABLE_HTTPS_TLS12=1
 if %foo% equ 2 (
 	echo.[1G[[33mi[0m][%pos%GВнимание. Чтобы сделать поиск 'Tls v1.3', отключите 'ENABLE_HTTPS_TLS12=0'
-	echo.[1G[[33mi[0m][%pos%GБудет сделан поиск 'Tls v1.2'
+	echo.[%pos%GБудет сделан поиск 'Tls v1.2'
 )
 
 echo.[%pos%G[36mCURL_MAX_TIME=%CURL_MAX_TIME%[0m
@@ -1464,8 +1471,7 @@ echo.[1G[[32m+[0m][%pos%GНайден IP '[33m%DOMAINS%[0m': [[33m%ip_dom
 rem powershell -NoP -sta -NonI -Command "Get-Process -Name 'winws.exe' | Stop-Process -Force" 1>nul 2>&1
 
 if  %find_strategy_position_start% gtr %find_strategy% (
-	echo.[1G[[31mx[0m][%pos%G[31mОшибка.[0m Параметр '[33mfind_strategy_position_start=[0m' 
-	echo.[%pos%G в файле '[33m%homenc%\run.config[0m' превышает количество стратегий: [32m%find_strategy%[0m
+	echo.[1G[[31mx[0m][%pos%G[31mОшибка.[0m Параметр '[33mfind_strategy_position_start=[0m'  в файле '[33m%homenc%\run.config[0m' превышает количество стратегий: [32m%find_strategy%[0m
 	echo.[%pos%G Параметр '[33mfind_strategy_position_start=[0m' будет сброшен в '[31m1[0m'
 	echo.
 	set /a find_strategy_position_start=1
@@ -1476,14 +1482,10 @@ if %find_strategy_position_start% neq 1 (
 )
 
 
-echo.[1G[[33mi[0m][%pos%GПри прохождении каждой 100-й позиции мы запомним её
-echo.[%pos%G в файле '[33m%homenc%\run.config[0m'
-echo.[1G[[33mi[0m][%pos%GПоиск можно будет прервать, потом повторный поиск будет начат с позиции,
-echo.[%pos%G указанной в параметре '[33mfind_strategy_position_start=%find_strategy_position_start%[0m'
-echo.[%pos%G в файле '[33m%homenc%\run.config[0m'
-echo.[1G[[33mi[0m][%pos%GЕсли хотите начать поиск с начала, укажите значение '1' параметру '[33mfind_strategy_position_start=[0m'
-echo.[%pos%G в файле '[33m%homenc%\run.config[0m'
-echo.[1G[[33mi[0m][%pos%GНайденные стратегии сохраняются в файле '%homenc%\strategy\found_strategy.log'
+echo.[1G[[33mi[0m][%pos%GПри прохождении каждой 100-й позиции мы запомним её в файле '[33m%homenc%\run.config[0m'
+echo.[1G[[33mi[0m][%pos%GПоиск можно будет прервать, потом повторный поиск будет начат с позиции, указанной в параметре '[33mfind_strategy_position_start=%find_strategy_position_start%[0m' в файле '[33m%homenc%\run.config[0m'
+echo.[1G[[33mi[0m][%pos%GЕсли хотите начать поиск с начала, укажите значение '1' параметру '[33mfind_strategy_position_start=[0m' в файле '[33m%homenc%\run.config[0m'
+echo.[1G[[33mi[0m][%pos%GНайденные стратегии сохраняются в файле '[33m%homenc%\strategy\found_strategy.log[0m'
 if not exist %home%\strategy\found_strategy.log echo.#>%home%\strategy\found_strategy.log
 for /F "skip=1" %%a in (%home%\strategy\found_strategy.log) do set /a find_strategy_found+=1
 echo.

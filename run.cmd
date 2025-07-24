@@ -1514,7 +1514,7 @@ if not exist %home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.%find_strategy_position_s
 for /F "skip=1" %%a in (%home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.%find_strategy_position_start%) do set /a find_strategy_found+=1
 echo.
 echo.[%pos%G[32mПоиск стратегии для [33m'%DOMAINS%'[0m [%ip_dom%][31m:%HTTPS_PORT%[0m
-echo.
+REM echo.
 set "foo=| 0рогресс | 1екущий | 2сего | 3айдено | 4шибки запуска WinWS | 5шибки завершения процесса WinWS | 6оды ответа Curl | 7EPEATS |"
 for /l %%x in (0,1,160) do (
 	if "x!foo:~%%x,1!"=="x" (
@@ -1539,8 +1539,10 @@ for /l %%x in (0,1,160) do (
 	)
 )
 :@br1538
-echo.[%pos%G^| Прогресс ^| Текущий ^| Всего ^| Найдено ^| Ошибки запуска WinWS ^| Ошибки завершения процесса WinWS ^| Коды ответа Curl ^| REPEATS ^|
 set /a a=%pos%+%a%-1
+for /l %%x in (%pos%,1,%a%) do <nul set /p =[%%xG-
+echo.
+echo.[%pos%G^| Прогресс ^| Текущий ^| Всего ^| Найдено ^| Ошибки запуска WinWS ^| Ошибки завершения процесса WinWS ^| Коды ответа Curl ^| REPEATS ^|
 for /l %%x in (%pos%,1,%a%) do <nul set /p =[%%xG-
 echo.[?25l
 set /a line_count=1

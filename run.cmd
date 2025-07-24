@@ -163,8 +163,8 @@ set /a check_restart_str=0
 if %profile_count% GTR 0 ( 
 	for /l %%i in (1,1,%profile_count%) do (
 		if %%i EQU 1 (
-			REM for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
-			REM echo.
+			for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
+			echo.
 			if not "x%daemon_status%"=="x%daemon%" set /a check_restart_str+=1
 			if not "x%debug_status%"=="x%debug%" set /a check_restart_str+=1
 			if not "x%custom_str%"=="x%custom_strategy%" set /a check_restart_str+=1
@@ -184,23 +184,21 @@ if %profile_count% GTR 0 (
 			echo.[%c4%G[33mЗапуск 'custom' стратегий[0m: !offon!
 			if "x!ip%%i!"=="xon" ( set "offon=да" ) else ( set "offon=нет" )
 			echo.[%c4%G[33mИспользовать список IP[0m: !offon!
-			REM set /a foo=%c4%
-			REM set /a foo=!foo! - 1
-			REM for /l %%x in (1,1,!foo!) do <nul set /p =[30m-[0m
-			REM for /l %%x in (%c4%,1,%c8%) do <nul set /p =[%%xG-
-			REM echo.
+			set /a foo=%c4%
+			set /a foo=!foo! - 1
+			for /l %%x in (1,1,!foo!) do <nul set /p =[30m-[0m
+			for /l %%x in (%c4%,1,%c8%) do <nul set /p =[%%xG-
 			echo.
 		)
 		set "about_profile=!pr%%i!"
 		echo.[%c1%GPID: !pid%%i![%c4%G[36m!about_profile:~0,%about_profile_strsize%![0m
 	)
-	REM for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
-	REM echo.
+	for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
+	echo.
 	set "strategy_run=!n1!" 
 REM ) else (
 	REM for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
 	REM echo.
-	echo.
 )
 rem --------------------------------------
 if "x%arg_1%"=="xstart" (

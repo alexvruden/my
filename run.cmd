@@ -48,7 +48,7 @@ if %errorLevel% neq 0 (
 	exit
 )
 mode con: cols=%mode_con_cols% lines=%mode_con_lines%
-powershell -command "&{$H=get-host;$W=$H.ui.rawui;$B=$W.buffersize;$B.width=%mode_con_cols%;$B.height=9999;$W.buffersize=$B;}" 1>nul 2>&1
+powershell -command "&{$H=Get-Host;$W=$H.UI.RawUI;$B=$W.BufferSize;$B.Width=%mode_con_cols%;$B.Height=9999;$W.BufferSize=$B;}" 1>nul 2>&1
 set "arch="
 set "archd="
 for /f "tokens=2 delims=:" %%i in ('2^>nul powershell -Command "Get-CimInstance Win32_operatingsystem | select OSArchitecture | Format-List -Property *"') do set archd=%%i
@@ -1206,7 +1206,7 @@ exit /b
 :progress_in_percent_begin
 set /a pinp_b_pos=%~1
 set /a pinp_b_pos+=2
-<nul set /p =[%pinp_b_pos%G0%%
+set /a %~3+=2
 set /a show_progress_in_percent_count=0
 set /a temp_percent_count=0
 set /a pinp=0
@@ -1232,18 +1232,16 @@ set /a temp_percent_count+=1
 if %pinp% neq 100 (
 	if !temp_percent_count! equ 1 (
 		set /a pinp+=%pinp_count%
+		set /a %~3=!pinp!
 		if !pinp! lss 10 (
 			set /a pinp_c_pos+=2
-			<nul set /p =[!pinp_c_pos!G!pinp!%%
 		) else if !pinp! lss 100 (
 			set /a pinp_c_pos+=1
-			<nul set /p =[!pinp_c_pos!G!pinp!%%
-		) else (
-			<nul set /p =[!pinp_c_pos!G!pinp!%%
 		)
 		set /a temp_percent+=%temp_percent_1%
 	)
 	if !temp_percent_count! equ %temp_percent_1% set /a "temp_percent_count=0"
+	set /a %~2=!pinp_c_pos!
 )
 exit /b
 
@@ -1286,14 +1284,12 @@ set /a pos=5
 set /a find_strategy_found=0
 set /a find_strategy_kill_error=0
 set /a find_strategy_run_error=0
-set curl_ret_code=-
-set curl_cmd_scan=
-set strategy_file_lst=strategy_https.lst
+set "curl_ret_code=-"
+set "curl_cmd_scan="
+set "strategy_file_lst=strategy_https.lst"
 
 if %find_strategy_position_start% lss 1 set find_strategy_position_start=1
-
-cls
-echo.
+echo.[J[2J[3J
 if not defined winwsdir (
 	echo.[1G[[33mi[0m][%pos%G[37mДля работы скрипта скачать новую версию драйверов и извлечь в директорию '[33m%homenc%\bin\[37m' [0m
 	echo.
@@ -1313,17 +1309,17 @@ if not exist %winwsdir%\WinDivert%archd%.sys (
 
 
 
-echo.[1G[[33mi[0m][%pos%GЗавершим все 'winws' процессы
+echo.[1G[[33mi[0m][%pos%GЗавершим все 'winws' процессы[0m
 call:@check_kill
-REM if %errorlevel% equ 0 (
-	REM echo.[%pos%GГотово
-REM )
+if %errorlevel% equ 0 (
+	echo.[1G[[32m+[0m][%pos%GГотово[0m
+)
 
 if exist %home%\winws_error_code del /f /q %home%\winws_error_code
 
 if not exist %home%\blockcheck.config.txt call:blockcheck_create_cfg
-echo.[1G[[33mi[0m][%pos%GЧитаем хотелку '[33m%homenc%\blockcheck.config.txt[0m'
-for /F "skip=1 eol=# tokens=1,2 delims==" %%a in (%home%\blockcheck.config.txt) do set %%~a=%%~b
+<nul set /p =[1G[[33mi[0m][%pos%GЧитаем хотелку '[33m%homenc%\blockcheck.config.txt[0m'[E
+for /F "skip=1 eol=# tokens=1,2 delims==" %%a in (%home%\blockcheck.config.txt) do set "%%a=%%b"
 
 if defined ENABLE_HTTP if "x%ENABLE_HTTP%"=="x1" set strategy_file_lst=strategy_http.lst
 if defined ENABLE_HTTP3 if "x%ENABLE_HTTP3%"=="x1" set strategy_file_lst=strategy_http3.lst
@@ -1334,9 +1330,9 @@ if defined ENABLE_HTTP if "x%ENABLE_HTTP%"=="x1" set /a foo+=1
 if defined ENABLE_HTTPS_TLS12 if "x%ENABLE_HTTPS_TLS12%"=="x1" set /a foo+=1
 if defined ENABLE_HTTP3 if "x%ENABLE_HTTP3%"=="x1" set /a foo+=1
 if %foo% geq 2 (
-	echo.[1G[[31mx[0m][%pos%G[31m Сканируем что-то одно из HTTP, HTTPS, HTTP3[0m
-	echo.[1G[[33mi[0m][%pos%GБудет выбрано сканирование HTTPS
-	set strategy_file_lst=strategy_https.lst
+echo.[1G[[31mx[0m][%pos%GСканируем что-то одно из HTTP, HTTPS, HTTP3[0m
+echo.[1G[[33mi[0m][%pos%GБудет выбрано сканирование HTTPS
+set "strategy_file_lst=strategy_https.lst"
 )
 
 if not defined DOMAINS set "DOMAINS=ntc.party"
@@ -1352,12 +1348,12 @@ for /L %%i in (1,1,50) do (
 )
 :@break_DOMAINS
 if %foo% equ 1 (
-	echo.[%pos%G[31mDOMAINS=%DOMAINSFULL%[0m
+	echo.
+	echo.[1G[[31mx[0m][%pos%GDOMAINS=%DOMAINSFULL%[0m
 	echo.
 	echo.[1G[[33mi[0m][%pos%GТолько один домен проверим
 )
-echo.[%pos%G[36mDOMAINS=%DOMAINS%[0m
-
+<nul set /p =[1G[[33mi[0m][%pos%GDOMAINS=%DOMAINS%[0m[E
 if not defined CURL_MAX_TIME set CURL_MAX_TIME=2
 REM if not defined IPVS set IPVS=4
 set IPVS=4
@@ -1379,6 +1375,7 @@ if "x%ENABLE_HTTPS_TLS12%"=="x1" (
 	set "TLSmax=--tls-max 1.2"
 	set /a foo+=1
 )
+
 if %foo% equ 0 set ENABLE_HTTPS_TLS12=1
 if %foo% equ 2 (
 	echo.[1G[[33mi[0m][%pos%GВнимание. Чтобы сделать поиск 'Tls v1.3', отключите 'ENABLE_HTTPS_TLS12=0'
@@ -1393,8 +1390,9 @@ if "x%strategy_file_lst%"=="xstrategy_http.lst" echo.[%pos%G[36mHTTP_PORT=%HTT
 echo.[%pos%G[36mENABLE_HTTPS_TLS12=%ENABLE_HTTPS_TLS12%[0m
 echo.[%pos%G[36mENABLE_HTTPS_TLS13=%ENABLE_HTTPS_TLS13%[0m
 
+
 if defined CURL (
-	echo.[%pos%G[36mCURL=%CURL%[0m
+	echo.[2K[%pos%G[36mCURL=%CURL%[0m
 	if exist %home%\%CURL% (
 		for /f "delims=" %%a in ('2^>nul %home%\%CURL% -V') do (
 			set foo=%%a
@@ -1416,6 +1414,7 @@ for /f "delims=" %%a in ('2^>nul %CURL% -V') do (
 	goto:@break_curl_2
 )
 :@break_curl_2
+
 echo.[1G[[32m+[0m][%pos%GНайден 'curl': [33m%foo:~0,12%[0m
 
 if "x%strategy_file_lst%"=="xstrategy_https.lst" set curl_cmd_scan=--connect-to %DOMAINS%::[%ip_dom%]:%HTTPS_PORT% -ISs -A Mozilla --max-time %CURL_MAX_TIME% %TLSver% %TLSmax% https://%DOMAINS%
@@ -1475,15 +1474,18 @@ if  %find_strategy_position_start% gtr %find_strategy% (
 if %find_strategy_position_start% neq 1 (
 	echo.[1G[[33mi[0m][%pos%GПредыдущий поиск был прерван на позиции '[33m%find_strategy_position_start%[0m', продолжим поиск с неё.
 )
+
+
 echo.[1G[[33mi[0m][%pos%GПри прохождении каждой 100-й позиции мы запомним её
 echo.[%pos%G в файле '[33m%homenc%\run.config[0m'
-echo.
 echo.[1G[[33mi[0m][%pos%GПоиск можно будет прервать, потом повторный поиск будет начат с позиции,
 echo.[%pos%G указанной в параметре '[33mfind_strategy_position_start=%find_strategy_position_start%[0m'
 echo.[%pos%G в файле '[33m%homenc%\run.config[0m'
-echo.
 echo.[1G[[33mi[0m][%pos%GЕсли хотите начать поиск с начала, укажите значение '1' параметру '[33mfind_strategy_position_start=[0m'
 echo.[%pos%G в файле '[33m%homenc%\run.config[0m'
+echo.[1G[[33mi[0m][%pos%GНайденные стратегии сохраняются в файле '%homenc%\strategy\found_strategy.log'
+if not exist %home%\strategy\found_strategy.log echo.#>%home%\strategy\found_strategy.log
+for /F "skip=1" %%a in (%home%\strategy\found_strategy.log) do set /a find_strategy_found+=1
 echo.
 echo.
 echo.[%pos%G[32mПоиск стратегии для [33m'%DOMAINS%'[0m [%ip_dom%][31m:%HTTPS_PORT%[0m
@@ -1491,10 +1493,9 @@ echo.
 echo.[%pos%GПрогресс ^| Текущий ^|  Всего  ^| Найдено ^|
 set /a foo=%pos%+40
 for /l %%x in (%pos%,1,%foo%) do <nul set /p =[%%xG-
-echo.
+<nul set /p =[E
+
 echo.[?25l
-set /a pos_percent=%pos%+4
-call:progress_in_percent_begin %pos_percent% %find_strategy%
 set /a line_count=1
 set /a count_strategy=0
 set /a count_strategy_start=%find_strategy_position_start%
@@ -1502,8 +1503,11 @@ set /a pos1=%pos%+11
 set /a pos2=%pos%+22
 set /a pos3=%pos%+31
 set /a pos4=%pos%+40
-<nul set /p =[%pos1%G0[%pos2%G%find_strategy%
+set /a pos_percent=%pos%+4
+call:progress_in_percent_begin %pos_percent% %find_strategy% pinp_b_pos_out
+<nul set /p =[2K[%pinp_b_pos_out%G0%%[%pos1%G0[%pos2%G%find_strategy%
 set /a count_strategy_100=0
+
 for /F "skip=1 tokens=*" %%a in (%home%\strategy\%strategy_file_lst%) do (
 	set /a line_count+=1
 	set comment_char=%%a
@@ -1559,9 +1563,9 @@ for /F "skip=1 tokens=*" %%a in (%home%\strategy\%strategy_file_lst%) do (
 				if !curl_ret_code! equ 0 (
 					set /a find_strategy_found+=1
 					if defined R_str (
-						echo.Line[!line_count!]: !L_str!^^! !R_str! >>%home%\found_strategy.log
+						echo.!L_str!^^! !R_str! >>%home%\strategy\found_strategy.log
 					) else (
-						echo.Line[!line_count!]: !L_str! >>%home%\found_strategy.log
+						echo.!L_str! >>%home%\strategy\found_strategy.log
 					)
 					rem set "found_strategy!find_strategy_found!=%%~a"
 				)
@@ -1574,16 +1578,17 @@ for /F "skip=1 tokens=*" %%a in (%home%\strategy\%strategy_file_lst%) do (
 				set /a count_strategy_100=0
 			)
 		)
-		echo.[1F[2K
-		call:progress_in_percent_count %pos_percent%
+		rem echo.[1F[2K
+		rem <nul set /p =[2K
+		call:progress_in_percent_count %pos_percent% ap1 ap2
 		if %find_strategy_debug% equ 1 (
 			set "foo=[Error kill: !find_strategy_kill_error! ] [ Error run: !find_strategy_run_error! ] [ curl errorcode: !curl_ret_code! ]"
 		) else set "foo="
-		<nul set /p =[%pos1%G!count_strategy![%pos2%G%find_strategy%[%pos3%G!find_strategy_found![%pos4%G!foo!
+		<nul set /p =[2K[!ap1!G!ap2!%%[%pos1%G!count_strategy![%pos2%G%find_strategy%[%pos3%G!find_strategy_found![%pos4%G!foo!
 	)
 )
-echo.[1F[2K
-<nul set /p =[%pos_percent%G100%% [%pos1%G!count_strategy![%pos2%G%find_strategy%[%pos3%G!find_strategy_found!
+rem echo.[1F[2K
+<nul set /p =[2K[%pos_percent%G100%% [%pos1%G!count_strategy![%pos2%G%find_strategy%[%pos3%G!find_strategy_found!
 echo.
 echo.
 echo.[%pos%GГотово 

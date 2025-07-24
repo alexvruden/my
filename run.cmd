@@ -462,6 +462,7 @@ for /l %%i in (1,1,%profile_count%) do (
 		powershell -NoP -sta -NonI -Command "Stop-Process -Id !pid%%i! -Force" 1>nul 2>&1
 	)
 )
+call:@check_kill
 set "strategy_run="
 if "x%arg_1%"=="xstart" goto:terminate_done
 if "x%arg_1%"=="xstop" goto:terminate_done

@@ -1,0 +1,17 @@
+#
+--wf-l3=ipv4 --wf-udp=50000 --dpi-desync=fake
+--wf-l3=ipv4 --wf-udp=50000 --dpi-desync=fake --dpi-desync-repeats=2
+--wf-l3=ipv4 --wf-udp=50000 --dpi-desync=fake --dpi-desync-repeats=5
+--wf-l3=ipv4 --wf-udp=50000 --dpi-desync=fake --dpi-desync-repeats=10
+--wf-l3=ipv4 --wf-udp=50000 --dpi-desync=fake --dpi-desync-repeats=20
+--wf-l3=ipv4 --wf-udp=50000 --dpi-desync=fake --dpi-desync-fake-quic=@quic_initial_www_google_com.bin
+--wf-l3=ipv4 --wf-udp=50000 --dpi-desync=fake --dpi-desync-fake-quic=@quic_initial_www_google_com.bin --dpi-desync-repeats=2
+--wf-l3=ipv4 --wf-udp=50000 --dpi-desync=fake --dpi-desync-fake-quic=@quic_initial_www_google_com.bin --dpi-desync-repeats=5
+--wf-l3=ipv4 --wf-udp=50000 --dpi-desync=fake --dpi-desync-fake-quic=@quic_initial_www_google_com.bin --dpi-desync-repeats=10
+--wf-l3=ipv4 --wf-udp=50000 --dpi-desync=fake --dpi-desync-fake-quic=@quic_initial_www_google_com.bin --dpi-desync-repeats=20
+--wf-l3=ipv4 --wf-udp=50000 --dpi-desync=ipfrag2 --dpi-desync-ipfrag-pos-udp=8
+--wf-l3=ipv4 --wf-udp=50000 --dpi-desync=ipfrag2 --dpi-desync-ipfrag-pos-udp=16
+--wf-l3=ipv4 --wf-udp=50000 --dpi-desync=ipfrag2 --dpi-desync-ipfrag-pos-udp=24
+--wf-l3=ipv4 --wf-udp=50000 --dpi-desync=ipfrag2 --dpi-desync-ipfrag-pos-udp=32
+--wf-l3=ipv4 --wf-udp=50000 --dpi-desync=ipfrag2 --dpi-desync-ipfrag-pos-udp=40
+--wf-l3=ipv4 --wf-udp=50000 --dpi-desync=ipfrag2 --dpi-desync-ipfrag-pos-udp=64

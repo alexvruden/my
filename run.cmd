@@ -450,7 +450,10 @@ if "x%strategy_name%"=="x" (
 )
 
 :terminate
-if not defined strategy_run goto:terminate_done
+if not defined strategy_run (
+	call:@check_kill
+	goto:terminate_done
+)
 if "x%arg_1%"=="xstart" goto:terminate_all
 if "x%arg_1%"=="xstop" goto:terminate_all
 if %menu_choice% neq 1000 if %menu_choice% EQU %terminate_count% goto:terminate_all
@@ -1310,7 +1313,7 @@ if not exist %winwsdir%\WinDivert%archd%.sys (
 
 
 
-echo.[1G[[32mi[0m][%pos%GЗавершим все 'winws' процессы
+echo.[1G[[33mi[0m][%pos%GЗавершим все 'winws' процессы
 call:@check_kill
 REM if %errorlevel% equ 0 (
 	REM echo.[%pos%GГотово
@@ -1461,7 +1464,7 @@ set ip_dom=%ip_dom: =%
 echo.[1G[[32m+[0m][%pos%GНайден IP '[33m%DOMAINS%[0m': [[33m%ip_dom%[0m]
 rem powershell -NoP -sta -NonI -Command "Get-Process -Name 'winws.exe' | Stop-Process -Force" 1>nul 2>&1
 
-if  %find_strategy_position_start% geq %find_strategy% (
+if  %find_strategy_position_start% gtr %find_strategy% (
 	echo.[1G[[31mx[0m][%pos%G[31mОшибка.[0m Параметр '[33mfind_strategy_position_start=[0m' 
 	echo.[%pos%G в файле '[33m%homenc%\run.config[0m' превышает количество стратегий: [32m%find_strategy%[0m
 	echo.[%pos%G Параметр '[33mfind_strategy_position_start=[0m' будет сброшен в '[31m1[0m'

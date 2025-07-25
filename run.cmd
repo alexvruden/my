@@ -81,11 +81,8 @@ REM echo.[?3h
 :menu
 cls
 echo.[100M
-for /f "skip=4 tokens=2 delims=:" %%a in ('mode') do (
-	set "mode_con_cols=%%a"
-	goto:@formodebreak
-)
-:@formodebreak
+echo off
+for /f %%i in ('2^>nul powershell -command "$h=get-host;$h.ui.rawui.windowsize.width"') do set mode_con_cols=%%i
 set "mode_con_cols=%mode_con_cols: =%"
 set /a c1=5
 set /a c2=9
@@ -94,7 +91,7 @@ set /a c4=30
 set /a c5=55
 set /a c6=80
 set /a c7=100
-set /a c8=%mode_con_cols% - 5
+set /a c8=%mode_con_cols% - 10
 echo.[5G[2mОбновление меню скрипта каждые 60 сек.[0m
 set /a srv_menu_count=1000
 set /a strategy_menu_count=1000
@@ -104,7 +101,7 @@ set /a terminate_count=1000
 set /a blockcheck_menu_count=1000
 set /a find_strategy_menu_count=1000
 
-if defined count_strategy echo.[5GПоиск стратегий на [32mпаузе[0m, вы можете вернуться
+REM if defined count_strategy echo.[5GПоиск стратегий на [32mпаузе[0m, вы можете вернуться
 
 set /a menu_choice=1000
 if not exist %winwsdir%\winws.exe (
@@ -174,7 +171,7 @@ set /a check_restart_str=0
 if %profile_count% GTR 0 ( 
 	for /l %%i in (1,1,%profile_count%) do (
 		if %%i EQU 1 (
-			for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
+			for /l %%x in (%c1%,1,%c8%) do <nul set /p =(0[%%xGq(B
 			echo.
 			if not "x%daemon_status%"=="x%daemon%" set /a check_restart_str+=1
 			if not "x%debug_status%"=="x%debug%" set /a check_restart_str+=1
@@ -197,14 +194,14 @@ if %profile_count% GTR 0 (
 			echo.[%c4%G[33mИспользовать список IP[0m: !offon!
 			set /a foo=%c4%
 			set /a foo=!foo! - 1
-			for /l %%x in (1,1,!foo!) do <nul set /p =[%%xG[8m-[0m
-			for /l %%x in (%c4%,1,%c8%) do <nul set /p =[%%xG-
+			for /l %%x in (1,1,!foo!) do <nul set /p =[%%xG[8m(0q(B[0m
+			for /l %%x in (%c4%,1,%c8%) do <nul set /p =(0[%%xGq(B
 			echo.
 		)
 		set "about_profile=!pr%%i!"
 		echo.[%c1%GPID: !pid%%i![%c4%G[36m!about_profile:~0,%about_profile_strsize%![0m
 	)
-	for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
+	for /l %%x in (%c1%,1,%c8%) do <nul set /p =(0[%%xGq(B
 	echo.
 	set "strategy_run=!n1!" 
 REM ) else (
@@ -228,7 +225,9 @@ if "x%arg_1%"=="xstop" (
 
 set /a menu_count=1
 set /a find_strategy_menu_count=!menu_count!
-echo.[%c1%G[37m!menu_count!.[%c2%GПоиск стратегий[0m
+set "foo="
+if defined count_strategy set "foo=[[32mпауза[0m]"
+echo.[%c1%G[37m!menu_count!.[%c2%GПоиск стратегий[0m %foo%
 rem ------------------------------------------------------------------------------------
 if exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh (
 	REM for /l %%x in (%c1%,1,%c8%) do <nul set /p =[%%xG-
@@ -240,7 +239,7 @@ if exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh (
 rem ------------------------------------------------------------------------------------
 set /a foo=%c1%-1
 set "a1="
-if %param_trigger% equ 0 set "a1=[..]"
+if %param_trigger% equ 0 ( set "a1=[..]" ) else ( echo. )
 echo.[%foo%G[33m%a1%[%c2%G[33mПара[93mм[33mетры запуска стратегии[0m
 if %param_trigger% neq 0 (
 	echo.
@@ -1306,7 +1305,7 @@ exit /b 1
 
 :find_strategy
 cls
-echo.[100M
+<nul set /p =[100M[E
 set /a find_strategy_debug=0
 set /a pos=5
 
@@ -1316,7 +1315,7 @@ if not defined winwsdir (
 	echo.[%pos%G Скачать:
 	echo.[%pos%G https://github.com/bol-van/zapret/releases
 	echo.
-	goto:@find_strategy_end
+	goto:@find_strategy_end1
 )
 if not exist %winwsdir%\WinDivert.dll (
 	echo.[1G[[31mx[0m][%pos%G[31mНе найден[0m файл [33m'%homenc%\!winwsdir:~%homestrsize%!\WinDivert.dll'[0m.
@@ -1343,7 +1342,7 @@ set /a find_strategy_run_error=0
 set "curl_ret_code=-"
 set "curl_cmd_scan="
 set "strategy_file_lst=strategy_https.lst"
-echo.
+echo.[%pos%GУпрощенная версия '[33mblockcheck[0m' на основе списка стратегий[0m
 echo.
 echo.[1G[[33mi[0m][%pos%GЗавершим все 'winws' процессы[0m
 call:@check_kill
@@ -1356,30 +1355,25 @@ if exist %home%\winws_error_code del /f /q %home%\winws_error_code
 if not exist %home%\blockcheck.config.txt call:blockcheck_create_cfg
 echo.[1G[[33mi[0m][%pos%GЧитаем хотелку '[33m%homenc%\blockcheck.config.txt[0m'
 for /F "skip=1 eol=# tokens=1,2 delims==" %%a in (%home%\blockcheck.config.txt) do set "%%a=%%b"
-echo.[1G[[33mi[0m][%pos%GИспользуемые переменные из '[33m%homenc%\blockcheck.config.txt[0m'
+echo.[1G[[32m+[0m][%pos%GИспользуем переменные из '[33m%homenc%\blockcheck.config.txt[0m'
 
 if not defined DOMAINS (
 	set "DOMAINS=ntc.party"
 	echo.[%pos%G[33mDOMAINS not defined[0m
 )
 set DOMAINSFULL=%DOMAINS%
-set DOMAINS=%DOMAINS:"=%
+set DOMAINSFULL=%DOMAINSFULL:"=%
 set /a foo=0
-for /L %%i in (1,1,50) do (
-	if "x!DOMAINS:~%%i,1!"=="x " (
-		set DOMAINS=!DOMAINS:~0,%%i!
-		set /a foo=1
-		goto:@break_DOMAINS
-	)
+for %%i in (%DOMAINSFULL%) do (
+	set /a foo+=1
+	if !foo! equ 1 set DOMAINS=%%i
 )
-:@break_DOMAINS
-if %foo% equ 1 (
-	echo.
-	echo.[%pos%G[31mDOMAINS=%DOMAINSFULL%[0m
-	echo.
+if %foo% gtr 1 (
+	echo.[1G[[31mx[0m][%pos%G[31mDOMAINS="%DOMAINSFULL%"[0m
 	echo.[1G[[33mi[0m][%pos%GТолько один домен проверим
 )
-<nul set /p =[%pos%G[36mDOMAINS=%DOMAINS%[0m[E
+set DOMAINS=%DOMAINS: =%
+echo.[%pos%G[36mDOMAINS=%DOMAINS%[0m
 
 if not defined CURL_MAX_TIME (
 	set CURL_MAX_TIME=2
@@ -1545,7 +1539,8 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%DOMAINS%-%_PORT%-%_HTTP
 if not defined find_strategy_position_start set find_strategy_position_start=1
 set find_strategy_position_start=%find_strategy_position_start:.=%
 if %find_strategy_position_start% neq 1 (
-	echo.[1G[[33mi[0m][%pos%GПредыдущий поиск был прерван на позиции '[33m%find_strategy_position_start%[0m', продолжим поиск.
+	echo.[1G[[33mi[0m][%pos%GОбнаружен файл предыдущего поиска '%homenc%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.%find_strategy_position_start%'
+	echo.[1G[[33mi[0m][%pos%GПоиск был прерван на позиции '[33m%find_strategy_position_start%[0m', продолжим поиск.
 )
 
 if not exist %home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.%find_strategy_position_start% echo.#>%home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.%find_strategy_position_start%
@@ -1561,10 +1556,7 @@ echo.[%pos%G[32mПоиск стратегии для [33m'%DOMAINS%'[0m [%ip
 REM echo.
 set "foo=| 0рогресс | 1екущий | 2сего | 3айдено | 4шибки запуска WinWS | 5шибки завершения процесса WinWS | 6од ответа Curl | 7EPEATS |"
 for /l %%x in (0,1,160) do (
-	if "x!foo:~%%x,1!"=="x" (
-		set a=%%x
-		goto:@br1538
-	) else if "x!foo:~%%x,1!"=="x0" (
+	if "x!foo:~%%x,1!"=="x0" (
 		set /a pos0=%pos%+%%x
 	) else if "x!foo:~%%x,1!"=="x1" (
 		set /a pos1=%pos%+%%x
@@ -1582,16 +1574,7 @@ for /l %%x in (0,1,160) do (
 		set /a pos7=%pos%+%%x
 	)
 )
-:@br1538
-set /a a=%pos%+%a%-1
-for /l %%x in (%pos%,1,%a%) do <nul set /p =[%%xG-
-echo.
-echo.[%pos%G^| Прогресс ^| Текущий ^| Всего ^| Найдено ^| Ошибки запуска WinWS ^| Ошибки завершения процесса WinWS ^| Код ответа Curl ^| REPEATS ^|
-for /l %%x in (%pos%,1,%a%) do <nul set /p =[%%xG-
-echo.[?25l
-set /a line_count=1
-call:progress_in_percent_begin %find_strategy%
-<nul set /p =7
+
 set "foo=0 Прогресс 1 Текущий 2 Всего 3 Найдено 4 Ошибки запуска WinWS 5 Ошибки завершения процесса WinWS 6 Код ответа Curl 7 REPEATS 8"
 for /l %%x in (0,1,160) do (
 	if "x!foo:~%%x,1!"=="x0" (
@@ -1615,7 +1598,84 @@ for /l %%x in (0,1,160) do (
 	)
 )
 echo.
-for /l %%x in (%pos%,1,%a%) do <nul set /p =[%%xG-
+
+for /l %%x in (%ipos0%,1,%ipos8%) do (
+	if %%x equ %ipos0% (
+		<nul set /p =(0[%%xGl(B
+	) else if %%x equ %ipos1% (
+		<nul set /p =(0[%%xGw(B
+	) else if %%x equ %ipos2% (
+		<nul set /p =(0[%%xGw(B
+	) else if %%x equ %ipos3% (
+		<nul set /p =(0[%%xGw(B
+	) else if %%x equ %ipos4% (
+		<nul set /p =(0[%%xGw(B
+	) else if %%x equ %ipos5% (
+		<nul set /p =(0[%%xGw(B
+	) else if %%x equ %ipos6% (
+		<nul set /p =(0[%%xGw(B
+	) else if %%x equ %ipos7% (
+		<nul set /p =(0[%%xGw(B
+	) else if %%x equ %ipos8% (
+		<nul set /p =(0[%%xGk(B
+	) else (
+		<nul set /p =(0[%%xGq(B
+	)
+)
+echo.
+<nul set /p =[2K(0[%ipos0%Gx(B[%pos0%GПрогресс(0[%ipos1%Gx(B[%pos1%GТекущий(0[%ipos2%Gx(B[%pos2%GВсего(0[%ipos3%Gx(B[%pos3%GНайдено(0[%ipos4%Gx(B[%pos4%GОшибки запуска WinWS(0[%ipos5%Gx(B[%pos5%GОшибки завершения процесса WinWS(0[%ipos6%Gx(B[%pos6%GКод ответа Curl(0[%ipos7%Gx(B[%pos7%GREPEATS(0[%ipos8%Gx(B[E
+for /l %%x in (%ipos0%,1,%ipos8%) do (
+	if %%x equ %ipos0% (
+		<nul set /p =(0[%%xGt(B
+	) else if %%x equ %ipos1% (
+		<nul set /p =(0[%%xGn(B
+	) else if %%x equ %ipos2% (
+		<nul set /p =(0[%%xGn(B
+	) else if %%x equ %ipos3% (
+		<nul set /p =(0[%%xGn(B
+	) else if %%x equ %ipos4% (
+		<nul set /p =(0[%%xGn(B
+	) else if %%x equ %ipos5% (
+		<nul set /p =(0[%%xGn(B
+	) else if %%x equ %ipos6% (
+		<nul set /p =(0[%%xGn(B
+	) else if %%x equ %ipos7% (
+		<nul set /p =(0[%%xGn(B
+	) else if %%x equ %ipos8% (
+		<nul set /p =(0[%%xGu(B
+	) else (
+		<nul set /p =(0[%%xGq(B
+	)
+)
+echo.[?25l
+set /a line_count=1
+call:progress_in_percent_begin %find_strategy%
+<nul set /p =7
+<nul set /p =8[2K(0[%ipos0%Gx[%ipos1%Gx[%ipos2%Gx[%ipos3%Gx[%ipos4%Gx[%ipos5%Gx[%ipos6%Gx[%ipos7%Gx[%ipos8%Gx(B
+echo.
+for /l %%x in (%ipos0%,1,%ipos8%) do (
+	if %%x equ %ipos0% (
+		<nul set /p =(0[%%xGm(B
+	) else if %%x equ %ipos1% (
+		<nul set /p =(0[%%xGv(B
+	) else if %%x equ %ipos2% (
+		<nul set /p =(0[%%xGv(B
+	) else if %%x equ %ipos3% (
+		<nul set /p =(0[%%xGv(B
+	) else if %%x equ %ipos4% (
+		<nul set /p =(0[%%xGv(B
+	) else if %%x equ %ipos5% (
+		<nul set /p =(0[%%xGv(B
+	) else if %%x equ %ipos6% (
+		<nul set /p =(0[%%xGv(B
+	) else if %%x equ %ipos7% (
+		<nul set /p =(0[%%xGv(B
+	) else if %%x equ %ipos8% (
+		<nul set /p =(0[%%xGj(B
+	) else (
+		<nul set /p =(0[%%xGq(B
+	)
+)
 echo.
 echo.
 echo.[1G[[33mi[0m][%pos%GПри прохождении каждой [33m%save_count%[0m-й (один раз в 10 минут) позиции мы запомним её для этих настроек поиска [[33m%DOMAINS%-%_PORT%-%_HTTP%[0m]
@@ -1695,7 +1755,7 @@ for /F "skip=1 tokens=*" %%a in (%home%\strategy\%strategy_file_lst%) do (
 						)
 					)
 					if !_REPEATS! equ 1 call:progress_in_percent_count ap2
-					<nul set /p =8[2K[%ipos0%G^|[%pos0%G!ap2!%%[%ipos1%G^|[%pos1%G!count_strategy![%ipos2%G^|[%pos2%G%find_strategy%[%ipos3%G^|[%pos3%G!find_strategy_found![%ipos4%G^|[%pos4%G!find_strategy_kill_error![%ipos5%G^|[%pos5%G!find_strategy_run_error![%ipos6%G^|[%pos6%G!curl_ret_code![%ipos7%G^|[%pos7%G!_REPEATS![%ipos8%G^|[8m
+					<nul set /p =8[2K(0[%ipos0%Gx(B[%pos0%G!ap2!%%(0[%ipos1%Gx(B[%pos1%G!count_strategy!(0[%ipos2%Gx(B[%pos2%G%find_strategy%(0[%ipos3%Gx(B[%pos3%G!find_strategy_found!(0[%ipos4%Gx(B[%pos4%G!find_strategy_kill_error!(0[%ipos5%Gx(B[%pos5%G!find_strategy_run_error!(0[%ipos6%Gx(B[%pos6%G!curl_ret_code!(0[%ipos7%Gx(B[%pos7%G!_REPEATS!(0[%ipos8%Gx(B[8m
 				)
 				call:@check_kill 
 				if !errorlevel! neq 0 set /a find_strategy_kill_error+=1
@@ -1714,11 +1774,11 @@ for /F "skip=1 tokens=*" %%a in (%home%\strategy\%strategy_file_lst%) do (
 			set /a count_strategy_save+=1
 			if !count_strategy_save! equ %save_count% set /a count_strategy_save=0
 			call:progress_in_percent_count ap2
-			<nul set /p =8[2K[%ipos0%G^|[%pos0%G!ap2!%%[%ipos1%G^|[%pos1%G!count_strategy![%ipos2%G^|[%pos2%G%find_strategy%[%ipos3%G^|[%pos3%G!find_strategy_found![%ipos4%G^|[%pos4%G!find_strategy_kill_error![%ipos5%G^|[%pos5%G!find_strategy_run_error![%ipos6%G^|[%pos6%G!curl_ret_code![%ipos7%G^|[%pos7%G!_REPEATS![%ipos8%G^|[8m
+			<nul set /p =8[2K(0[%ipos0%Gx(B[%pos0%G!ap2!%%(0[%ipos1%Gx(B[%pos1%G!count_strategy!(0[%ipos2%Gx(B[%pos2%G%find_strategy%(0[%ipos3%Gx(B[%pos3%G!find_strategy_found!(0[%ipos4%Gx(B[%pos4%G!find_strategy_kill_error!(0[%ipos5%Gx(B[%pos5%G!find_strategy_run_error!(0[%ipos6%Gx(B[%pos6%G!curl_ret_code!(0[%ipos7%Gx(B[%pos7%G!_REPEATS!(0[%ipos8%Gx(B[8m
 		)
 	)
 )
-<nul set /p =8[2K[%ipos0%G^|[%pos0%G100%%[%ipos1%G^|[%pos1%G!count_strategy![%ipos2%G^|[%pos2%G%find_strategy%[%ipos3%G^|[%pos3%G!find_strategy_found![%ipos4%G^|[%pos4%G!find_strategy_kill_error![%ipos5%G^|[%pos5%G!find_strategy_run_error![%ipos6%G^|[%pos6%G [%ipos7%G^|[%pos7%G [%ipos8%G^|
+<nul set /p =8[2K(0[%ipos0%Gx(B[%pos0%G100%%(0[%ipos1%Gx(B[%pos1%G!count_strategy!(0[%ipos2%Gx(B[%pos2%G%find_strategy%(0[%ipos3%Gx(B[%pos3%G!find_strategy_found!(0[%ipos4%Gx(B[%pos4%G!find_strategy_kill_error!(0[%ipos5%Gx(B[%pos5%G!find_strategy_run_error!(0[%ipos6%Gx(B[%pos6%G!curl_ret_code!(0[%ipos7%Gx(B[%pos7%G!_REPEATS!(0[%ipos8%Gx(B
 move /Y %home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.!ext_old! %home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.done 1>nul 2>&1
 echo.[10E[0m
 echo.

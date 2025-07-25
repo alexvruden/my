@@ -1395,7 +1395,6 @@ if "x%strategy_file_lst%"=="xstrategy_https.lst" (
 		if "x!ENABLE_HTTPS_TLS13!"=="x0" set ENABLE_HTTPS_TLS12=1
 	) else set ENABLE_HTTPS_TLS12=%ENABLE_HTTPS_TLS12%
 
-		
 	if "x!ENABLE_HTTPS_TLS13!"=="x1" (
 		set "TLSver=--tlsv1.3"
 		set "TLSmax="

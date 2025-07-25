@@ -430,13 +430,13 @@ if %errorlevel% EQU 11 (
 echo.[1F[2K
 echo.
 if %menu_choice% equ 0 goto:menu_0
-if %find_strategy_menu_count% neq 1000 if %menu_choice% EQU %find_strategy_menu_count% goto:find_strategy
-if %blockcheck_menu_count% neq 1000 if %menu_choice% EQU %blockcheck_menu_count% goto:blockcheck
-if %menu_choice% GTR %menu_count% goto:menu
-if %terminate_count% neq 1000 if %menu_choice% GEQ %terminate_count% goto:terminate
-if %srv_menu_count% neq 1000 if %menu_choice% GEQ %srv_menu_count% goto:menu_srv
-if %strategy_menu_count% neq 1000 if %menu_choice% GEQ %strategy_menu_count% goto:strategy_choice
-if %parameter_menu_count% neq 1000 if %menu_choice% GEQ %parameter_menu_count% (
+if %find_strategy_menu_count% neq 1000 if %menu_choice% equ %find_strategy_menu_count% goto:find_strategy
+if %blockcheck_menu_count% neq 1000 if %menu_choice% equ %blockcheck_menu_count% goto:blockcheck
+if %menu_choice% gtr %menu_count% goto:menu
+if %terminate_count% neq 1000 if %menu_choice% geq %terminate_count% goto:terminate
+if %srv_menu_count% neq 1000 if %menu_choice% geq %srv_menu_count% goto:menu_srv
+if %strategy_menu_count% neq 1000 if %menu_choice% geq %strategy_menu_count% goto:strategy_choice
+if %parameter_menu_count% neq 1000 if %menu_choice% geq %parameter_menu_count% (
 	set /a foo=%menu_choice% - %parameter_menu_count% + 1
 	goto:menu_!foo!
 )
@@ -1209,6 +1209,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 exit /b
 
 :progress_in_percent_begin
+if defined pinp exit /b
 set /a show_progress_in_percent_count=0
 set /a temp_percent_count=0
 set /a pinp=0
@@ -1582,13 +1583,15 @@ echo.
 for /l %%x in (%pos%,1,%a%) do <nul set /p =[%%xG-
 echo.
 echo.
-echo.[1G[[33mi[0m][%pos%GПри прохождении каждой %save_count%-й позиции мы запомним её для этих настроек поиска [[33m%DOMAINS%-%_PORT%-%_HTTP%[0m]
-echo.[1G[[33mi[0m][%pos%GПоиск можно будет прервать, потом повторный поиск будет начат с прерванной позиции для этих настроек [[33m%DOMAINS%-%_PORT%-%_HTTP%[0m], кратно %save_count% 
+echo.[1G[[33mi[0m][%pos%GПри прохождении каждой [33m%save_count%[0m-й (один раз в 10 минут) позиции мы запомним её для этих настроек поиска [[33m%DOMAINS%-%_PORT%-%_HTTP%[0m]
+echo.[1G[[33mi[0m][%pos%GПоиск можно будет прервать, потом повторный поиск будет начат с прерванной позиции для этих настроек [[33m%DOMAINS%-%_PORT%-%_HTTP%[0m], кратно [33m%save_count%[0m
 echo.[1G[[33mi[0m][%pos%GНайденные стратегии для этих настроек поиска сохраняются в файле '[33m%homenc%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.*[0m'
-echo.[1G[[33mi[0m][%pos%GЕсли хотите начать поиск с начала, удалите файл найденных стратегий '[33m%homenc%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.*[0m'
+echo.[1G[[33mi[0m][%pos%GЕсли хотите начать поиск с начала закройте скрипт, удалите файл найденных стратегий '[33m%homenc%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.*[0m'
 echo.
-echo.[1G[[33mi[0m][%pos%GЕсли хотите прервать поиск и вернуться в меню, дождитесь '[36mREPEATS=%REPEATS%[0m' и нажимайте клавишу 'q' несколько раз[0m
+echo.[1G[[33mi[0m][%pos%GЕсли хотите сделать паузу и вернуться в меню, дождитесь '[36mREPEATS=%REPEATS%[0m' и нажимайте клавишу 'q' несколько раз[0m
 echo.[1G[[33mi[0m][%pos%GВы можете вернуться обратно, поиск продолжится.[0m
+echo.
+echo.[1G[[33mi[0m][%pos%GЕсли вы выключите скрипт, то поиск будет начат с прерванной позиции, сохраненной в файле '[33m%homenc%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.*[0m'
 
 set ext_old=%find_strategy_position_start%
 for /F "skip=1 tokens=*" %%a in (%home%\strategy\%strategy_file_lst%) do (
@@ -1679,7 +1682,7 @@ for /F "skip=1 tokens=*" %%a in (%home%\strategy\%strategy_file_lst%) do (
 )
 <nul set /p =8[2K[%ipos0%G^|[%pos0%G100%%[%ipos1%G^|[%pos1%G!count_strategy![%ipos2%G^|[%pos2%G%find_strategy%[%ipos3%G^|[%pos3%G!find_strategy_found![%ipos4%G^|[%pos4%G!find_strategy_kill_error![%ipos5%G^|[%pos5%G!find_strategy_run_error![%ipos6%G^|[%pos6%G [%ipos7%G^|[%pos7%G [%ipos8%G^|
 move /Y %home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.!ext_old! %home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.done 1>nul 2>&1
-echo.[8E[0m
+echo.[10E[0m
 echo.
 echo.[%pos%GГотово
 echo.
@@ -1702,7 +1705,7 @@ echo.[%pos%G[32mВирусов и майнеров здесь нет.[0m
 echo.
 echo.[%pos%GДобавьте директорию в '[33m%homenc%[0m' исключения антивируса.
 :@find_strategy_end
-echo.[8E[0m
+echo.[10E[0m
 :@find_strategy_end1
 echo.
 echo.[?25h

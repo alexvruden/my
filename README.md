@@ -1,11 +1,11 @@
 # Bypassing Censorship
 
 <br>
-Скачать этот скрипт: <a href="https://github.com/alexvruden/my/archive/refs/heads/main.zip">отсюда</a>
+Скачать этот скрипт: <a href="https://github.com/alexvruden/my/archive/refs/heads/main.zip" title="https://github.com/alexvruden/my/archive/refs/heads/main.zip">отсюда</a>
 <br>
-Для работы скрипта скачать по ссылке https://github.com/bol-van/zapret/releases новую версию драйверов и извлечь в директорию '..\bin\'
+Для работы скрипта <a href="https://github.com/bol-van/zapret/releases" title="https://github.com/bol-van/zapret/releases">скачать</a> новую версию драйверов и извлечь в директорию '..\bin\'
 <br>
-Если хотите использовать '<i>blockcheck</i>' то нужно его скачать https://github.com/bol-van/zapret-win-bundle/archive/refs/heads/master.zip и извлечь в директорию '..\bin\'
+Если хотите использовать '<i>blockcheck</i>' то нужно его <a href="https://github.com/bol-van/zapret-win-bundle/archive/refs/heads/master.zip" title="https://github.com/bol-van/zapret-win-bundle/archive/refs/heads/master.zip">скачать</a> и извлечь в директорию '..\bin\'
 <br>
 Для использования <b>встроенной</b> в скрипт функции поиска стратегий не требуется скачивать '<i>blockcheck</i>'
 <br>

@@ -354,15 +354,14 @@ if %srv_trigger% neq 0 (
 		powershell -Command "Get-WmiObject win32_process -Filter 'name = \"cmd.exe\"' | select commandline" |find "run_agent.cmd" 1>nul 2>&1
 		if !errorlevel! EQU 0 (
 			if exist %home%\agent.log (
-				rem last status
 			 	for /f "delims=" %%i in (%home%\agent.log) do set "foo=%%i"			
 			) else set "foo=.........неизвестное состояние..."
-			echo.[%c2%G[36m[[0m агент : [32mвключен[%c8%G[36m][0m
-			echo.[%c2%G[36m[[0m статус: [33m!foo:~9![%c8%G[36m][0m
+			echo.[%c3%GАгент : [32mвключен[0m
+			echo.[%c3%GСтатус: [33m!foo:~9![0m
 			set /a agent_work=1
 		) else (
-			echo.[%c2%G[36m[[0m агент : [31mвыключен[%c8%G[36m][0m
-			echo.[%c2%G[33mДля запуска агента выполнить задание [37m'dpiagent'[33m в планировщике заданий[0m
+			echo.[%c3%GАгент : [31mвыключен[0m
+			echo.[%c3%G[33mДля запуска агента выполнить задание [37m'dpiagent'[33m в планировщике заданий[0m
 			set /a agent_work=0
 		)
 		if !agent_work! equ 1 (

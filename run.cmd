@@ -1,7 +1,10 @@
 @echo off
+echo.[c
+echo.[?1049l
+echo.[!п
+REM echo.[?3h
 chcp 1251 > nul
 setlocal EnableDelayedExpansion
-
 set /a mode_con_cols = 160
 set /a mode_con_lines= 40
 
@@ -67,11 +70,17 @@ if defined winwsdir (
 	set "fakedir=!winwsdir:~0,-24!\files\fake"
 )
 
-echo.]0;Bypassing Censorship %foo%
+echo.]0;Bypassing Censorship %foo%\
 echo.[39;49m
 echo.[7l
+echo.[?12l
+echo.[?25l
+REM echo.[1;200r
+REM echo.[?3h
+
 :menu
 cls
+echo.[100M
 for /f "skip=4 tokens=2 delims=:" %%a in ('mode') do (
 	set "mode_con_cols=%%a"
 	goto:@formodebreak
@@ -86,7 +95,7 @@ set /a c5=55
 set /a c6=80
 set /a c7=100
 set /a c8=%mode_con_cols% - 5
-echo.[5G[36mОбновление меню скрипта каждые 60 сек.[0m
+echo.[5G[2mОбновление меню скрипта каждые 60 сек.[0m
 set /a srv_menu_count=1000
 set /a strategy_menu_count=1000
 set /a parameter_menu_count=1000
@@ -94,6 +103,8 @@ set /a agent_work=1000
 set /a terminate_count=1000
 set /a blockcheck_menu_count=1000
 set /a find_strategy_menu_count=1000
+
+if defined count_strategy echo.[5GПоиск стратегий на [32mпаузе[0m, вы можете вернуться
 
 set /a menu_choice=1000
 if not exist %winwsdir%\winws.exe (
@@ -186,7 +197,7 @@ if %profile_count% GTR 0 (
 			echo.[%c4%G[33mИспользовать список IP[0m: !offon!
 			set /a foo=%c4%
 			set /a foo=!foo! - 1
-			for /l %%x in (1,1,!foo!) do <nul set /p =[30m-[0m
+			for /l %%x in (1,1,!foo!) do <nul set /p =[%%xG[8m-[0m
 			for /l %%x in (%c4%,1,%c8%) do <nul set /p =[%%xG-
 			echo.
 		)
@@ -418,6 +429,10 @@ if %errorlevel% GEQ 12 goto:expand_strategy
 if %errorlevel% EQU 11 goto:menu
 set /a first_digit=%errorlevel% - 1
 echo.[2F
+REM for /l %%i in (1,1,50) do (
+	REM if "x!strchoice:~%%i,1!"=="x!strchoice:~%first_digit%,1!" set foo=!strchoice:~%%i,1!
+REM )
+REM choice /N /C:0123456789z /D z /T 3 /M "#:%foo%"
 choice /N /C:0123456789z /D z /T 3 /M "#:"
 if %errorlevel% EQU 255 call:cerror 402
 if %errorlevel% EQU 0 call:cerror 403
@@ -427,7 +442,7 @@ if %errorlevel% EQU 11 (
 	set /a second_digit=%errorlevel% - 1
 	set /a menu_choice=%first_digit% * 10 + !second_digit!
 )
-echo.[1F[2K
+echo.[1F[M
 echo.
 if %menu_choice% equ 0 goto:menu_0
 if %find_strategy_menu_count% neq 1000 if %menu_choice% equ %find_strategy_menu_count% goto:find_strategy
@@ -1266,24 +1281,9 @@ exit /b 1
 
 :find_strategy
 cls
+echo.[100M
 set /a find_strategy_debug=0
-if defined count_strategy (
-	call:@check_kill
-	echo.
-	echo.
-	echo.[1G[[33mi[0m][%pos%GПредыдущий поиск был прерван на позиции '[33m%count_strategy%[0m', продолжим поиск с неё.
-	goto:@return_find
-)
-set /a find_strategy=0
 set /a pos=5
-set /a count_strategy=0
-set /a count_strategy_save=0
-set /a find_strategy_found=0
-set /a find_strategy_kill_error=0
-set /a find_strategy_run_error=0
-set "curl_ret_code=-"
-set "curl_cmd_scan="
-set "strategy_file_lst=strategy_https.lst"
 
 if not defined winwsdir (
 	echo.[1G[[33mi[0m][%pos%G[37mДля работы скрипта скачать новую версию драйверов и извлечь в директорию '[33m%homenc%\bin\[37m' [0m
@@ -1302,6 +1302,22 @@ if not exist %winwsdir%\WinDivert%archd%.sys (
 	goto:@find_strategy_txtmess
 )
 
+if defined count_strategy (
+	call:@check_kill
+	echo.
+	echo.
+	echo.[1G[[33mi[0m][%pos%GПредыдущий поиск был прерван на позиции '[33m%count_strategy%[0m', продолжим поиск с неё.
+	goto:@return_find
+)
+set /a find_strategy=0
+set /a count_strategy=0
+set /a count_strategy_save=0
+set /a find_strategy_found=0
+set /a find_strategy_kill_error=0
+set /a find_strategy_run_error=0
+set "curl_ret_code=-"
+set "curl_cmd_scan="
+set "strategy_file_lst=strategy_https.lst"
 echo.
 echo.
 echo.[1G[[33mi[0m][%pos%GЗавершим все 'winws' процессы[0m

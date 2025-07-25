@@ -1209,36 +1209,30 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 exit /b
 
 :progress_in_percent_begin
-if defined pinp exit /b
-set /a show_progress_in_percent_count=0
+if defined pinp goto:@progress_in_percent_exit
 set /a temp_percent_count=0
 set /a pinp=0
-set /a temp_percent=%~1
-set /a temp_percent=!temp_percent!/100
+set /a temp_percent = %~1 / 100
 set /a pinp_count=1
-if !temp_percent! equ 0 (
-	set /a temp_percent=%~1
-	set /a temp_percent=!temp_percent!/10
-	set /a pinp_count=10
-	if !temp_percent! equ 0 (
-		set /a temp_percent=%~1
-		set /a pinp_count=100/!temp_percent!
-	)
-)
-set /a temp_percent_1=!temp_percent!
+if %temp_percent% neq 0 goto:@progress_in_percent_end
+set /a temp_percent = %~1 / 10
+set /a pinp_count=10
+if %temp_percent% neq 0 goto:@progress_in_percent_end
+set /a temp_percent=%~1
+set /a pinp_count=100 / %temp_percent%
+:@progress_in_percent_end
+set /a temp_percent_step=!temp_percent!
+:@progress_in_percent_exit
 exit /b
 
 :progress_in_percent_count
-set /a show_progress_in_percent_count+=1
 set /a temp_percent_count+=1
-if %pinp% neq 100 (
-	if !temp_percent_count! equ 1 (
-		set /a pinp+=%pinp_count%
-		set /a %~1=!pinp!
-		set /a temp_percent+=%temp_percent_1%
-	)
-	if !temp_percent_count! equ %temp_percent_1% set /a "temp_percent_count=0"
-)
+if %pinp% equ 100 goto:@progress_in_percent_count_exit
+if %temp_percent_count% neq %temp_percent_step% goto:@progress_in_percent_count_exit
+set /a "temp_percent_count=0"
+set /a pinp+=%pinp_count%
+:@progress_in_percent_count_exit
+set /a %~1=%pinp%
 exit /b
 
 :@check_run
@@ -1511,19 +1505,21 @@ for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\%DOMAINS%-%_PORT%-%_HTTP
 if not defined find_strategy_position_start set find_strategy_position_start=1
 set find_strategy_position_start=%find_strategy_position_start:.=%
 if %find_strategy_position_start% neq 1 (
-	echo.[1G[[33mi[0m][%pos%GПредыдущий поиск был прерван на позиции '[33m%find_strategy_position_start%[0m', продолжим поиск с неё.
+	echo.[1G[[33mi[0m][%pos%GПредыдущий поиск был прерван на позиции '[33m%find_strategy_position_start%[0m', продолжим поиск.
 )
 
 if not exist %home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.%find_strategy_position_start% echo.#>%home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.%find_strategy_position_start%
 for /F "skip=1" %%a in (%home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.%find_strategy_position_start%) do set /a find_strategy_found+=1
 
 set /a save_count = 600 / ( %REPEATS% * %CURL_MAX_TIME% )
+set ext_old=%find_strategy_position_start%
+set /a count_strategy_start=%find_strategy_position_start%
 
 :@return_find
 echo.
 echo.[%pos%G[32mПоиск стратегии для [33m'%DOMAINS%'[0m [%ip_dom%][31m:%HTTPS_PORT%[0m
 REM echo.
-set "foo=| 0рогресс | 1екущий | 2сего | 3айдено | 4шибки запуска WinWS | 5шибки завершения процесса WinWS | 6оды ответа Curl | 7EPEATS |"
+set "foo=| 0рогресс | 1екущий | 2сего | 3айдено | 4шибки запуска WinWS | 5шибки завершения процесса WinWS | 6од ответа Curl | 7EPEATS |"
 for /l %%x in (0,1,160) do (
 	if "x!foo:~%%x,1!"=="x" (
 		set a=%%x
@@ -1550,14 +1546,13 @@ for /l %%x in (0,1,160) do (
 set /a a=%pos%+%a%-1
 for /l %%x in (%pos%,1,%a%) do <nul set /p =[%%xG-
 echo.
-echo.[%pos%G^| Прогресс ^| Текущий ^| Всего ^| Найдено ^| Ошибки запуска WinWS ^| Ошибки завершения процесса WinWS ^| Коды ответа Curl ^| REPEATS ^|
+echo.[%pos%G^| Прогресс ^| Текущий ^| Всего ^| Найдено ^| Ошибки запуска WinWS ^| Ошибки завершения процесса WinWS ^| Код ответа Curl ^| REPEATS ^|
 for /l %%x in (%pos%,1,%a%) do <nul set /p =[%%xG-
 echo.[?25l
 set /a line_count=1
-set /a count_strategy_start=%find_strategy_position_start%
 call:progress_in_percent_begin %find_strategy%
 <nul set /p =7
-set "foo=0 Прогресс 1 Текущий 2 Всего 3 Найдено 4 Ошибки запуска WinWS 5 Ошибки завершения процесса WinWS 6 Коды ответа Curl 7 REPEATS 8"
+set "foo=0 Прогресс 1 Текущий 2 Всего 3 Найдено 4 Ошибки запуска WinWS 5 Ошибки завершения процесса WinWS 6 Код ответа Curl 7 REPEATS 8"
 for /l %%x in (0,1,160) do (
 	if "x!foo:~%%x,1!"=="x0" (
 		set /a ipos0=%pos%+%%x
@@ -1593,7 +1588,6 @@ echo.[1G[[33mi[0m][%pos%GВы можете вернуться обратно
 echo.
 echo.[1G[[33mi[0m][%pos%GЕсли вы выключите скрипт, то поиск будет начат с прерванной позиции, сохраненной в файле '[33m%homenc%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.*[0m'
 
-set ext_old=%find_strategy_position_start%
 for /F "skip=1 tokens=*" %%a in (%home%\strategy\%strategy_file_lst%) do (
 	set /a line_count+=1
 	set comment_char=%%a
@@ -1643,20 +1637,24 @@ for /F "skip=1 tokens=*" %%a in (%home%\strategy\%strategy_file_lst%) do (
 			call:@check_run
 			if !errorlevel! equ 0 (
 				set _REPEATS=0
+				set /a repne_tamper=0
 				for /l %%c in (1,1,%REPEATS%) do (
 					set /a _REPEATS+=1
 					set curl_ret_code=0
 					%CURL% %curl_cmd_scan% 1>nul 2>&1
 					set curl_ret_code=!errorlevel!
 					if !curl_ret_code! equ 0 (
-						set /a find_strategy_found+=1
-						if defined R_str (
-							echo.!L_str!^^! !R_str! >>%home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.!find_strategy_position_start!
-						) else (
-							echo.!L_str! >>%home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.!find_strategy_position_start!
+						set /a repne_tamper+=1
+						if !repne_tamper! equ 1 (
+							set /a find_strategy_found+=1
+							if defined R_str (
+								echo.!L_str!^^! !R_str! >>%home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.!ext_old!
+							) else (
+								echo.!L_str! >>%home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.!ext_old!
+							)
 						)
 					)
-					call:progress_in_percent_count ap2
+					if !_REPEATS! equ 1 call:progress_in_percent_count ap2
 					<nul set /p =8[2K[%ipos0%G^|[%pos0%G!ap2!%%[%ipos1%G^|[%pos1%G!count_strategy![%ipos2%G^|[%pos2%G%find_strategy%[%ipos3%G^|[%pos3%G!find_strategy_found![%ipos4%G^|[%pos4%G!find_strategy_kill_error![%ipos5%G^|[%pos5%G!find_strategy_run_error![%ipos6%G^|[%pos6%G!curl_ret_code![%ipos7%G^|[%pos7%G!_REPEATS![%ipos8%G^|[8m
 				)
 				call:@check_kill 
@@ -1704,8 +1702,13 @@ echo.
 echo.[%pos%G[32mВирусов и майнеров здесь нет.[0m
 echo.
 echo.[%pos%GДобавьте директорию в '[33m%homenc%[0m' исключения антивируса.
+goto:@find_strategy_end1
 :@find_strategy_end
-echo.[10E[0m
+echo.[10E
+pause >nul
+echo.[0m
+echo.[?25h
+goto:menu
 :@find_strategy_end1
 echo.
 echo.[?25h

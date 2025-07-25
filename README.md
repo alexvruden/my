@@ -1,7 +1,7 @@
 # Bypassing Censorship
 
 <br>
-Скачать этот скрипт: <a name="здесь">https://github.com/alexvruden/my/archive/refs/heads/main.zip</a>
+Скачать этот скрипт: <a href="https://github.com/alexvruden/my/archive/refs/heads/main.zip">отсюда</a>
 <br>
 Для работы скрипта скачать по ссылке https://github.com/bol-van/zapret/releases новую версию драйверов и извлечь в директорию '..\bin\'
 <br>

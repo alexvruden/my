@@ -1405,7 +1405,7 @@ if "x%strategy_file_lst%"=="xstrategy_https.lst" (
 		set "TLSmax=--tls-max 1.2"
 	)
 	
-	echo.[%pos%G[36mENABLE_HTTPS_TLS12%ENABLE_HTTPS_TLS12%[0m
+	echo.[%pos%G[36mENABLE_HTTPS_TLS12=%ENABLE_HTTPS_TLS12%[0m
 	echo.[%pos%G[36mENABLE_HTTPS_TLS13=%ENABLE_HTTPS_TLS13%[0m
 	
 )

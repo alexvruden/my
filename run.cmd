@@ -601,7 +601,8 @@ rem set "zapret_hosts_user_exclude=--hostlist-exclude=%winwsdir:~0,-24%\ipset\za
 set "zapret_hosts_user_exclude="
 rem set "zapret_hosts_user_exclude=%zapret_hosts_user_exclude% --ipset-exclude=%winwsdir:~0,-24%\ipset\zapret-hosts-user-exclude.txt.default"
 if not exist %home%\lists\exclude md %home%\lists\exclude >nul
-for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\exclude\*.txt') do (
+if not exist %home%\lists\exclude\exclude-hosts.txt echo.#>%home%\lists\exclude\exclude-hosts.txt
+for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\exclude\*.txt %home%\lists\exclude\*.lst %home%\lists\exclude\*.gz') do (
 	set "zapret_hosts_user_exclude=!zapret_hosts_user_exclude! --hostlist-exclude=%home%\lists\exclude\%%X"
 )
 set "daemon_bakup=%daemon%"
@@ -813,6 +814,7 @@ goto:menu_0
 :blockcheck
 echo.
 call:blockcheck_create_cfg
+
 if not exist %home%\bin\zapret-win-bundle-master\cygwin\bin\bash.exe (
 	echo.[5G[31mОшибка. [37mФайл не найден: '[33m%homenc%\bin\zapret-win-bundle-master\cygwin\bin\bash[37m'[0m
 	goto:err_blockcheck
@@ -1852,7 +1854,7 @@ if not exist %home%\blockcheck.config.txt (
 	echo.# 
 	echo.# DOMAINS - СЃРїРёСЃРѕРє С‚РµСЃС‚РёСЂСѓРµРјС‹С… РґРѕРјРµРЅРѕРІ С‡РµСЂРµР· РїСЂРѕР±РµР»
 	echo.
-	echo DOMAINS="ntc.party"
+	echo DOMAINS="ntc.party rutracker.net"
 	echo.# 
 	)>%home%\blockcheck.config.txt
 )

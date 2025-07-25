@@ -4,7 +4,7 @@
 Скачать этот скрипт [отсюда](https://github.com/alexvruden/my/archive/refs/heads/main.zip)
 <br>
 
-Для работы скрипта <link title="скачать" href="https://github.com/bol-van/zapret/releases"> новую версию драйверов и извлечь в директорию '..\bin\'
+Для работы скрипта <A HREF="скачать">https://github.com/bol-van/zapret/releases</A> новую версию драйверов и извлечь в директорию '..\bin\'
 <br>
 Если хотите использовать '<i>blockcheck</i>' то нужно его скачать <url>https://github.com/bol-van/zapret-win-bundle/archive/refs/heads/master.zip</url> и извлечь в директорию '..\bin\'
 <br>

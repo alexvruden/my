@@ -430,14 +430,14 @@ if %errorlevel% EQU 11 (
 echo.[1F[2K
 echo.
 if %menu_choice% equ 0 goto:menu_0
-if %menu_choice% EQU %find_strategy_menu_count% goto:find_strategy
-if %menu_choice% EQU %blockcheck_menu_count% goto:blockcheck
+if %find_strategy_menu_count% neq 1000 if %menu_choice% EQU %find_strategy_menu_count% goto:find_strategy
+if %blockcheck_menu_count% neq 1000 if %menu_choice% EQU %blockcheck_menu_count% goto:blockcheck
 if %menu_choice% GTR %menu_count% goto:menu
 if %terminate_count% neq 1000 if %menu_choice% GEQ %terminate_count% goto:terminate
 if %srv_menu_count% neq 1000 if %menu_choice% GEQ %srv_menu_count% goto:menu_srv
 if %strategy_menu_count% neq 1000 if %menu_choice% GEQ %strategy_menu_count% goto:strategy_choice
 if %parameter_menu_count% neq 1000 if %menu_choice% GEQ %parameter_menu_count% (
-	set /a foo=%menu_choice%-1
+	set /a foo=%menu_choice% - %parameter_menu_count% + 1
 	goto:menu_!foo!
 )
 goto:menu

@@ -9,14 +9,13 @@
 <br>
 Для использования <b>встроенной</b> в скрипт функции поиска стратегий не требуется скачивать '<i>blockcheck</i>'
 <br>
-
+<br>
 <b>Пример:</b>
 <br>
-<quote>
-..\bin\zapret-v71.2
-..\bin\zapret-win-bundle-master
-</quote>
-
+<i>..\bin\zapret-v71.2</i>
+<br>
+<i>..\bin\zapret-win-bundle-master</i>
+<br>
 <br>
 <img src="https://github.com/alexvruden/my/blob/main/01.png" />
 <br> 

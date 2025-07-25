@@ -1282,7 +1282,6 @@ if defined count_strategy (
 set /a find_strategy=0
 set /a pos=5
 set /a count_strategy=0
-set /a save_count=50
 set /a count_strategy_save=0
 set /a find_strategy_found=0
 set /a find_strategy_kill_error=0
@@ -1350,6 +1349,7 @@ if not defined CURL_MAX_TIME (
 	set CURL_MAX_TIME=2
 	echo.[%pos%G[33mCURL_MAX_TIME not defined[0m
 ) else echo.[%pos%G[36mCURL_MAX_TIME=%CURL_MAX_TIME%[0m
+if %CURL_MAX_TIME% equ 0 set CURL_MAX_TIME=2
 
 if not defined IPVS (
 	set IPVS=4
@@ -1358,6 +1358,7 @@ if not defined IPVS (
 
 set IPVS=4
 echo.[%pos%G[36mIPVS=%IPVS%[0m
+if %IPVS% equ 0 set IPVS=4
 
 if defined ENABLE_HTTP if "x%ENABLE_HTTP%"=="x1" set strategy_file_lst=strategy_http.lst
 if defined ENABLE_HTTP3 if "x%ENABLE_HTTP3%"=="x1" set strategy_file_lst=strategy_http3.lst
@@ -1418,6 +1419,7 @@ if not defined REPEATS (
 	set REPEATS=4
 	echo.[%pos%G[33mREPEATS не указан, используем по-умолчанию [36mREPEATS=4[0m
 ) else echo.[%pos%G[36mREPEATS=%REPEATS%[0m
+if %REPEATS% equ 0 set REPEATS=4
 
 rem -----------------------
 
@@ -1513,6 +1515,9 @@ if %find_strategy_position_start% neq 1 (
 
 if not exist %home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.%find_strategy_position_start% echo.#>%home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.%find_strategy_position_start%
 for /F "skip=1" %%a in (%home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.%find_strategy_position_start%) do set /a find_strategy_found+=1
+
+set /a save_count = 600 / ( %REPEATS% * %CURL_MAX_TIME% )
+
 :@return_find
 echo.
 echo.[%pos%G[32mПоиск стратегии для [33m'%DOMAINS%'[0m [%ip_dom%][31m:%HTTPS_PORT%[0m
@@ -1583,7 +1588,7 @@ echo.[1G[[33mi[0m][%pos%GНайденные стратегии для эти
 echo.[1G[[33mi[0m][%pos%GЕсли хотите начать поиск с начала, удалите файл найденных стратегий '[33m%homenc%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.*[0m'
 echo.
 echo.[1G[[33mi[0m][%pos%GЕсли хотите прервать поиск и вернуться в меню, дождитесь '[36mREPEATS=%REPEATS%[0m' и нажимайте клавишу 'q' несколько раз[0m
-REM echo.[1G[[33mi[0m][%pos%GВы можете вернуться обратно, поиск продолжится.[0m
+echo.[1G[[33mi[0m][%pos%GВы можете вернуться обратно, поиск продолжится.[0m
 
 set ext_old=%find_strategy_position_start%
 for /F "skip=1 tokens=*" %%a in (%home%\strategy\%strategy_file_lst%) do (
@@ -1672,18 +1677,18 @@ for /F "skip=1 tokens=*" %%a in (%home%\strategy\%strategy_file_lst%) do (
 		)
 	)
 )
-<nul set /p =[2K[%pos0%G100%% [%pos1%G!count_strategy![%pos2%G%find_strategy%[%pos3%G!find_strategy_found!
+<nul set /p =8[2K[%ipos0%G^|[%pos0%G100%%[%ipos1%G^|[%pos1%G!count_strategy![%ipos2%G^|[%pos2%G%find_strategy%[%ipos3%G^|[%pos3%G!find_strategy_found![%ipos4%G^|[%pos4%G!find_strategy_kill_error![%ipos5%G^|[%pos5%G!find_strategy_run_error![%ipos6%G^|[%pos6%G [%ipos7%G^|[%pos7%G [%ipos8%G^|
+move /Y %home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.!ext_old! %home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.done 1>nul 2>&1
+echo.[8E[0m
 echo.
-echo.
-move /Y %home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.!ext_old! %home%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.!find_strategy_position_start! 1>nul 2>&1
-echo.[%pos%GГотово 
+echo.[%pos%GГотово
 echo.
 if !find_strategy_found! neq 0 (
 	echo.[%pos%GНайдено стратегий: !find_strategy_found!
-	echo.[%pos%GОписание стратегий в файле '%homenc%\found_strategy.log'
+	echo.[%pos%GОписание стратегий в файле '%homenc%\strategy\%DOMAINS%-%_PORT%-%_HTTP%.done'
 )
 echo.
-goto:@find_strategy_end
+goto:@find_strategy_end1
 
 :@find_strategy_txtmess
 echo.
@@ -1698,6 +1703,7 @@ echo.
 echo.[%pos%GДобавьте директорию в '[33m%homenc%[0m' исключения антивируса.
 :@find_strategy_end
 echo.[8E[0m
+:@find_strategy_end1
 echo.
 echo.[?25h
 echo.[%pos%GНажмите любую клавишу для возврата в меню.

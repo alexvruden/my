@@ -411,42 +411,66 @@ if defined strategy_run (
 echo.
 echo.[%c1%G0.[%c2%GВыход
 echo.
-set "strchoice=0123456789rcсafфаetеуmьvм"
+:@choice_gtr_menu_count
+set "str1choice=0123456789rcсafфаetеуmьvм"
 REM cс		- 'С'тратегии
 REM afфа	- 'А'втоматизация
 REM etеу	- Зав'е'ршить стратегию
 REM mьvм	- Пара'м'етры
-
-choice /N /C:%strchoice% /D r /T 60 /M "#:"
-if %errorlevel% EQU 255 call:cerror 391
-if %errorlevel% EQU 0 call:cerror 392
-REM if %errorlevel% GEQ 26 goto:...
-if %errorlevel% GEQ 22 goto:param_trigger
-if %errorlevel% GEQ 18 goto:terminate_trigger
-if %errorlevel% GEQ 14 goto:srv_menu_trigger
-if %errorlevel% GEQ 12 goto:expand_strategy
-if %errorlevel% EQU 11 goto:menu
-set /a first_digit=%errorlevel% - 1
+set /a first_digit=1000
+choice /N /C:%str1choice% /D r /T 60 /M "#:"
+if %errorlevel% EQU 255 call:cerror 421
+if %errorlevel% EQU 0 call:cerror 422
+set /a _errorlevel=%errorlevel%
+set /a first_digit=%_errorlevel% - 1
+set "first_digit_char="
+for /l %%i in (0,1,50) do (
+	if %first_digit% neq 1000 (
+		if "x!str1choice:~%%i,1!"=="x!str1choice:~%first_digit%,1!" (
+			set first_digit_char=!str1choice:~%%i,1!
+			goto:@break435
+		)
+	)
+)
+:@break435
+REM if %_errorlevel% GEQ 26 goto:...
+if %_errorlevel% GEQ 22 goto:param_trigger
+if %_errorlevel% GEQ 18 goto:terminate_trigger
+if %_errorlevel% GEQ 14 goto:srv_menu_trigger
+if %_errorlevel% GEQ 12 goto:expand_strategy
+if %_errorlevel% EQU 11 goto:menu
 echo.[2F
-REM for /l %%i in (1,1,50) do (
-	REM if "x!strchoice:~%%i,1!"=="x!strchoice:~%first_digit%,1!" set foo=!strchoice:~%%i,1!
-REM )
-REM choice /N /C:0123456789z /D z /T 3 /M "#:%foo%"
+set "str2choice=0123456789z"
+set /a second_digit=1000
+set "second_digit_char="
 choice /N /C:0123456789z /D z /T 3 /M "#:"
-if %errorlevel% EQU 255 call:cerror 402
-if %errorlevel% EQU 0 call:cerror 403
+if %errorlevel% EQU 255 call:cerror 440
+if %errorlevel% EQU 0 call:cerror 441
 if %errorlevel% EQU 11 (
 	set /a menu_choice=%first_digit%
 ) else (
 	set /a second_digit=%errorlevel% - 1
 	set /a menu_choice=%first_digit% * 10 + !second_digit!
 )
-echo.[1F[M
+for /l %%i in (0,1,50) do (
+	if %second_digit% neq 1000 (
+		if "x!str2choice:~%%i,1!"=="x!str2choice:~%second_digit%,1!" (
+			set second_digit_char=!str2choice:~%%i,1!
+			goto:@break462
+		)
+	)
+)
+:@break462
+echo.[1F[5M#: %first_digit_char%%second_digit_char%
+timeout /T 1 /NOBREAK >nul
+if %menu_choice% gtr %menu_count% (
+	echo.[2F[5M
+	goto:@choice_gtr_menu_count
+)
 echo.
 if %menu_choice% equ 0 goto:menu_0
 if %find_strategy_menu_count% neq 1000 if %menu_choice% equ %find_strategy_menu_count% goto:find_strategy
 if %blockcheck_menu_count% neq 1000 if %menu_choice% equ %blockcheck_menu_count% goto:blockcheck
-if %menu_choice% gtr %menu_count% goto:menu
 if %terminate_count% neq 1000 if %menu_choice% geq %terminate_count% goto:terminate
 if %srv_menu_count% neq 1000 if %menu_choice% geq %srv_menu_count% goto:menu_srv
 if %strategy_menu_count% neq 1000 if %menu_choice% geq %strategy_menu_count% goto:strategy_choice

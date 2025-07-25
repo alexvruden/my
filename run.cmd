@@ -1080,16 +1080,12 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 			) else if "x!fletter!"=="x--wf-raw" (
 				set "LN=%%N"
 				if "x!LN:~0,1!"=="x@" (
-					if "x%custom_strategy%"=="xon" (
-						if exist %parse_str_strategy_apath%\!LN:~1! (
-							set sWinDivert=--wf-raw=@%parse_str_strategy_apath%\!LN:~1!
-						) else (
-							set "skip_WinDivert=on"
-							if "x%custom_strategy%"=="xon" (
-								call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'%homenc%\strategy\%strategy_name%\custom\!LN:~0!'"
-							) else call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'%homenc%\strategy\%strategy_name%\!LN:~0!'"
-							call:cecho xx31 "%str_file_path_for_cecho%\%%~I :" "Параметр" "!fletter!=%%N" "отброшен"	
-						)
+					if exist %parse_str_strategy_apath%\!LN:~1! (
+						set sWinDivert=--wf-raw=@%parse_str_strategy_apath%\!LN:~1!
+					) else (
+						set "skip_WinDivert=on"
+						call:cecho x1x3 "%str_file_path_for_cecho%\%%~I :" "Ошибка." "Файл не найден:" "'%homenc%\strategy\%strategy_name%\!LN:~1!'"
+						call:cecho xx31 "%str_file_path_for_cecho%\%%~I :" "Параметр" "!fletter!=%%N" "отброшен"	
 					)
 				) else (
 						set "skip_WinDivert=on"

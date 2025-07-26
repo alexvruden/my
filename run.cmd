@@ -1107,6 +1107,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 					if "x!psabout!"=="x" ( set "sabout=!sabout! !sWinDivert:~5!" ) else ( set "sabout=!sabout! !psabout!" )
 				)
 				set "LN="
+				set "psabout="
 				set /a parse_mayok=1
 			) else if "x!fletter!"=="x--wf-tcp" (
 				if "x%%~N"=="x" (
@@ -1119,6 +1120,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 				) else (
 					if "x!psabout!"=="x" ( set "sabout=!sabout! !sWinDivert:~5!" ) else ( set "sabout=!sabout! !psabout!" )
 				)
+				set "psabout="
 				set /a parse_mayok=1
 			) else if "x!fletter!"=="x--wf-udp" (
 				if "x%%~N"=="x" (
@@ -1131,6 +1133,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 				) else (
 					if "x!psabout!"=="x" ( set "sabout=!sabout! !sWinDivert:~5!" ) else ( set "sabout=!sabout! !psabout!" )
 				)
+				set "psabout="
 				set /a parse_mayok=1
 			) else if "x!fletter!"=="x--filter-udp" (
 				if "x%%~N"=="x" (
@@ -1236,6 +1239,7 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 				) else ( 
 					if not "x!psabout!"=="x" set "sabout=!sabout! !psabout!" 
 				)
+				set "psabout="
 			) else (
 				set "skip_profile=off"
 			)

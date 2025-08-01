@@ -465,7 +465,8 @@ REM afфа	- 'А'втоматизация
 REM etеу	- Зав'е'ршить стратегию
 REM mьvм	- Пара'м'етры
 set /a first_digit=1000
-choice /N /C:%str1choice% /D r /T 60 /M "#:"
+<nul set /p "=7#: "
+choice /N /C:%str1choice% /D r /T 60 /M "#:" 1>nul 2>&1
 if %errorlevel% EQU 255 call:cerror 421
 if %errorlevel% EQU 0 call:cerror 422
 set /a _errorlevel=%errorlevel%
@@ -486,11 +487,12 @@ if %_errorlevel% GEQ 18 goto:terminate_trigger
 if %_errorlevel% GEQ 14 goto:srv_menu_trigger
 if %_errorlevel% GEQ 12 goto:strategy_trigger
 if %_errorlevel% EQU 11 goto:menu
-echo.[2F
 set "str2choice=0123456789z"
 set /a second_digit=1000
 set "second_digit_char="
-choice /N /C:0123456789z /D z /T 3 /M "#:"
+<nul set /p "=8#: %first_digit_char%"
+
+choice /N /C:0123456789z /D z /T 3 /M "#:" 1>nul 2>&1
 if %errorlevel% EQU 255 call:cerror 440
 if %errorlevel% EQU 0 call:cerror 441
 if %errorlevel% EQU 11 (
@@ -508,13 +510,13 @@ for /l %%i in (0,1,50) do (
 	)
 )
 :@break462
-echo.[1F[5M#: %first_digit_char%%second_digit_char%
+<nul set /p "=8#: %first_digit_char%%second_digit_char%"
 timeout /T 1 /NOBREAK >nul
 if %menu_choice% gtr %menu_count% (
-	echo.[2F[5M
+	<nul set /p =8[2K
 	goto:@choice_gtr_menu_count
 )
-echo.
+<nul set /p =8[2E
 if %menu_choice% equ 0 goto:menu_0
 if %find_strategy_menu_count% neq 1000 if %menu_choice% equ %find_strategy_menu_count% goto:find_strategy
 if %blockcheck_menu_count% neq 1000 if %menu_choice% equ %blockcheck_menu_count% goto:blockcheck
@@ -1495,7 +1497,8 @@ if defined count_strategy (
 	call:check_kill
 	echo.
 	echo.
-	echo.[%_pos%G[[33mi[0m][%pos%GПредыдущий поиск был прерван на позиции '[33m%count_strategy%[0m', продолжим поиск с неё.
+	echo.[%_pos%G[[33mi[0m][%pos%GПредыдущий поиск был завершён на позиции '[33m%count_strategy%[0m', продолжим поиск.
+	set /a line_begin=%line_begin_mem%+%count_strategy%
 	goto:@return_find
 )
 set /a find_strategy_found=0
@@ -1676,17 +1679,7 @@ if %total_strategy% equ 0 (
 	goto:@find_strategy_end
 )
 call:progress_in_percent_begin %total_strategy%
-set foo=0
-set "curl_dns="
-for /f %%a in ('2^>nul nslookup iana.org ^| find "192.0.43.8"') do set foo=1
-if %foo% equ 1 (
-    echo.[%_pos%G[[33mi[0m][%pos%GПроверка DNS пройдена
-) else (
-	echo.[%_pos%G[[31mx[0m][%pos%GОшибка DNS.
-	echo.[%pos%GРекомендуется установить известные DNS-серверы и настроить DoH.
-	rem echo.[%pos%GСкрипт будет использовать зашифрованный DNS CloudFlare.
-	rem set curl_dns=--dns-servers "1.1.1.1:853"
-)
+set /a ap2=0
 echo.[%_pos%G[[33mi[0m][%pos%GПоиск IP для [33m%DOMAINS%[0m
 rem -----------------bug powershell WebRequest
 REM for /f %%a in ('2^>nul powershell -command "Invoke-WebRequest -Uri https://dns.google/resolve?name=%DOMAINS% | Select-Object Content | Format-List -Property *"') do (
@@ -1697,7 +1690,7 @@ REM )
 rem -----------------bug powershell WebRequest
 
 set "_resolve="
-for /f "delims=" %%a in ('2^>nul %CURL% https://dns.google/resolve?name^=%DOMAINS%') do (
+for /f "delims=" %%a in ('2^>nul %CURL% --max-time 3 https://dns.google/resolve?name^=%DOMAINS%') do (
 	set _resolve=%%a
 )
 
@@ -1716,6 +1709,18 @@ if not defined ip_dom (
 set ip_dom=%ip_dom:"=%
 set ip_dom=%ip_dom: =%
 echo.[%_pos%G[[32m+[0m][%pos%GНайден IP: [33m%ip_dom%[0m
+
+set foo=0
+set "curl_dns="
+for /f %%a in ('2^>nul nslookup iana.org ^| find "192.0.43.8"') do set foo=1
+if %foo% equ 1 (
+    echo.[%_pos%G[[33mi[0m][%pos%GПроверка DNS пройдена
+) else (
+	echo.[%_pos%G[[31mx[0m][%pos%GОшибка DNS.
+	echo.[%pos%GРекомендуется установить известные DNS-серверы и настроить DoH.
+	rem echo.[%pos%GСкрипт будет использовать зашифрованный DNS CloudFlare.
+	rem set curl_dns=--dns-servers "1.1.1.1:853"
+)
 
 if "x%type_find%"=="x[HTTPS]" (
 	set curl_cmd_scan=%curl_dns% --connect-to %DOMAINS%::[%ip_dom%]:%HTTPS_PORT% -ISs -A Mozilla --max-time %CURL_MAX_TIME% %TLSver% %TLSmax% https://%DOMAINS%
@@ -1743,7 +1748,7 @@ if not defined find_strategy_position_end (
 )
 if %find_strategy_position_end% neq 0 (
 	echo.[%_pos%G[[33mi[0m][%pos%GОбнаружен файл предыдущего поиска '[33m%homenc%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.%find_strategy_position_end%[0m'
-	echo.[%_pos%G[[33mi[0m][%pos%GПоиск был прерван на позиции '[33m%find_strategy_position_end%[0m', продолжим поиск.
+	echo.[%_pos%G[[33mi[0m][%pos%GПоиск был завершен на позиции '[33m%find_strategy_position_end%[0m', продолжим поиск.
 )
 
 if exist %home%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.%find_strategy_position_end% (
@@ -1754,7 +1759,6 @@ if %find_strategy_position_end% geq %total_strategy% (
 	goto:@find_strategy_end
 )
 set ext_old=%find_strategy_position_end%
-set /a count_strategy_start=%find_strategy_position_end%
 
 rem ---------------------------------------------------------
 set /a count_strategy=%find_strategy_position_end%
@@ -1771,10 +1775,12 @@ rem ---------------------------------------------------------
 
 if exist %home%\strategy\error_%DOMAINS%-%_PORT%-%_HTTP%.log del /f /q %home%\strategy\error_%DOMAINS%-%_PORT%-%_HTTP%.log 1>nul 2>&1
 
+set /a line_begin=%line_begin%+%count_strategy%
+set /a line_count=%line_begin%
+set /a line_begin_mem=%line_begin%
 
 :@return_find
 
-set /a line_begin=%line_begin%+%count_strategy%
 
 echo.
 echo.[%pos%G[32mПоиск стратегии для [33m'%DOMAINS%'[0m [%ip_dom%][31m:%HTTPS_PORT%[0m
@@ -1896,165 +1902,163 @@ set /a ipos7dec=%ipos7%-1
 set /a pos6cut=%ipos7dec%-%pos6%
 rem add 9 ANSI color symbols
 set /a pos6cut+=9
-set /a line_count=%line_begin%
 for /F "skip=%line_begin% tokens=*" %%a in (%home%\strategy\strategy.lst) do (
-	set /a line_count+=1
 	set read_line=%%a
 	set foo=!read_line: =!
 	set comment_char=!read_line: =!
 	set comment_char=!comment_char:~0,1!
 	if "x!comment_char!"=="x[" goto:@find_strategy_break
-	REM if not "x!foo!"=="x" if not "x!comment_char!"=="x#" (
-		set /a count_strategy+=1
-		if !count_strategy! gtr %count_strategy_start% (
-			call:progress_in_percent_count ap2
-			set "foo="
-			for /L %%c in (%pos6%,1,%ipos7dec%) do set "foo=!foo! "
-			<nul set /p =8[%pos0%G!ap2!%%[%pos1%G!count_strategy![%pos2%G%total_strategy%[%pos3%G!find_strategy_found![%pos4%G!find_strategy_run_error![%pos5%G!find_strategy_kill_error![%pos6%G!foo![%pos7%G     [?25l[8m
-			set /a read_linecount=0
-			for /L %%c in (500,-1,0) do (
-				if "x!read_line:~%%c,2!"=="x--" (
-					set "read_line!read_linecount!=!read_line:~%%c!"
-					set "read_line=!read_line:~0,%%c!"
-					set /a read_linecount+=1
-				)
-			)
-			set /a read_linecount-=1
-			set "winws_arg_str_="
-			set exist_fake_tls_std=0
-			for /L %%c in (!read_linecount!,-1,0) do (
-				set /a parse_desync = 0
-				if defined read_line%%c (
-					for /F "tokens=1,2 delims==" %%d in ("!read_line%%c!") do (
-						if "x%%d"=="x--dpi-desync-fake-tls" (
-							set "foo=%%e"
-							set "foo=!foo: =!"
-							if "x!foo!"=="x" (
-								rem found '!'
-								set exist_fake_tls_std=1
-								set "winws_arg_str_=!winws_arg_str_! --dpi-desync-fake-tls=^! "
-							) else if "x!foo:~0,2!"=="x0x" (
-								rem found HEX
-								set "winws_arg_str_=!winws_arg_str_! !read_line%%c!"
-							) else (
-								rem found filename?
-								set count_f=0
-								for /L %%f in (500,-1,0) do (
-									if !count_f! equ 0 if "x!foo:~%%f,1!"=="x/" (
-										set count_f=%%f
-										set foo=!foo:~%%f!
-										set foo=!foo:~1!
-									)
-								)
-								set "winws_arg_str_=!winws_arg_str_! %%d=%fakedir%\!foo! "
-							)
-						) else if "x%%d"=="x--dpi-desync-fake-unknown" (
-							set /a parse_desync = 1
-						) else if "x%%d"=="x--dpi-desync-fake-syndata" (
-							set /a parse_desync = 1
-						) else if "x%%d"=="x--dpi-desync-fake-wireguard" (
-							set /a parse_desync = 1
-						) else if "x%%d"=="x--dpi-desync-fake-dht" (
-							set /a parse_desync = 1
-						) else if "x%%d"=="x--dpi-desync-fake-discord" (
-							set /a parse_desync = 1
-						) else if "x%%d"=="x--dpi-desync-fake-stun" (
-							set /a parse_desync = 1
-						) else if "x%%d"=="x--dpi-desync-udplen-pattern" (
-							set /a parse_desync = 1
-						) else if "x%%d"=="x--dpi-desync-fake-quic" (
-							set /a parse_desync = 1
-						) else if "x%%d"=="x--dpi-desync-fake-unknown-udp" (
-							set /a parse_desync = 1
-						) else (
-							set "winws_arg_str_=!winws_arg_str_! !read_line%%c!"
-						)
-						
-						if !parse_desync! equ 1 (
-							set "foo=%%e"
-							set "foo=!foo: =!"
-							if "x!foo:~0,2!"=="x0x" (
-								set "winws_arg_str_=!winws_arg_str_! !read_line%%c!"
-							) else (
-								rem found filename?
-								set count_f=0
-								for /L %%f in (500,-1,0) do (
-									if !count_f! equ 0 if "x!foo:~%%f,1!"=="x/" (
-										set count_f=%%f
-										set foo=!foo:~%%f!
-										set foo=!foo:~1!
-									)
-								)
-								set "winws_arg_str_=!winws_arg_str_! %%d=%fakedir%\!foo! "
-							)
-						)
-					)
-				)
-			)
-			%winwsdir%\winws.exe --daemon !winws_arg_str_! 1>nul 2>&1
-			set winws_ret_code=!errorlevel!
-			if !winws_ret_code! neq 0 (
-				echo.!line_count!: %winwsdir%\winws.exe --dry-run !winws_arg_str_! >>%home%\strategy\error_%DOMAINS%-%_PORT%-%_HTTP%.log
-			)
-			call:check_run
-			if !errorlevel! equ 0 (
-				for /l %%c in (1,1,%REPEATS%) do (
-					set curl_ret_code=0
-					%CURL% %curl_cmd_scan% 1>nul 2>&1
-					set curl_ret_code_str=!errorlevel!
-					set /a curl_ret_code+=!curl_ret_code_str!
-					if %%c equ %REPEATS% (
-						if !curl_ret_code! equ 0 (
-							set /a find_strategy_found+=1
-							echo.!line_count!: !winws_arg_str_! >>%home%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.!ext_old!
-						)
-					)
-					if !curl_ret_code_str! equ 0 (
-						set "curl_ret_code_str=0: [32mOK[0m                       "
-					) else if !curl_ret_code_str! equ 2 (
-						if %%c equ %REPEATS% goto:@curl_2
-						set "curl_ret_code_str=6: [31mFAILED_INIT[0m              "
-					) else if !curl_ret_code_str! equ 6 (
-						if %%c equ %REPEATS% goto:@curl_6
-						set "curl_ret_code_str=6: [31mCOULDNT_RESOLVE_HOST[0m     "
-					) else if !curl_ret_code_str! equ 28 (
-						set "curl_ret_code_str=28: [33mOPERATION_TIMEDOUT[0m      "
-					) else if !curl_ret_code_str! equ 35 (
-						set "curl_ret_code_str=35: [33mSSL_CONNECT_ERROR[0m       "
-					) else (
-						set "curl_ret_code_str=!curl_ret_code_str!: [33mUNKNOWN_ERROR[0m           "
-					)
-					set curl_ret_code_str=!curl_ret_code_str:~0,%pos6cut%!
-					<nul set /p =8[%pos0%G!ap2!%%[%pos1%G!count_strategy![%pos2%G%total_strategy%[%pos3%G!find_strategy_found![%pos4%G!find_strategy_run_error![%pos5%G!find_strategy_kill_error![%pos6%G!curl_ret_code_str![%pos7%G%%c[?25l[8m
-				)
-				call:check_kill 
-				if !errorlevel! neq 0 set /a find_strategy_kill_error+=1
-			) else (
-				set /a find_strategy_run_error+=1
-				<nul set /p =8[%pos0%G!ap2!%%[%pos1%G!count_strategy![%pos2%G%total_strategy%[%pos3%G!find_strategy_found![%pos4%G!find_strategy_run_error![%pos5%G!find_strategy_kill_error![%pos6%G-[%pos7%G-[?25l[8m
-			)
-			
-			if not "x!ap2_old!"=="x!ap2!" (
-				if exist %home%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.!ext_old! (
-					move /Y %home%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.!ext_old! %home%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.!count_strategy! 1>nul 2>&1
-				) else echo.#>%home%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.!count_strategy!
-				set ext_old=!count_strategy!
-				set "ap2_old=!ap2!"
-			)
-			set "foo="
-			for /L %%c in (%pos6%,1,%ipos7dec%) do set "foo=!foo! "
-			<nul set /p =8[%pos0%G!ap2!%%[%pos1%G!count_strategy![%pos2%G%total_strategy%[%pos3%G!find_strategy_found![%pos4%G!find_strategy_run_error![%pos5%G!find_strategy_kill_error![%pos6%G!foo![%pos7%G[32mпауза[0m[?25l[8m
-			choice /N /C:qйp /D p /T 1
-			if !errorlevel! EQU 255 goto:@find_strategy_end_choice
-			if !errorlevel! EQU 0 goto:@find_strategy_end_choice
-			if !errorlevel! EQU 1 goto:@find_strategy_end_choice
-			if !errorlevel! EQU 2 goto:@find_strategy_end_choice
-		) else (
-			call:progress_in_percent_count ap2
-			<nul set /p =8[%pos0%G!ap2!%%[%pos1%G!count_strategy![%pos2%G%total_strategy%[%pos3%G!find_strategy_found![%pos4%G-[%pos5%G-[%pos6%G-[%pos7%G-[?25l[8m
-			set "ap2_old=!ap2!"
+	set "foo="
+	for /L %%c in (%pos6%,1,%ipos7dec%) do set "foo=!foo! "
+	<nul set /p =8[%pos0%G!ap2!%%[%pos1%G!count_strategy![%pos2%G%total_strategy%[%pos3%G!find_strategy_found![%pos4%G!find_strategy_run_error![%pos5%G!find_strategy_kill_error![%pos6%G!foo![%pos7%G     [?25l[8m
+	REM set /a foo=0
+	REM for /f %%i in ('2^>nul %CURL% --max-time 1 one.one.one.one ^| find "cloudflare"') do set /a foo=1
+	REM if !foo! neq 1 goto:@find_strategy_no_ping
+	%CURL% --max-time 1 one.one.one.one 1>nul 2>&1
+	if !errorlevel! neq 0 goto:@find_strategy_no_ping
+	call:progress_in_percent_count ap2
+	set /a line_count+=1
+	set /a count_strategy+=1
+	set /a read_linecount=0
+	for /L %%c in (500,-1,0) do (
+		if "x!read_line:~%%c,2!"=="x--" (
+			set "read_line!read_linecount!=!read_line:~%%c!"
+			set "read_line=!read_line:~0,%%c!"
+			set /a read_linecount+=1
 		)
-	REM )
+	)
+	set /a read_linecount-=1
+	set "winws_arg_str_="
+	set exist_fake_tls_std=0
+	for /L %%c in (!read_linecount!,-1,0) do (
+		set /a parse_desync = 0
+		if defined read_line%%c (
+			for /F "tokens=1,2 delims==" %%d in ("!read_line%%c!") do (
+				if "x%%d"=="x--dpi-desync-fake-tls" (
+					set "foo=%%e"
+					set "foo=!foo: =!"
+					if "x!foo!"=="x" (
+						rem found '!'
+						set exist_fake_tls_std=1
+						set "winws_arg_str_=!winws_arg_str_! --dpi-desync-fake-tls=^! "
+					) else if "x!foo:~0,2!"=="x0x" (
+						rem found HEX
+						set "winws_arg_str_=!winws_arg_str_! !read_line%%c!"
+					) else (
+						rem found filename?
+						set count_f=0
+						for /L %%f in (500,-1,0) do (
+							if !count_f! equ 0 if "x!foo:~%%f,1!"=="x/" (
+								set count_f=%%f
+								set foo=!foo:~%%f!
+								set foo=!foo:~1!
+							)
+						)
+						set "winws_arg_str_=!winws_arg_str_! %%d=%fakedir%\!foo! "
+					)
+				) else if "x%%d"=="x--dpi-desync-fake-unknown" (
+					set /a parse_desync = 1
+				) else if "x%%d"=="x--dpi-desync-fake-syndata" (
+					set /a parse_desync = 1
+				) else if "x%%d"=="x--dpi-desync-fake-wireguard" (
+					set /a parse_desync = 1
+				) else if "x%%d"=="x--dpi-desync-fake-dht" (
+					set /a parse_desync = 1
+				) else if "x%%d"=="x--dpi-desync-fake-discord" (
+					set /a parse_desync = 1
+				) else if "x%%d"=="x--dpi-desync-fake-stun" (
+					set /a parse_desync = 1
+				) else if "x%%d"=="x--dpi-desync-udplen-pattern" (
+					set /a parse_desync = 1
+				) else if "x%%d"=="x--dpi-desync-fake-quic" (
+					set /a parse_desync = 1
+				) else if "x%%d"=="x--dpi-desync-fake-unknown-udp" (
+					set /a parse_desync = 1
+				) else (
+					set "winws_arg_str_=!winws_arg_str_! !read_line%%c!"
+				)
+				
+				if !parse_desync! equ 1 (
+					set "foo=%%e"
+					set "foo=!foo: =!"
+					if "x!foo:~0,2!"=="x0x" (
+						set "winws_arg_str_=!winws_arg_str_! !read_line%%c!"
+					) else (
+						rem found filename?
+						set count_f=0
+						for /L %%f in (500,-1,0) do (
+							if !count_f! equ 0 if "x!foo:~%%f,1!"=="x/" (
+								set count_f=%%f
+								set foo=!foo:~%%f!
+								set foo=!foo:~1!
+							)
+						)
+						set "winws_arg_str_=!winws_arg_str_! %%d=%fakedir%\!foo! "
+					)
+				)
+			)
+		)
+	)
+	%winwsdir%\winws.exe --daemon !winws_arg_str_! 1>nul 2>&1
+	set winws_ret_code=!errorlevel!
+	if !winws_ret_code! neq 0 (
+		echo.!line_count!: %winwsdir%\winws.exe --dry-run !winws_arg_str_! >>%home%\strategy\error_%DOMAINS%-%_PORT%-%_HTTP%.log
+	)
+	call:check_run
+	if !errorlevel! equ 0 (
+		for /l %%c in (1,1,%REPEATS%) do (
+			set curl_ret_code=0
+			%CURL% %curl_cmd_scan% 1>nul 2>&1
+			set curl_ret_code_str=!errorlevel!
+			set /a curl_ret_code+=!curl_ret_code_str!
+			if %%c equ %REPEATS% (
+				if !curl_ret_code! equ 0 (
+					set /a find_strategy_found+=1
+					echo.!line_count!: !winws_arg_str_! >>%home%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.!ext_old!
+					move /Y %home%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.!ext_old! %home%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.!count_strategy! 1>nul 2>&1
+					set ext_old=!count_strategy!
+				)
+			)
+			if !curl_ret_code_str! equ 0 (
+				set "curl_ret_code_str=0: [32mOK[0m                       "
+			) else if !curl_ret_code_str! equ 2 (
+				if %%c equ %REPEATS% goto:@find_strategy_curl_2
+				set "curl_ret_code_str=2: [31mFAILED_INIT[0m              "
+			) else if !curl_ret_code_str! equ 6 (
+				if %%c equ %REPEATS% goto:@find_strategy_curl_6
+				set "curl_ret_code_str=6: [31mCOULDNT_RESOLVE_HOST[0m     "
+			) else if !curl_ret_code_str! equ 28 (
+				set "curl_ret_code_str=28: [33mOPERATION_TIMEDOUT[0m      "
+			) else if !curl_ret_code_str! equ 35 (
+				set "curl_ret_code_str=35: [33mSSL_CONNECT_ERROR[0m       "
+			) else (
+				set "curl_ret_code_str=!curl_ret_code_str!: [33mUNKNOWN_ERROR[0m           "
+			)
+			set curl_ret_code_str=!curl_ret_code_str:~0,%pos6cut%!
+			<nul set /p =8[%pos0%G!ap2!%%[%pos1%G!count_strategy![%pos2%G%total_strategy%[%pos3%G!find_strategy_found![%pos4%G!find_strategy_run_error![%pos5%G!find_strategy_kill_error![%pos6%G!curl_ret_code_str![%pos7%G%%c[?25l[8m
+		)
+		call:check_kill 
+		if !errorlevel! neq 0 set /a find_strategy_kill_error+=1
+	) else (
+		set /a find_strategy_run_error+=1
+		<nul set /p =8[%pos0%G!ap2!%%[%pos1%G!count_strategy![%pos2%G%total_strategy%[%pos3%G!find_strategy_found![%pos4%G!find_strategy_run_error![%pos5%G!find_strategy_kill_error![%pos6%G-[%pos7%G-[?25l[8m
+	)
+	
+	if not "x!ap2_old!"=="x!ap2!" (
+		if exist %home%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.!ext_old! (
+			move /Y %home%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.!ext_old! %home%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.!count_strategy! 1>nul 2>&1
+		) else echo.#>%home%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.!count_strategy!
+		set ext_old=!count_strategy!
+		set "ap2_old=!ap2!"
+	)
+	set "foo="
+	for /L %%c in (%pos6%,1,%ipos7dec%) do set "foo=!foo! "
+	<nul set /p =8[%pos0%G!ap2!%%[%pos1%G!count_strategy![%pos2%G%total_strategy%[%pos3%G!find_strategy_found![%pos4%G!find_strategy_run_error![%pos5%G!find_strategy_kill_error![%pos6%G!foo![%pos7%G[32mпауза[0m[?25l[8m
+	choice /N /C:qйp /D p /T 1  1>nul 2>&1
+	if !errorlevel! EQU 255 goto:@find_strategy_end_choice
+	if !errorlevel! EQU 0 goto:@find_strategy_end_choice
+	if !errorlevel! EQU 1 goto:@find_strategy_end_choice
+	if !errorlevel! EQU 2 goto:@find_strategy_end_choice
 )
 :@find_strategy_break
 set "foo="
@@ -2074,14 +2078,14 @@ if %find_strategy_found% neq 0 (
 echo.
 goto:@find_strategy_end
 
-:@curl_2
+:@find_strategy_curl_2
 echo.[12E[0m
 call:check_kill 
 echo.[%_pos%G[[31mx[0m][%pos%G[31mInternal libcurl Error[0m
 echo.
 goto:@find_strategy_end
 
-:@curl_6
+:@find_strategy_curl_6
 echo.[12E[0m
 call:check_kill 
 echo.[%_pos%G[[31mx[0m][%pos%G[31mОшибка [0mcURL "[31mCould not resolve host[0m". Не удалось найти IP-адрес для указанного доменного имени.[0m
@@ -2116,6 +2120,12 @@ REM pause >nul
 echo.[0m
 echo.[?25h
 goto:menu
+:@find_strategy_no_ping
+echo.[12E
+echo.[0m
+echo.
+echo.[%pos%G[31mНет интернета.[0m Поиск ставим на паузу. Восстановите связь и можно продолжить поиск.
+goto:@find_strategy_end
 :@find_strategy_end
 echo.
 echo.[?25h

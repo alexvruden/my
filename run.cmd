@@ -133,7 +133,10 @@ echo.[?25l
 cls
 echo.[5G[2mПроверка обновлений.[0m
 call:check_update
-
+echo.[5G[2mПроверка стратегий.[0m
+cd /d %home%\strategy
+for /f "delims=" %%i in ('2^>nul dir /b *.zip') do if not exist %%~ni tar -xf "%%~i" 1>nul 2>&1
+cd /d %home%
 :menu
 cls
 for /f %%i in ('2^>nul powershell -command "$h=get-host;$h.ui.rawui.windowsize.width"') do set mode_con_cols_W=%%i

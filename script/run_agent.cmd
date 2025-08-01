@@ -49,19 +49,25 @@ if "x%agent_mode%"=="xstart" goto:@start
 
 :@ping
 timeout /T %loop_period% /NOBREAK >nul
-ping /n 1 %ip_router% >nul
+ping /n 1 %ip_router% | find "TTL=" 1>nul 2>&1
 set /a ping_status_i=%errorlevel%
 set /a ping_change+=1
 if %ping_status_i% equ 0 (
-	if %show_message_stdout% equ 1 echo.ping %ip_router% - ok
-	if %ping_change% geq %stop_after_num_err_ping% (
+	set "curtime=!TIME:~0,2!.!TIME:~3,2!.!TIME:~6,2!"
+	set "curtime=!curtime: =0!"
+	if %show_message_stdout% equ 1 echo.!curtime! ping %ip_router% - ok
+	set /a foo=%stop_after_num_err_ping%
+	if %ping_ok% equ 0 if %ping_err% equ 0 set /a foo=1
+	if %ping_change% geq !foo! (
 		set /a ping_change=0
-		ping /n 4 %host_e% >nul
+		ping /n 4 %host_e% | find "TTL=" 1>nul 2>&1
 		set /a ping_status_e=!errorlevel!
 		if !ping_status_e! equ 0 (
-			if %show_message_stdout% equ 1 echo.ping %host_e% - ok
+			set "curtime=!TIME:~0,2!.!TIME:~3,2!.!TIME:~6,2!"
+			set "curtime=!curtime: =0!"
+			if %show_message_stdout% equ 1 echo.!curtime! ping %host_e% - ok
 		) else (
-			if %show_message_stdout% equ 1 echo.ping %host_e% - loss [проблема с роутером?]
+			if %show_message_stdout% equ 1 echo.!curtime! ping %host_e% - loss [проблема с роутером?]
 		)
 	)
 ) else if %show_message_stdout% equ 1 echo.ping %ip_router% - loss
@@ -81,7 +87,7 @@ if %foo% neq 0 (
 		)
 		set /a ping_err_count+=1
 		if !ping_err_count! equ %stop_after_num_err_ping% (
-			call:@message log "нет интернета, стоп 'winws.exe'"
+			call:@message log "нет интернета, стоп"
 			if %stop_no_inet% equ 0 start "x" %home%\run.cmd stop
 			call:@message log "ждем появления интернета"
 			set /a stop_no_inet=1

@@ -1,0 +1,32 @@
+#tcp: user
+
+#tcp: user
+--wf-tcp=1024-65535
+
+$1: hostlist
+HOSTLIST_NOAUTO
+--dpi-desync=fake,multidisorder
+--dpi-desync-split-pos=midsld
+--dpi-desync-repeats=6
+--dpi-desync-fooling=badseq,md5sig
+
+--new
+
+$2: ipset
+
+IPSET
+--dpi-desync=fake,multidisorder
+--dpi-desync-split-pos=midsld
+--dpi-desync-repeats=6
+--dpi-desync-fooling=badseq,md5sig
+
+--new
+
+$3: hostlist-auto
+--dpi-desync=fake,multidisorder
+--dpi-desync-split-pos=midsld
+--dpi-desync-repeats=6
+--dpi-desync-fooling=badseq,md5sig
+--hostlist-auto=hostlist-auto.txt
+
+# profile#0

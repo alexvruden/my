@@ -1,0 +1,14 @@
+#tcp 443 
+
+$cloudflare_dns
+--wf-raw=@cloudflare_dns.raw
+
+#$1: cloudflare
+--dpi-desync=fake
+--dpi-desync-fooling=badseq
+
+#--dpi-desync=fake,multidisorder
+#--dpi-desync-split-pos=1,midsld
+#--dpi-desync-repeats=11
+#--dpi-desync-fooling=badseq
+#--dpi-desync-fake-tls-mod=rnd,dupsid,sni=www.google.com

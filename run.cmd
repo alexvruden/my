@@ -35,7 +35,6 @@ set /a profile_count=0
 set "arg_1=%~1"
 set "arg_2=%~2"
 set "arg_3=%~3"
-
 net session >nul 2>&1
 if %errorLevel% neq 0 ( 
 	echo.
@@ -55,7 +54,6 @@ if not exist %home%\run.config (
 	echo.new_version_available=
 	echo.
 	echo.daemon=on
-	echo.debug=off
 	echo.custom_strategy=off
 	echo.IPsetStatus=off
 	echo.
@@ -64,7 +62,7 @@ if not exist %home%\run.config (
 	echo.ip_router=
 	echo.agent_mode=start
 	echo.agent_start_strategy=none
-	echo.agent_start_params=1000
+	echo.agent_start_params=100
 	)>%home%\run.config
 )
 set "foo="
@@ -79,13 +77,12 @@ if %errorLevel% neq 0 (
 		)
 	)
 )
-
 for /F "skip=1 eol=# tokens=1,2 delims==" %%a in (%home%\run.config) do set %%~a=%%~b
 set foo=%%a
 set foo=!foo: =!
 if not "x!foo!"=="x" (
 	set /a aoo=0
-	for %%i in (show_popup new_version_available check_update daemon debug custom_strategy IPsetStatus ip_router agent_mode agent_start_strategy agent_start_params) do (
+	for %%i in (show_popup new_version_available check_update daemon custom_strategy IPsetStatus ip_router agent_mode agent_start_strategy agent_start_params) do (
 		if "x%%i"=="x!foo!" set /a aoo=1
 		<nul set /p =.
 	)
@@ -104,7 +101,6 @@ set /a goo=64-%goo%
 for /L %%c in (1,1,%goo%) do set "foo=!foo! "
 set "foo=%foo%https://github.com/alexvruden/my/releases"
 if "x%show_popup%"=="xon" if "x%new_version_available%"=="xtrue" powershell -Command "[void] [System.Reflection.Assembly]::LoadWithPartialName('System.Windows.Forms');$objNotifyIcon=New-Object System.Windows.Forms.NotifyIcon;$objNotifyIcon.BalloonTipText='%foo%';$objNotifyIcon.Icon=[system.drawing.systemicons]::Information;$objNotifyIcon.BalloonTipTitle='Bypassing Censorship';$objNotifyIcon.BalloonTipIcon='None';$objNotifyIcon.Visible=$True;$objNotifyIcon.ShowBalloonTip(5000);" 
-
 mode con: cols=%mode_con_cols% lines=%mode_con_lines%
 powershell -command "&{$H=Get-Host;$W=$H.UI.RawUI;$B=$W.BufferSize;$B.Width=%mode_con_cols%;$B.Height=9999;$W.BufferSize=$B;}" 1>nul 2>&1
 set "arch="
@@ -124,7 +120,6 @@ if defined winwsdir (
 	)
 	set "fakedir=!winwsdir:~0,-24!\files\fake"
 )
-
 echo.]0;[Bypassing Censorship] WinWS: %foo%\
 echo.[39;49m
 echo.[7l
@@ -162,16 +157,12 @@ set /a agent_work=1000
 set /a terminate_count=1000
 set /a blockcheck_menu_count=1000
 set /a find_strategy_menu_count=1000
-
 set /a menu_choice=1000
 if not exist %winwsdir%\winws.exe (
 	echo.[5G[31mДля работы скрипта скачать новую версию драйверов и извлечь в директорию '[33m%homenc%\bin\[31m' [0m
 )
-
 <nul set /p =[5GСекундочку
-
 if "x%new_version_available%"=="xtrue" echo.[5G[92mЕсть обновление.[0m
-
 set "winws_pid="
 set /a socks5=0
 set /a found_winws=0
@@ -182,12 +173,10 @@ for /f "tokens=1,2 delims=," %%a in ('2^>nul tasklist /FI "IMAGENAME eq winws.ex
 		<nul set /p =.
 	)
 )
-
 set "strategy_run="
 set /a profile_count=0
 set "commandline="
 set "daemon_status="
-set "debug_status="
 if %found_winws% GTR 0 ( 
 	for /l %%m in (1,1,%found_winws%) do (
 		for /f "tokens=* delims=" %%a in ('2^>nul powershell -Command "Get-WmiObject win32_process -Filter 'ProcessId ^= !winws_pid%%m!' | select commandline | Format-List -Property *"') do (
@@ -199,9 +188,8 @@ if %found_winws% GTR 0 (
 		set "commandline%%m=!commandline!"
 		set "commandline="
 	)
-	
 	for /l %%m in (1,1,%found_winws%) do (
-		for /f "tokens=2-7 delims=[]" %%a in ("!commandline%%m!") do (
+		for /f "tokens=2-6 delims=[]" %%a in ("!commandline%%m!") do (
 			set /a profile_count+=1
 			set "n!profile_count!=%%~a"
 			set "custom_str=%%~b"
@@ -209,7 +197,6 @@ if %found_winws% GTR 0 (
 			set "pr!profile_count!=%%~d"
 			set "pid!profile_count!=!winws_pid%%m!"
 			set "daemon_status=%%~e"
-			set "debug_status=%%~f"
 			<nul set /p =.
 		)
 	)
@@ -225,7 +212,6 @@ if %profile_count% GTR 0 (
 			for /l %%x in (%c1%,1,%c8%) do <nul set /p =(0[%%xGq(B
 			echo.
 			if not "x%daemon_status%"=="x%daemon%" set /a check_restart_str+=1
-			if not "x%debug_status%"=="x%debug%" set /a check_restart_str+=1
 			if not "x%custom_str%"=="x%custom_strategy%" set /a check_restart_str+=1
 			if not "x%ip1%"=="x%IPsetStatus%" set /a check_restart_str+=1
 			if !check_restart_str! neq 0 (
@@ -237,8 +223,6 @@ if %profile_count% GTR 0 (
 			echo.
 			if "x!daemon_status!"=="xon" ( set "offon=да" ) else ( set "offon=нет" )
 			echo.[%c4%G[33mЗапуск в скрытом окне[0m: !offon!
-			if "x!debug_status!"=="xon" ( set "offon=да" ) else ( set "offon=нет" )
-			echo.[%c4%G[33mПоказывать ход работы в окне[0m: !offon!
 			if "x!custom_str!"=="xon" ( set "offon=да" ) else ( set "offon=нет" )
 			echo.[%c4%G[33mЗапуск 'custom' стратегий[0m: !offon!
 			if "x!ip%%i!"=="xon" ( set "offon=да" ) else ( set "offon=нет" )
@@ -262,7 +246,6 @@ if %profile_count% GTR 0 (
 		echo.
 	)
 )
-rem --------------------------------------
 if "x%arg_1%"=="xstart" (
 	if "x%arg_2%"=="x" ( 
 		set "strategy_name=%agent_start_strategy%" 
@@ -276,19 +259,16 @@ if "x%arg_1%"=="xstart" (
 if "x%arg_1%"=="xstop" (
 	goto:terminate
 )
-
 set /a menu_count=1
 set /a find_strategy_menu_count=!menu_count!
 set "foo="
 if defined count_strategy set "foo=[[32mпауза[0m]"
 echo.[%c1%G[37m!menu_count!.[%c2%GПоиск стратегий[0m %foo%
-rem ------------------------------------------------------------------------------------
 if exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh (
 	set /a menu_count+=1
 	set /a blockcheck_menu_count=!menu_count!
 	echo.[%c1%G[37m!menu_count!.[%c2%GBlockcheck[0m
 )
-rem ------------------------------------------------------------------------------------
 set /a foo=%c1%-1
 set "a1="
 if %param_trigger% equ 0 ( set "a1=[..]" ) else ( echo. )
@@ -306,21 +286,6 @@ if %param_trigger% neq 0 (
 	set /a menu_count+=1
 	set /a parameter_menu_count=!menu_count!
 	echo.[%c1%G[37m!menu_count!.[%c2%GЗапуск в скрытом окне[%c5%G[[3!foo!m!offon![0m]
-	set "atten="
-	set /a foo=7
-	if "x%debug%"=="xon" ( 
-		set /a foo=2
-		set "offon=да " 
-	) else ( 
-		set /a foo=1
-		set "offon=нет" 
-	)
-	REM if "x%debug%"=="x@filename" (
-		REM set /a foo=7
-		REM set "atten=very slow"
-	REM )
-	set /a menu_count+=1
-	echo.[%c1%G[37m!menu_count!.[%c2%GПоказывать ход работы в окне[%c5%G[[3!foo!m!offon![0m] [31m!atten![0m
 	set /a menu_count+=1
 	if "x%custom_strategy%"=="xon" (
 		set /a foo=2
@@ -345,7 +310,6 @@ if %param_trigger% neq 0 (
 rem ------------------------------------------------------------------------------------
 set /a foo=%c1%-1
 set /a about_strategy_strsize=%c8%-%c5%
-
 if %strategy_trigger% equ 0 (
 	echo.[%foo%G[33m[..][%c2%G[93mС[33mтратегии[0m
 ) else ( 
@@ -354,7 +318,6 @@ if %strategy_trigger% equ 0 (
 	set "strategy_count_name="
 	set "strategy_name_spath="
 	set /a foo=0
-
 	for /f "delims=" %%I in ('2^>nul dir /b /a:d %home%\strategy\') do (
 		set /a fexist=0
 		set "sfoo="
@@ -379,7 +342,6 @@ if %strategy_trigger% equ 0 (
 		)
 	)
 	if !foo! equ 0 ( 
-		rem echo.[1F[2K
 		echo.[%c2%G[31mСтратегии не найдены. [0m
 		echo.[%c2%GДобавьте файлы стратегий в папку '[33m%homenc%\strategy\[0m'
 	) 
@@ -406,7 +368,6 @@ if %srv_trigger% neq 0 (
 			set /a agent_work=1
 		) else (
 			echo.[%c3%GАгент : [31mвыключен[0m
-			rem echo.[%c3%G[33mДля запуска агента выполнить задание [37m'dpiagent'[33m в планировщике заданий[0m
 			set /a agent_work=0
 		)
 		if !agent_work! equ 1 (
@@ -452,7 +413,6 @@ if defined strategy_run (
 		)
 	)
 )
-
 echo.
 echo.[%c1%G0.[%c2%GВыход
 for /l %%x in (%c1%,1,%c8%) do <nul set /p =(0[%%xGq(B
@@ -491,7 +451,6 @@ set "str2choice=0123456789z"
 set /a second_digit=1000
 set "second_digit_char="
 <nul set /p "=8#: %first_digit_char%"
-
 choice /N /C:0123456789z /D z /T 3 /M "#:" 1>nul 2>&1
 if %errorlevel% EQU 255 call:cerror 440
 if %errorlevel% EQU 0 call:cerror 441
@@ -528,7 +487,6 @@ if %parameter_menu_count% neq 1000 if %menu_choice% geq %parameter_menu_count% (
 	goto:menu_!foo!
 )
 goto:menu
-
 :strategy_choice
 if "x!strategy_count_name%menu_choice%!"=="x" goto:menu
 set "strategy_name=!strategy_count_name%menu_choice%!"
@@ -540,7 +498,6 @@ if "x%strategy_name%"=="x" (
 	pause >nul
 	goto:menu
 )
-
 :terminate
 if not defined strategy_run (
 	call:check_kill
@@ -573,7 +530,6 @@ if %menu_choice% neq 1000 if %menu_choice% EQU %terminate_count% (
 )
 if %menu_choice% neq 1000 if %menu_choice% EQU %blockcheck_menu_count% goto:@terminate_done
 if %menu_choice% neq 1000 if %menu_choice% LSS %terminate_count% goto:@terminate_done
-
 :@terminate_one
 set /a cpofile=%menu_choice%-%terminate_count%
 call:cecho x3x "Завершаем работу профиля стратегии" "'%strategy_run%'" "[!pr%cpofile%!]"
@@ -641,7 +597,6 @@ echo.[5GНажмите любую клавишу для возврата в м�
 pause >nul
 goto:menu
 :@skiptxtmess
-
 set "fakedir=%winwsdir:~0,-24%\files\fake"
 if exist %strategy_apath%\about set /p about_strategy=<%strategy_apath%\about
 if not exist %strategy_apath%\log md %strategy_apath%\log >nul
@@ -655,7 +610,6 @@ for /f "delims=" %%X in ('2^>nul dir /B %home%\lists\exclude\*.txt %home%\lists\
 	set "zapret_hosts_user_exclude=!zapret_hosts_user_exclude! --hostlist-exclude=%home%\lists\exclude\%%X"
 )
 set "daemon_bakup=%daemon%"
-set "debug_bakup=%debug%"
 set "custom_strategy_bakup=%custom_strategy%"
 set "IPsetStatus_bakup=%IPsetStatus%"
 if not defined arg_3 goto:@arg_3_default
@@ -667,23 +621,16 @@ if "x%arg_3:~0,1%"=="x0" (
 	) else goto:@error_arg3
 )
 if "x%arg_3:~1,1%"=="x0" (
-	set "debug=off"
-) else (
-	if "x%arg_3:~1,1%"=="x1" (
-		set "debug=on"
-	) else goto:@error_arg3
-)
-if "x%arg_3:~2,1%"=="x0" (
 	set "custom_strategy=off"
 ) else (
-	if "x%arg_3:~2,1%"=="x1" (
+	if "x%arg_3:~1,1%"=="x1" (
 		set "custom_strategy=on"
 	) else goto:@error_arg3
 )
-if "x%arg_3:~3,1%"=="x0" (
+if "x%arg_3:~2,1%"=="x0" (
 	set "IPsetStatus=off"
 ) else (
-	if "x%arg_3:~3,1%"=="x1" (
+	if "x%arg_3:~2,1%"=="x1" (
 		set "IPsetStatus=on"
 	) else goto:@error_arg3
 )
@@ -696,7 +643,6 @@ if "x%custom_strategy%"=="xon" (
 	if not exist %strategy_apath%\custom md %strategy_apath%\custom >nul
 	call:parse_str "%strategy_apath%\custom" "%homenc%\strategy\%strategy_name%\custom"
 )
-
 if %pcount% equ 0 goto:@nulpcount
 call:cecho x3 "Создано профилей:" "'%scount%'"
 for /f "delims=" %%I in ('%winwsdir%\winws.exe --version') do set "foo=%%I"
@@ -716,7 +662,7 @@ for /l %%i in (1,1,%pcount%) do (
 	if "x%daemon%"=="xon" set wsdaemon=--daemon
 	set "sabout=x"
 	if exist %strategy_apath%\log\"!name_strategy_file_parse_ok%%i!"-about.log set /p sabout=<%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-about.log"
-	set wscomment=--comment [%strategy_name%][%custom_strategy%][%IPsetStatus%][!sabout!][%daemon%][%debug%]
+	set wscomment=--comment [%strategy_name%][%custom_strategy%][%IPsetStatus%][!sabout!][%daemon%]
 	%winwsdir%\winws.exe --dry-run !wsdebug! !wsdaemon! !wscomment! !wsarg! 2>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-dry-run-status-err.log" 1>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-dry-run-status.log"
 	if !errorlevel! neq 0 (
 		call:cecho 1x3 "Ошибка." "Подробности смотри в" "'%homenc%\strategy\%strategy_name%\log\!name_strategy_file_parse_ok%%i!-dry-run-status-err.log"
@@ -725,10 +671,8 @@ for /l %%i in (1,1,%pcount%) do (
 	)
 	%winwsdir%\winws.exe --wf-save="%strategy_apath%\log\!name_strategy_file_parse_ok%%i!-save.raw" !wsarg! 2>>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-wf-save-status-err.log" 1>>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-wf-save-status.log"
 	if "x%daemon%"=="xoff" (
-		rem echo.start "%strategy_name%:[!sabout!] Custom:[%custom_strategy%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !wsdebug! !wscomment! !wsarg! >>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-run-cmd.bat.example"
-		rem start "%strategy_name%:[!sabout!] Custom:[%custom_strategy%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !wsdebug! !wscomment! !wsarg!
-		echo.start "[!sabout!] Custom:[%custom_strategy%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !wsdebug! !wscomment! !wsarg! >>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-run-cmd.bat.example"
-		start "[!sabout!] Custom:[%custom_strategy%] IPset:[%IPsetStatus%] Debug:[%debug%]" %winwsdir%\winws.exe !wsdebug! !wscomment! !wsarg!
+		echo.start "[!sabout!] Custom:[%custom_strategy%] IPset:[%IPsetStatus%] %winwsdir%\winws.exe !wsdebug! !wscomment! !wsarg! >>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-run-cmd.bat.example"
+		start "[!sabout!] Custom:[%custom_strategy%] IPset:[%IPsetStatus%] %winwsdir%\winws.exe !wsdebug! !wscomment! !wsarg!
 	)
 	if "x%daemon%"=="xon" (
 		echo.%winwsdir%\winws.exe !wsdebug! !wsdaemon! !wscomment! !wsarg! >>%strategy_apath%\log\"!name_strategy_file_parse_ok%%i!-run-cmd.bat.example"
@@ -739,7 +683,6 @@ for /l %%i in (1,1,%pcount%) do (
 			goto:strategy_list_end
 		)
 	)
-	
 	call:cecho x6x2 "!name_strategy_for_cecho%%i! :" "[!sabout!]" "-" "ok"
 )
 :@nulpcount
@@ -751,28 +694,20 @@ if %pcount% neq 0 (
 	set /a ecode=1
 )
 :strategy_list_end
-
 if "x%arg_1%"=="xstart" (
 	set "daemon=%daemon_bakup%"
-	set "debug=%debug_bakup%"
 	set "custom_strategy=%custom_strategy_bakup%"
 	set "IPsetStatus=%IPsetStatus_bakup%"
 	exit %ecode%
 )
 if %pcount% equ 0 goto:strategy_list_exit
 set /a foo=0
-if "x%daemon%"=="xon" set /a foo+=1000
-if "x%debug%"=="xon" set /a foo+=100
+if "x%daemon%"=="xon" set /a foo+=100
 if "x%custom_strategy%"=="xon" set /a foo+=10
 if "x%IPsetStatus%"=="xon" set /a foo+=1
 set agent_start_strategy=%strategy_name%
 set /a agent_start_params=%foo%
 call:sconfig
-REM for /l %%x in (5,-1,1) do (
-	REM echo.[F
-	REM <nul set /p =[5G[37mВозврат в меню через [32m%%x[37m с.[0m
-	REM timeout /T 1 /NOBREAK >nul
-REM )
 :strategy_list_exit
 echo.
 echo.[%c3%GНажмите любую клавишу для возврата в меню.
@@ -782,11 +717,9 @@ goto:menu
 set /a ecode=1
 echo.[5G[31mНеверный аргумент #3: [37m'[33m%arg_3%[37m'[0m]
 goto:strategy_list_end
-
 :strategy_trigger
 if %strategy_trigger% equ 0 ( set /a strategy_trigger=1 ) else ( set /a strategy_trigger=0 )
 goto:menu
-
 :srv_menu_trigger
 if %srv_trigger% equ 0 ( set /a srv_trigger=1 ) else ( set /a srv_trigger=0 )
 goto:menu
@@ -808,6 +741,7 @@ exit /b %ecode%
 set "debug=%debug%"
 if "x%daemon%"=="xon" ( 
 	set "daemon=off" 
+	set "debug=on" 
 ) else ( 
 	set "daemon=on"
 	set "debug=off"
@@ -816,22 +750,6 @@ call:sconfig
 goto:menu
 
 :menu_2
-rem debug=@filename - very slow :(
-
-if "x%debug%"=="xon" (
-	set "debug=off"
-) else if "x%debug%"=="xoff" (
-	if "x%daemon%"=="xon" ( 
-		set "daemon=off" 
-		set "debug=on" 
-	) else ( 
-		set "debug=on" 
-	)
-) 
-call:sconfig
-goto:menu
-
-:menu_3
 set /a foo=0
 set "foob="
 set "fooe="
@@ -840,11 +758,10 @@ if "x%custom_strategy%"=="xon" (
 ) else (
 	set "custom_strategy=on"
 )
-
 call:sconfig
 goto:menu
 
-:menu_4
+:menu_3
 if "x%IPsetStatus%"=="xon" (
 	set "IPsetStatus=off"
 ) else ( 
@@ -863,7 +780,6 @@ goto:menu_0
 :blockcheck
 echo.
 call:blockcheck_create_cfg
-
 if not exist %home%\bin\zapret-win-bundle-master\cygwin\bin\bash.exe (
 	echo.[5G[31mОшибка. [37mФайл не найден: '[33m%homenc%\bin\zapret-win-bundle-master\cygwin\bin\bash[37m'[0m
 	goto:@err_blockcheck
@@ -880,15 +796,12 @@ if not exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\blockcheck.sh
 	pause >nul
 	goto:menu
 )
-
 call:check_kill
-
 echo.[5GПауза.
 echo.[5G[37mОтредактируйте/Добавьте в '[33m%homenc%\blockcheck.config.txt[37m' параметры для сканирования.[0m
 echo.
 echo.[5GЕсли отредактировали, то нажмите любую клавишу для продолжения.
 pause >nul
-
 if exist %home%\bin\zapret-win-bundle-master\blockcheck\zapret\config del /f /q %home%\bin\zapret-win-bundle-master\blockcheck\zapret\config 1>nul 2>&1
 rem CRLF to LF
 rem ----------------- http://stackoverflow.com/a/6379861/1012053
@@ -914,11 +827,6 @@ echo.goto:loop
 )>%home%\blockcheck.log.cmd
 echo.[5G[37mПосмотреть отчет можно с помощью '[33m%homenc%\blockcheck.log.cmd[37m'[0m
 echo.
-REM for /l %%x in (5,-1,1) do (
-	REM echo.[F
-	REM <nul set /p =[5G[37mВозврат в меню через [32m%%x[37m с.[0m
-	REM timeout /T 1 /NOBREAK >nul
-REM )
 echo.[5GНажмите любую клавишу для возврата в меню.
 pause >nul
 goto:menu
@@ -935,7 +843,6 @@ set /a cadisable=1000
 set /a castart=1000
 set /a castop=1000
 set /a cadel=1000
-
 if %agent_work% equ 1 (
 	if not "x%agent_mode%"=="xstart" set /a castart=0
 	if not "x%agent_mode%"=="xstop" set /a castop=0
@@ -1029,7 +936,6 @@ if not "x%~7"=="x" <nul set /p = [%bm7%m %~7
 if not "x%~8"=="x" <nul set /p = [%bm8%m %~8
 if not "x%~9"=="x" <nul set /p = [%bm9%m %~9
 echo.[0m
-
 exit /b
 
 :sconfig
@@ -1042,7 +948,6 @@ echo.check_update=%check_update%
 echo.new_version_available=%new_version_available%
 echo.
 echo.daemon=%daemon%
-echo.debug=%debug%
 echo.custom_strategy=%custom_strategy%
 echo.IPsetStatus=%IPsetStatus%
 echo.
@@ -1059,10 +964,8 @@ exit /b
 rem https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28
 REM curl -L \
   REM -H "Accept: application/vnd.github+json" \
-  REM -H "Authorization: Bearer <YOUR-TOKEN>" \
-  REM -H "X-GitHub-Api-Version: 2022-11-28" \
   REM https://api.github.com/repos/OWNER/REPO/releases
-set /a updated=20250801
+set /a updated=20250802
 if not defined check_update set check_update=on
 if not "x%check_update%"=="xon" exit /b 0
 set foo=0
@@ -1102,7 +1005,6 @@ exit /b 0
 :parse_str
 set "parse_str_strategy_apath=%~1"
 set "str_file_path_for_cecho=%~2"
-
 for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') do (
 	set "skip_profile=off"
 	set "skip_WinDivert=off"
@@ -1333,7 +1235,6 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 				set "profile_param=!profile_param! %%~M=%%~N"
 				set /a parse_mayok=1
 			)
-			
 			if !parse_desync! equ 1 (
 				set "foo=%%~N"
 				set "foo=!foo: =!"
@@ -1369,7 +1270,6 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 			) else (
 				set "skip_profile=off"
 			)
-			
 			if not "x!tmp_profile_param!"=="x " (
 				set /a pcount+=1
 				set "name_strategy_file_parse_ok!pcount!=%%~nI"
@@ -1383,7 +1283,6 @@ for /f "delims=" %%I in ('2^>nul dir /b %parse_str_strategy_apath%\*.strategy') 
 		)
 	)
 )
-
 exit /b
 
 :progress_in_percent_begin
@@ -1411,7 +1310,6 @@ if %percent_step% neq 0 (
 	)
 	goto:@progress_in_percent_begin_exit
 )
-
 set /a percent_step = %progress_in_percent_begin_max% / 10
 set /a pinp_count=10
 if %percent_step% neq 0 (
@@ -1428,7 +1326,6 @@ if %percent_step% neq 0 (
 	)
 	goto:@progress_in_percent_begin_exit
 )
-
 set /a percent_step=%progress_in_percent_begin_max%
 set /a pinp_count=100 / %percent_step%
 set /a foo=0
@@ -1492,7 +1389,6 @@ if not exist %winwsdir%\WinDivert%archd%.sys (
 	echo.[%_pos%G[[31mx[0m][%pos%G[31mНе найден[0m файл [33m'%homenc%\!winwsdir:~%homestrsize%!\WinDivert%archd%.sys'[0m.
 	goto:@find_strategy_txtmess
 )
-
 if defined count_strategy (
 	call:check_kill
 	echo.
@@ -1522,7 +1418,6 @@ if not exist %home%\blockcheck.config.txt (
 	echo.[%_pos%G[[33mi[0m][%pos%GСоздание файла параметров '[33m%homenc%\blockcheck.config.txt[0m'
 	call:blockcheck_create_cfg
 ) else echo.[%_pos%G[[33mi[0m][%pos%GЧитаем параметры '[33m%homenc%\blockcheck.config.txt[0m'
-
 for /F "skip=1 eol=# tokens=1,2 delims==" %%a in (%home%\blockcheck.config.txt) do (
 	set foo=%%a
 	set foo=!foo: =!
@@ -1554,13 +1449,11 @@ if %foo% gtr 1 (
 	echo.[%_pos%G[[33mi[0m][%pos%GТолько один домен проверим
 )
 set DOMAINS=%DOMAINS: =%
-
 set /a CURL_MAX_TIMEw=0
 if defined CURL_MAX_TIME set /a CURL_MAX_TIMEw=%CURL_MAX_TIME%
 if %CURL_MAX_TIMEw% equ 0 set "CURL_MAX_TIME=2"
 if not defined CURL_MAX_TIME set "CURL_MAX_TIME=2"
 if defined CURL_MAX_TIME echo.[%pos%G[36mCURL_MAX_TIME=%CURL_MAX_TIME%[0m
-
 set "type_find="
 if defined ENABLE_HTTP if "x%ENABLE_HTTP%"=="x1" (
 	set "type_find=[HTTP]"
@@ -1650,7 +1543,6 @@ set curl_version=%curl_version:(=%
 set curl_version=%curl_version:)=%
 for /f "tokens=2 delims= " %%a in ("%curl_version%") do set "foo=%%a"
 echo.[%_pos%G[[32m+[0m][%pos%GНайден 'cURL' v.%foo%
-
 set "foo="
 set /a line_begin=1
 set /a line_count=1
@@ -1681,14 +1573,6 @@ if %total_strategy% equ 0 (
 call:progress_in_percent_begin %total_strategy%
 set /a ap2=0
 echo.[%_pos%G[[33mi[0m][%pos%GПоиск IP для [33m%DOMAINS%[0m
-rem -----------------bug powershell WebRequest
-REM for /f %%a in ('2^>nul powershell -command "Invoke-WebRequest -Uri https://dns.google/resolve?name=%DOMAINS% | Select-Object Content | Format-List -Property *"') do (
-	REM set "_WebRequest=%%a"
-	REM set "_WebRequest=!_WebRequest:~10!"
-	REM set "Object_Content=!Object_Content!!_WebRequest!"
-REM )
-rem -----------------bug powershell WebRequest
-
 set "_resolve="
 for /f "delims=" %%a in ('2^>nul %CURL% --max-time 3 https://dns.google/resolve?name^=%DOMAINS%') do (
 	set _resolve=%%a
@@ -1721,7 +1605,6 @@ if %foo% equ 1 (
 	rem echo.[%pos%GСкрипт будет использовать зашифрованный DNS CloudFlare.
 	rem set curl_dns=--dns-servers "1.1.1.1:853"
 )
-
 if "x%type_find%"=="x[HTTPS]" (
 	set curl_cmd_scan=%curl_dns% --connect-to %DOMAINS%::[%ip_dom%]:%HTTPS_PORT% -ISs -A Mozilla --max-time %CURL_MAX_TIME% %TLSver% %TLSmax% https://%DOMAINS%
 	set _PORT=%HTTPS_PORT%
@@ -1737,7 +1620,6 @@ if "x%type_find%"=="x[HTTP]" (
 	set _PORT=%HTTP_PORT%
 	set _HTTP=HTTP
 )
-
 set "find_strategy_position_end="
 for /f "delims=" %%I in ('2^>nul dir /b %home%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.*') do set find_strategy_position_end=%%~xI
 if not defined find_strategy_position_end (
@@ -1750,7 +1632,6 @@ if %find_strategy_position_end% neq 0 (
 	echo.[%_pos%G[[33mi[0m][%pos%GОбнаружен файл предыдущего поиска '[33m%homenc%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.%find_strategy_position_end%[0m'
 	echo.[%_pos%G[[33mi[0m][%pos%GПоиск был завершен на позиции '[33m%find_strategy_position_end%[0m', продолжим поиск.
 )
-
 if exist %home%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.%find_strategy_position_end% (
 	for /F "skip=1" %%a in (%home%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.%find_strategy_position_end%) do set /a find_strategy_found+=1
 )
@@ -1772,16 +1653,12 @@ for /L %%c in (0,1,99) do (
 )
 :@break1724
 rem ---------------------------------------------------------
-
 if exist %home%\strategy\error_%DOMAINS%-%_PORT%-%_HTTP%.log del /f /q %home%\strategy\error_%DOMAINS%-%_PORT%-%_HTTP%.log 1>nul 2>&1
-
 set /a line_begin=%line_begin%+%count_strategy%
 set /a line_count=%line_begin%
 set /a line_begin_mem=%line_begin%
 
 :@return_find
-
-
 echo.
 echo.[%pos%G[32mПоиск стратегии для [33m'%DOMAINS%'[0m [%ip_dom%][31m:%HTTPS_PORT%[0m
 REM echo.
@@ -1794,7 +1671,6 @@ for /l %%x in (0,1,160) do (
 		set /a pos_count+=1
 	)
 )
-
 set "foo=0 Прогресс 1 Текущий 2 Всего 3 Найдено 4 Ошибки запуска WinWS 5 Ошибки завершения WinWS 6      Код ответа cURL      7 REPEATS 8"
 set /a pos_count=0
 for /l %%x in (0,1,160) do (
@@ -1911,9 +1787,6 @@ for /F "skip=%line_begin% tokens=*" %%a in (%home%\strategy\strategy.lst) do (
 	set "foo="
 	for /L %%c in (%pos6%,1,%ipos7dec%) do set "foo=!foo! "
 	<nul set /p =8[%pos0%G!ap2!%%[%pos1%G!count_strategy![%pos2%G%total_strategy%[%pos3%G!find_strategy_found![%pos4%G!find_strategy_run_error![%pos5%G!find_strategy_kill_error![%pos6%G!foo![%pos7%G     [?25l[8m
-	REM set /a foo=0
-	REM for /f %%i in ('2^>nul %CURL% --max-time 1 one.one.one.one ^| find "cloudflare"') do set /a foo=1
-	REM if !foo! neq 1 goto:@find_strategy_no_ping
 	%CURL% --max-time 1 one.one.one.one 1>nul 2>&1
 	if !errorlevel! neq 0 goto:@find_strategy_no_ping
 	call:progress_in_percent_count ap2
@@ -1928,6 +1801,7 @@ for /F "skip=%line_begin% tokens=*" %%a in (%home%\strategy\strategy.lst) do (
 		)
 	)
 	set /a read_linecount-=1
+	set /a generate_count=!read_linecount!
 	set "winws_arg_str_="
 	set exist_fake_tls_std=0
 	for /L %%c in (!read_linecount!,-1,0) do (
@@ -1941,6 +1815,7 @@ for /F "skip=%line_begin% tokens=*" %%a in (%home%\strategy\strategy.lst) do (
 						rem found '!'
 						set exist_fake_tls_std=1
 						set "winws_arg_str_=!winws_arg_str_! --dpi-desync-fake-tls=^! "
+						set "generate_str%%c=--dpi-desync-fake-tls=^!"
 					) else if "x!foo:~0,2!"=="x0x" (
 						rem found HEX
 						set "winws_arg_str_=!winws_arg_str_! !read_line%%c!"
@@ -1976,13 +1851,14 @@ for /F "skip=%line_begin% tokens=*" %%a in (%home%\strategy\strategy.lst) do (
 					set /a parse_desync = 1
 				) else (
 					set "winws_arg_str_=!winws_arg_str_! !read_line%%c!"
+					set "generate_str%%c=!read_line%%c!"
 				)
-				
 				if !parse_desync! equ 1 (
 					set "foo=%%e"
 					set "foo=!foo: =!"
 					if "x!foo:~0,2!"=="x0x" (
 						set "winws_arg_str_=!winws_arg_str_! !read_line%%c!"
+						set "generate_str%%c=!read_line%%c!"
 					) else (
 						rem found filename?
 						set count_f=0
@@ -1994,6 +1870,7 @@ for /F "skip=%line_begin% tokens=*" %%a in (%home%\strategy\strategy.lst) do (
 							)
 						)
 						set "winws_arg_str_=!winws_arg_str_! %%d=%fakedir%\!foo! "
+						set "generate_str%%c=%%d=%fakedir%\!foo!"
 					)
 				)
 			)
@@ -2017,6 +1894,7 @@ for /F "skip=%line_begin% tokens=*" %%a in (%home%\strategy\strategy.lst) do (
 					echo.!line_count!: !winws_arg_str_! >>%home%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.!ext_old!
 					move /Y %home%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.!ext_old! %home%\strategy\run_%DOMAINS%-%_PORT%-%_HTTP%.!count_strategy! 1>nul 2>&1
 					set ext_old=!count_strategy!
+					call:create_strategy !line_count!
 				)
 			)
 			if !curl_ret_code_str! equ 0 (
@@ -2055,10 +1933,7 @@ for /F "skip=%line_begin% tokens=*" %%a in (%home%\strategy\strategy.lst) do (
 	for /L %%c in (%pos6%,1,%ipos7dec%) do set "foo=!foo! "
 	<nul set /p =8[%pos0%G!ap2!%%[%pos1%G!count_strategy![%pos2%G%total_strategy%[%pos3%G!find_strategy_found![%pos4%G!find_strategy_run_error![%pos5%G!find_strategy_kill_error![%pos6%G!foo![%pos7%G[32mпауза[0m[?25l[8m
 	choice /N /C:qйp /D p /T 1  1>nul 2>&1
-	if !errorlevel! EQU 255 goto:@find_strategy_end_choice
-	if !errorlevel! EQU 0 goto:@find_strategy_end_choice
-	if !errorlevel! EQU 1 goto:@find_strategy_end_choice
-	if !errorlevel! EQU 2 goto:@find_strategy_end_choice
+	if !errorlevel! neq 3 goto:@find_strategy_end_choice
 )
 :@find_strategy_break
 set "foo="
@@ -2116,7 +1991,6 @@ goto:@find_strategy_end
 :@find_strategy_end_choice
 echo.[12E
 call:check_kill 
-REM pause >nul
 echo.[0m
 echo.[?25h
 goto:menu
@@ -2132,6 +2006,24 @@ echo.[?25h
 echo.[%pos%GНажмите любую клавишу для возврата в меню.
 pause >nul
 goto:menu
+
+:create_strategy
+set "_dir=%~1"
+if not exist %home%\strategy\blockcheck_%_dir% ( 
+	md %home%\strategy\blockcheck_%_dir%\custom >nul
+	md %home%\strategy\blockcheck_%_dir%\skip >nul
+)
+set /a _irand=(20000*%random%/32678)+10000
+set "generate_to=%home%\strategy\blockcheck_%_dir%" 
+if exist %home%\strategy\blockcheck_%_dir%\%_PORT%-%_HTTP%.strategy set "generate_to=%home%\strategy\blockcheck_%_dir%\skip"
+if not exist %home%\strategy\blockcheck_%_dir%\about echo.Создана скриптом из списка [line: %_dir%]>%home%\strategy\blockcheck_%_dir%\about
+set "_ext=strategy"
+if exist %generate_to%\%_PORT%-%_HTTP%.strategy set "_ext=strategy.%_irand%"
+echo.#Create from list line: %_dir% >%generate_to%\%_PORT%-%_HTTP%.%_ext%
+for /l %%i in (%generate_count%,-1,0) do (
+	if defined generate_str%%i echo.!generate_str%%i! >>%home%\strategy\blockcheck_%_dir%\%_PORT%-%_HTTP%.%_ext%
+)
+exit /b
 
 :help
 cls

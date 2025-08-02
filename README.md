@@ -23,5 +23,3 @@
 <br>
 <img src="https://github.com/alexvruden/my/blob/main/04.png" />
 <br>
-<img src="https://github.com/alexvruden/my/blob/main/05.png" />
-<br>

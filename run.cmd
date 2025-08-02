@@ -120,6 +120,8 @@ if defined winwsdir (
 	)
 	set "fakedir=!winwsdir:~0,-24!\files\fake"
 )
+rem bol-van: автоматическое включение tcp timestamps в windows, которые отключены по умолчанию
+netsh interface tcp set global timestamps=enabled 1>nul 2>&1
 echo.]0;[Bypassing Censorship] WinWS: %foo%\
 echo.[39;49m
 echo.[7l
@@ -1592,6 +1594,7 @@ if not defined ip_dom (
 
 set ip_dom=%ip_dom:"=%
 set ip_dom=%ip_dom: =%
+for /f "tokens=1 delims=:" %%i in ("%ip_dom%") do set "ip_dom=%%i"
 echo.[%_pos%G[[32m+[0m][%pos%GНайден IP: [33m%ip_dom%[0m
 
 set foo=0
@@ -1849,6 +1852,12 @@ for /F "skip=%line_begin% tokens=*" %%a in (%home%\strategy\strategy.lst) do (
 					set /a parse_desync = 1
 				) else if "x%%d"=="x--dpi-desync-fake-unknown-udp" (
 					set /a parse_desync = 1
+				) else if "x%%d"=="x--wf-tcp" (
+					set "winws_arg_str_=!winws_arg_str_! --wf-tcp=%_PORT%"
+					set "generate_str%%c=--wf-tcp=%_PORT%"
+				) else if "x%%d"=="x--wf-udp" (
+					set "winws_arg_str_=!winws_arg_str_! --wf-udp=%_PORT%"
+					set "generate_str%%c=--wf-udp=%_PORT%"
 				) else (
 					set "winws_arg_str_=!winws_arg_str_! !read_line%%c!"
 					set "generate_str%%c=!read_line%%c!"
@@ -2043,88 +2052,91 @@ if not exist %home%\blockcheck.config.txt (
 	echo.# CURL - Р·Р°РјРµРЅР° РїСЂРѕРіСЂР°РјРјС‹ curl 
 	echo.
 	echo.# CURL=bin\curl.exe
-	echo.# 
+	echo.
 	echo.# CURL_MAX_TIME - РІСЂРµРјСЏ С‚Р°Р№РјР°СѓС‚Р° curl РІ СЃРµРєСѓРЅРґР°С…
 	echo.
 	echo.# CURL_MAX_TIME=2
-	echo.# 
+	echo.
 	echo.# CURL_MAX_TIME_QUIC - РІСЂРµРјСЏ С‚Р°Р№РјР°СѓС‚Р° curl РґР»СЏ quic. РµСЃР»Рё РЅРµ Р·Р°РґР°РЅРѕ, РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ Р·РЅР°С‡РµРЅРёРµ CURL_MAX_TIME
 	echo.# CURL_MAX_TIME_DOH - РІСЂРµРјСЏ С‚Р°Р№РјР°СѓС‚Р° curl РґР»СЏ DoH СЃРµСЂРІРµСЂРѕРІ
 	echo.# CURL_CMD=1 - РїРѕРєР°Р·С‹РІР°С‚СЊ РєРѕРјР°РЅРґС‹ curl
 	echo.# CURL_OPT - РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ curl. `-k` - РёРіРЅРѕСЂ СЃРµСЂС‚РёС„РёРєР°С‚РѕРІ. `-v` - РїРѕРґСЂРѕР±РЅС‹Р№ РІС‹РІРѕРґ РїСЂРѕС‚РѕРєРѕР»Р°
 	echo.
-	echo.#CURL_OPT=-v
-	echo.# 
+	echo.# CURL_OPT=-v
+	echo.
 	echo.# IPVS=4^|6^|46 - С‚РµСЃС‚РёСЂСѓРµРјС‹Рµ РІРµСЂСЃРёРё ip РїСЂРѕС‚РѕРєРѕР»Р°
 	echo.
-	echo IPVS=4
-	echo.# 
+	echo.IPVS=4
+	echo.
 	echo.# ENABLE_HTTP=0^|1 - РІРєР»СЋС‡РёС‚СЊ С‚РµСЃС‚ plain http
 	echo.
-	echo ENABLE_HTTP=0
-	echo.# 
+	echo.# ENABLE_HTTP=0
+	echo.
 	echo.# ENABLE_HTTPS_TLS12=0^|1 - РІРєР»СЋС‡РёС‚СЊ С‚РµСЃС‚ https TLS 1.2
 	echo.
-	echo ENABLE_HTTPS_TLS12=1
-	echo.# 
+	echo.ENABLE_HTTPS_TLS12=1
+	echo.
 	echo.# ENABLE_HTTPS_TLS13=0^|1 - РІРєР»СЋС‡РёС‚СЊ С‚РµСЃС‚ https TLS 1.3
 	echo.
-	echo ENABLE_HTTPS_TLS13=0
-	echo.# 
+	echo.ENABLE_HTTPS_TLS13=0
+	echo.
 	echo.# ENABLE_HTTP3=0^|1 - РІРєР»СЋС‡РёС‚СЊ С‚РµСЃС‚ QUIC
 	echo.
-	echo ENABLE_HTTP3=0
-	echo.# 
+	echo.# ENABLE_HTTP3=0
+	echo.
 	echo.# REPEATS - РєРѕР»РёС‡РµСЃС‚РІРѕ РїРѕРїС‹С‚РѕРє С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ
 	echo.
-	echo REPEATS=4
-	echo.# 
+	echo.REPEATS=4
+	echo.
 	echo.# PARALLEL=0^|1 - РІРєР»СЋС‡РёС‚СЊ РїР°СЂР°Р»Р»РµР»СЊРЅС‹Рµ РїРѕРїС‹С‚РєРё. РјРѕР¶РµС‚ РѕР±РёРґРµС‚СЊ СЃР°Р№С‚ РёР·-Р·Р° РґРѕР»Р±РµР¶РєРё Рё РїСЂРёРІРµСЃС‚Рё Рє РЅРµРІРµСЂРЅРѕРјСѓ СЂРµР·СѓР»СЊС‚Р°С‚Сѓ
 	echo.
-	echo PARALLEL=0
-	echo.# 
+	echo.PARALLEL=0
+	echo.
 	echo.# SCANLEVEL=quick^|standard^|force - СѓСЂРѕРІРµРЅСЊ СЃРєР°РЅРёСЂРѕРІР°РЅРёСЏ
 	echo.
-	echo SCANLEVEL=standard
-	echo.# 
+	echo.SCANLEVEL=standard
+	echo.
 	echo.# BATCH=1 - РїР°РєРµС‚РЅС‹Р№ СЂРµР¶РёРј Р±РµР· РІРѕРїСЂРѕСЃРѕРІ Рё РѕР¶РёРґР°РЅРёСЏ РІРІРѕРґР° РІ РєРѕРЅСЃРѕР»Рё
 	echo.
-	echo BATCH=1
-	echo.# 
+	echo.BATCH=1
+	echo.
 	echo.# HTTP_PORT, HTTPS_PORT, QUIC_PORT - РЅРѕРјРµСЂР° РїРѕСЂС‚РѕРІ РґР»СЏ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёС… РїСЂРѕС‚РѕРєРѕР»РѕРІ
 	echo.
-	echo HTTPS_PORT=443
-	echo.# 
+	echo.# HTTP_PORT=80
+	echo.
+	echo.HTTPS_PORT=443
+	echo.
+	echo.# QUIC_PORT=443
+	echo.
 	echo.# SKIP_DNSCHECK=1 - РѕС‚РєР°Р· РѕС‚ РїСЂРѕРІРµСЂРєРё DNS
 	echo.
-	echo SKIP_DNSCHECK=0
-	echo.# 
+	echo.SKIP_DNSCHECK=0
+	echo.
 	echo.# SKIP_IPBLOCK=1 - РѕС‚РєР°Р· РѕС‚ С‚РµСЃС‚РѕРІ Р±Р»РѕРєРёСЂРѕРІРєРё РїРѕ РїРѕСЂС‚Сѓ РёР»Рё IP
 	echo.# SKIP_TPWS=1 - РѕС‚РєР°Р· РѕС‚ С‚РµСЃС‚РѕРІ tpws
 	echo.
-	echo SKIP_TPWS=0
-	echo.# 
+	echo.SKIP_TPWS=0
+	echo.
 	echo.# SKIP_PKTWS=1 - РѕС‚РєР°Р· РѕС‚ С‚РµСЃС‚РѕРІ nfqws/dvtws/winws
 	echo.# PKTWS_EXTRA, TPWS_EXTRA - РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ nfqws/dvtws/winws Рё tpws, СѓРєР°Р·С‹РІР°РµРјС‹Рµ РїРѕСЃР»Рµ РѕСЃРЅРѕРІРЅРѕР№ СЃС‚СЂР°С‚РµРіРёРё
 	echo.
-	echo #PKTWS_EXTRA='user strategy for test'
-	echo #PKTWS_EXTRA='--wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig'
-	echo.# 
+	echo.# PKTWS_EXTRA='user strategy for test'
+	echo.# PKTWS_EXTRA='--wf-tcp=80 --dpi-desync=fake,split2 --dpi-desync-autottl=2 --dpi-desync-fooling=md5sig'
+	echo.
 	echo.# PKTWS_EXTRA_1 .. PKTWS_EXTRA_9, TPWS_EXTRA_1 .. TPWS_EXTRA_9 - РѕС‚РґРµР»СЊРЅРѕ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹, СЃРѕРґРµСЂР¶Р°С‰РёРµ РїСЂРѕР±РµР»С‹
 	echo.# PKTWS_EXTRA_PRE - РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ РґР»СЏ nfqws/dvtws/winws, СѓРєР°Р·С‹РІР°РµРјС‹Рµ РїРµСЂРµРґ РѕСЃРЅРѕРІРЅРѕР№ СЃС‚СЂР°С‚РµРіРёРµР№
 	echo.# PKTWS_EXTRA_PRE_1 .. PKTWS_EXTRA_PRE_9 - РѕС‚РґРµР»СЊРЅРѕ РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹, СЃРѕРґРµСЂР¶Р°С‰РёРµ РїСЂРѕР±РµР»С‹
 	echo.# SECURE_DNS=0^|1 - РїСЂРёРЅСѓРґРёС‚РµР»СЊРЅРѕ РІС‹РєР»СЋС‡РёС‚СЊ РёР»Рё РІРєР»СЋС‡РёС‚СЊ DoH
 	echo.
-	echo SECURE_DNS=1
-	echo.#
+	echo.SECURE_DNS=1
+	echo.
 	echo.# DOH_SERVERS - СЃРїРёСЃРѕРє URL DoH С‡РµСЂРµР· РїСЂРѕР±РµР» РґР»СЏ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРѕРіРѕ РІС‹Р±РѕСЂР° СЂР°Р±РѕС‚Р°СЋС‰РµРіРѕ СЃРµСЂРІРµСЂР°
 	echo.# DOH_SERVER - РєРѕРЅРєСЂРµС‚РЅС‹Р№ DoH URL, РѕС‚РєР°Р· РѕС‚ РїРѕРёСЃРєР°
 	echo.# UNBLOCKED_DOM - РЅРµР·Р°Р±Р»РѕРєРёСЂРѕРІР°РЅРЅС‹Р№ РґРѕРјРµРЅ, РєРѕС‚РѕСЂС‹Р№ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ С‚РµСЃС‚РѕРІ IP block
-	echo.# 
+	echo.
 	echo.# DOMAINS - СЃРїРёСЃРѕРє С‚РµСЃС‚РёСЂСѓРµРјС‹С… РґРѕРјРµРЅРѕРІ С‡РµСЂРµР· РїСЂРѕР±РµР»
 	echo.
-	echo DOMAINS="ntc.party rutracker.net"
-	echo.# 
+	echo.DOMAINS="ntc.party rutracker.net"
 	)>%home%\blockcheck.config.txt
 )
 chcp 1251 >nul

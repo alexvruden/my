@@ -10,7 +10,7 @@
 <br>
 <b>Пример:</b>
 <br>
-<i>..\bin\zapret-v71.2</i>
+<i>..\bin\zapret-v71.3</i>
 <br>
 <i>..\bin\zapret-win-bundle-master</i>
 <br>

@@ -132,7 +132,16 @@ echo.[5G[2mПроверка обновлений.[0m
 call:check_update
 echo.[5G[2mПроверка стратегий.[0m
 cd /d %home%\strategy
-for /f "delims=" %%i in ('2^>nul dir /b *.zip') do if not exist %%~ni tar -xf "%%~i" 1>nul 2>&1
+for /f "delims=" %%i in ('2^>nul dir /b *.zip') do (
+	if not exist %%~ni (
+		tar -h 1>nul 2>&1
+		if !errorlevel! equ 0 (
+			tar -xf "%%~i" 1>nul 2>&1
+		) else (
+			powershell -command "Expand-Archive -Path '%%~i' -DestinationPath '.' -Force" 1>nul 2>&1
+		)
+	)
+)
 cd /d %home%
 :menu
 cls
@@ -328,6 +337,8 @@ if %strategy_trigger% equ 0 (
 			for /f "delims=" %%a in ('2^>nul dir /x /b "!sfoo!\*.strategy"') do set /a fexist=1
 			if !fexist! neq 0 (
 				if not exist !sfoo!\about echo.нет описания>!sfoo!\about
+				if not exist !sfoo!\custom md !sfoo!\custom 1>nul 2>&1
+				if not exist !sfoo!\skip md !sfoo!\skip 1>nul 2>&1
 				set /p about_strategy=<!sfoo!\about
 				set /a menu_count+=1
 				if !strategy_menu_count! equ 1000 set /a strategy_menu_count=!menu_count!
@@ -477,7 +488,9 @@ if %menu_choice% gtr %menu_count% (
 	<nul set /p =8[2K
 	goto:@choice_gtr_menu_count
 )
-<nul set /p =8[2E
+REM <nul set /p =8[2E
+echo.
+echo.
 if %menu_choice% equ 0 goto:menu_0
 if %find_strategy_menu_count% neq 1000 if %menu_choice% equ %find_strategy_menu_count% goto:find_strategy
 if %blockcheck_menu_count% neq 1000 if %menu_choice% equ %blockcheck_menu_count% goto:blockcheck
@@ -2018,6 +2031,8 @@ goto:menu
 
 :create_strategy
 set "_dir=%~1"
+set /a _dir+=100000
+set "_dir=0%_dir:~1%"
 if not exist %home%\strategy\blockcheck_%_dir% ( 
 	md %home%\strategy\blockcheck_%_dir%\custom >nul
 	md %home%\strategy\blockcheck_%_dir%\skip >nul
@@ -2025,10 +2040,10 @@ if not exist %home%\strategy\blockcheck_%_dir% (
 set /a _irand=(20000*%random%/32678)+10000
 set "generate_to=%home%\strategy\blockcheck_%_dir%" 
 if exist %home%\strategy\blockcheck_%_dir%\%_PORT%-%_HTTP%.strategy set "generate_to=%home%\strategy\blockcheck_%_dir%\skip"
-if not exist %home%\strategy\blockcheck_%_dir%\about echo.Создана скриптом из списка [line: %_dir%]>%home%\strategy\blockcheck_%_dir%\about
+if not exist %home%\strategy\blockcheck_%_dir%\about echo.Создана скриптом из списка [line: %~1]>%home%\strategy\blockcheck_%_dir%\about
 set "_ext=strategy"
 if exist %generate_to%\%_PORT%-%_HTTP%.strategy set "_ext=strategy.%_irand%"
-echo.#Create from list line: %_dir% >%generate_to%\%_PORT%-%_HTTP%.%_ext%
+echo.#Create from list line: %~1 >%generate_to%\%_PORT%-%_HTTP%.%_ext%
 for /l %%i in (%generate_count%,-1,0) do (
 	if defined generate_str%%i echo.!generate_str%%i! >>%home%\strategy\blockcheck_%_dir%\%_PORT%-%_HTTP%.%_ext%
 )

@@ -32,8 +32,8 @@ Bypassing Censorship/run.cmd
 Bypassing Censorship/script/
 Bypassing Censorship/script/run_agent.cmd
 Bypassing Censorship/script/windivert_delete.cmd
-Bypassing Censorship/strategy/
 Bypassing Censorship/script/diagnostics.cmd
+Bypassing Censorship/strategy/
 Bypassing Censorship/strategy/example raw.zip
 Bypassing Censorship/strategy/preset_russia.zip
 Bypassing Censorship/strategy/preset_russia_autohostlist.zip

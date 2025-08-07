@@ -16,3 +16,4 @@ https://raw.githubusercontent.com/bol-van/rulist/main/reestr_hostname_resolvable
 <br>
 https://antizapret.prostovpn.org:8443/domains-export.txt
 <br>
+https://raw.githubusercontent.com/zapret-info/z-i/master/dump.csv.gz

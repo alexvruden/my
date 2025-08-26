@@ -1,4 +1,0 @@
-# Auto detect text files and perform LF normalization
-* text=auto
-*.cmd text working-tree-encoding=CP1251 eol=crlf
-*.md text working-tree-encoding=CP1251 eol=lf

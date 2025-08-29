@@ -1,0 +1,137 @@
+!impostor 
+and 
+!loopback 
+and
+(
+	(
+		outbound 
+		and 
+		(!tcp or tcp.Syn or tcp.Rst or tcp.Fin or tcp.PayloadLength>0) 
+		and 
+		((tcp.DstPort == 443)) 
+		and 
+		(
+			(ip.DstAddr > 103.21.244.0 and ip.DstAddr < 103.21.247.255) 
+			or
+			(ip.DstAddr > 103.22.200.0 and ip.DstAddr < 103.22.203.255) 
+			or
+			(ip.DstAddr > 103.31.4.0 and ip.DstAddr < 103.31.7.255) 
+			or
+			(ip.DstAddr > 104.16.0.0 and ip.DstAddr < 104.23.255.255) 
+			or
+			(ip.DstAddr > 104.24.0.0 and ip.DstAddr < 104.27.255.255) 
+			or
+			(ip.DstAddr > 108.162.192.0 and ip.DstAddr < 108.162.255.255) 
+			or
+			(ip.DstAddr > 131.0.72.0 and ip.DstAddr < 131.0.75.255) 
+			or
+			(ip.DstAddr > 141.101.64.0 and ip.DstAddr < 141.101.127.255) 
+			or
+			(ip.DstAddr > 162.158.0.0 and ip.DstAddr < 162.159.255.255) 
+			or
+			(ip.DstAddr > 172.64.0.0 and ip.DstAddr < 172.71.255.255) 
+			or
+			(ip.DstAddr > 173.245.48.0 and ip.DstAddr < 173.245.63.255) 
+			or
+			(ip.DstAddr > 188.114.96.0 and ip.DstAddr < 188.114.111.255) 
+			or
+			(ip.DstAddr > 190.93.240.0 and ip.DstAddr < 190.93.255.255) 
+			or
+			(ip.DstAddr > 197.234.240.0 and ip.DstAddr < 197.234.243.255) 
+			or
+			(ip.DstAddr > 198.41.128.0 and ip.DstAddr < 198.41.255.255)
+		) 
+		and
+		(
+			(
+				(ip.DstAddr < 127.0.0.1 or ip.DstAddr > 127.255.255.255) 
+				and 
+				(ip.DstAddr < 10.0.0.0 or ip.DstAddr > 10.255.255.255) 
+				and 
+				(ip.DstAddr < 192.168.0.0 or ip.DstAddr > 192.168.255.255) 
+				and 
+				(ip.DstAddr < 172.16.0.0 or ip.DstAddr > 172.31.255.255) 
+				and 
+				(ip.DstAddr < 169.254.0.0 or ip.DstAddr > 169.254.255.255)
+			) 
+			or 
+			(
+				(ipv6.DstAddr > ::1) 
+				and 
+				(ipv6.DstAddr < 2001::0 or ipv6.DstAddr >= 2001:1::0) 
+				and 
+				(ipv6.DstAddr < fc00::0 or ipv6.DstAddr >= fe00::0) 
+				and 
+				(ipv6.DstAddr < fe80::0 or ipv6.DstAddr >= fec0::0) 
+				and 
+				(ipv6.DstAddr < ff00::0 or ipv6.DstAddr >= ffff::0)
+			)
+		)
+	)
+	or
+	(
+		inbound 
+		and 
+		(tcp or ((tcp.Ack and tcp.Syn or tcp.Rst or tcp.Fin) or (tcp.PayloadLength>=12 and tcp.Payload32[0]==0x48545450 and tcp.Payload16[2]==0x2F31 and tcp.Payload[6]==0x2E and tcp.Payload16[4]==0x2033 and tcp.Payload[10]==0x30 and (tcp.Payload[11]==0x32 or tcp.Payload[11]==0x37))))
+		and 
+		((tcp.SrcPort == 443)) 
+		and 
+		(
+			(ip.SrcAddr > 103.21.244.0 and ip.SrcAddr < 103.21.247.255) 
+			or
+			(ip.SrcAddr > 103.22.200.0 and ip.SrcAddr < 103.22.203.255) 
+			or
+			(ip.SrcAddr > 103.31.4.0 and ip.SrcAddr < 103.31.7.255) 
+			or
+			(ip.SrcAddr > 104.16.0.0 and ip.SrcAddr < 104.23.255.255) 
+			or
+			(ip.SrcAddr > 104.24.0.0 and ip.SrcAddr < 104.27.255.255) 
+			or
+			(ip.SrcAddr > 108.162.192.0 and ip.SrcAddr < 108.162.255.255) 
+			or
+			(ip.SrcAddr > 131.0.72.0 and ip.SrcAddr < 131.0.75.255) 
+			or
+			(ip.SrcAddr > 141.101.64.0 and ip.SrcAddr < 141.101.127.255) 
+			or
+			(ip.SrcAddr > 162.158.0.0 and ip.SrcAddr < 162.159.255.255) 
+			or
+			(ip.SrcAddr > 172.64.0.0 and ip.SrcAddr < 172.71.255.255) 
+			or
+			(ip.SrcAddr > 173.245.48.0 and ip.SrcAddr < 173.245.63.255) 
+			or
+			(ip.SrcAddr > 188.114.96.0 and ip.SrcAddr < 188.114.111.255) 
+			or
+			(ip.SrcAddr > 190.93.240.0 and ip.SrcAddr < 190.93.255.255) 
+			or
+			(ip.SrcAddr > 197.234.240.0 and ip.SrcAddr < 197.234.243.255) 
+			or
+			(ip.SrcAddr > 198.41.128.0 and ip.SrcAddr < 198.41.255.255) 
+		) 
+		and
+		(
+			(
+				(ip.SrcAddr < 127.0.0.1 or ip.SrcAddr > 127.255.255.255) 
+				and 
+				(ip.SrcAddr < 10.0.0.0 or ip.SrcAddr > 10.255.255.255) 
+				and 
+				(ip.SrcAddr < 192.168.0.0 or ip.SrcAddr > 192.168.255.255) 
+				and 
+				(ip.SrcAddr < 172.16.0.0 or ip.SrcAddr > 172.31.255.255) 
+				and 
+				(ip.SrcAddr < 169.254.0.0 or ip.SrcAddr > 169.254.255.255)
+			) 
+			or 
+			(
+				(ipv6.SrcAddr > ::1) 
+				and 
+				(ipv6.SrcAddr < 2001::0 or ipv6.SrcAddr >= 2001:1::0) 
+				and 
+				(ipv6.SrcAddr < fc00::0 or ipv6.SrcAddr >= fe00::0) 
+				and 
+				(ipv6.SrcAddr < fe80::0 or ipv6.SrcAddr >= fec0::0) 
+				and 
+				(ipv6.SrcAddr < ff00::0 or ipv6.SrcAddr >= ffff::0)
+			)
+		)
+	)
+)

@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: Windows-2022 #windows-latest
     steps:
     - name: Make dir
       run: |

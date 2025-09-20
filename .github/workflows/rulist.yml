@@ -1,5 +1,6 @@
 name: bc_addon_rulist
 on:
+  workflow_dispatch:
   schedule:
     - cron: "0 1 * * 1"
 

@@ -1,0 +1,24 @@
+name: bc_addon_rulist
+on: [workflow_dispatch]
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - name: Make dir
+      run: |
+        md lists\hostlist
+        md lists\ipset
+        md lists\exclude
+        md bin
+        md lang
+        md strategy
+    - name: Download rulist
+      run: |
+        Invoke-WebRequest https://github.com/bol-van/rulist/blob/main/reestr_hostname_resolvable_ip4.txt -OutFile lists\hostlist\reestr_hostname_resolvable_ip4.txt
+        Invoke-WebRequest https://github.com/bol-van/rulist/blob/main/reestr_resolved_ip4.txt -OutFile lists\ipset\reestr_resolved_ip4.txt
+    - name: Create zip 
+      run: 7z a bc_addon_rulist.zip bin lang lists strategy
+    - name: Release
+      run: gh release upload for_bc_addon bc_addon_rulist.zip --clobber
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,5 +1,8 @@
 name: bc_addon_rulist
-on: [workflow_dispatch]
+on:
+  schedule:
+    - cron: "0 1 * * 1"
+
 jobs:
   build:
     runs-on: windows-latest

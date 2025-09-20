@@ -1,0 +1,7 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+*.cmd text eol=crlf
+docs export-ignore
+*.md export-ignore
+.gitattributes  export-ignore
+#*.md text working-tree-encoding=CP1251 eol=lf

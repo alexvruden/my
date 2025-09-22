@@ -1,11 +1,12 @@
 name: bc_addon_rulist
 on:
+  workflow_dispatch:
   schedule:
     - cron: "0 1 * * 1"
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: Windows-2022
     steps:
     - name: Make dir
       run: |
@@ -17,11 +18,12 @@ jobs:
         md strategy
     - name: Download rulist
       run: |
-        Invoke-WebRequest https://github.com/bol-van/rulist/blob/main/reestr_hostname_resolvable_ip4.txt -OutFile lists\hostlist\reestr_hostname_resolvable_ip4.txt
-        Invoke-WebRequest https://github.com/bol-van/rulist/blob/main/reestr_resolved_ip4.txt -OutFile lists\ipset\reestr_resolved_ip4.txt
+        Invoke-WebRequest https://raw.githubusercontent.com/bol-van/rulist/refs/heads/main/reestr_hostname_resolvable_ip4.txt -OutFile lists\hostlist\reestr_hostname_resolvable_ip4.txt
+        Invoke-WebRequest https://raw.githubusercontent.com/bol-van/rulist/refs/heads/main/reestr_resolved_ip4.txt -OutFile lists\ipset\reestr_resolved_ip4.txt
     - name: Create zip 
       run: 7z a bc_addon_rulist.zip bin lang lists strategy
     - name: Release
-      run: gh release upload for_bc_addon bc_addon_rulist.zip -R alexvruden/my --clobber
+      shell: cmd
+      run: gh release upload for_bc_addon bc_addon_rulist.zip -R %GITHUB_REPOSITORY% --clobber
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

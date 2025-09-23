@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: Windows-2022
     steps:
-    - name: Make dir
+    - name: Make addon
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       shell: cmd
@@ -19,7 +19,7 @@ jobs:
         md bin
         md lang
         md strategy
-        curl -o reestr_hostname_resolvable_ip4.txt https://raw.githubusercontent.com/bol-van/rulist/refs/heads/main/reestr_hostname_resolvable_ip4.txt
-        curl -o reestr_resolved_ip4.txt https://raw.githubusercontent.com/bol-van/rulist/refs/heads/main/reestr_resolved_ip4.txt
+        curl -o lists\hostlist\reestr_hostname_resolvable_ip4.txt https://raw.githubusercontent.com/bol-van/rulist/refs/heads/main/reestr_hostname_resolvable_ip4.txt
+        curl -o lists\ipset\reestr_resolved_ip4.txt https://raw.githubusercontent.com/bol-van/rulist/refs/heads/main/reestr_resolved_ip4.txt
         7z a bc_addon_rulist.zip bin lang lists strategy
         gh release upload for_bc_addon bc_addon_rulist.zip -R %GITHUB_REPOSITORY% --clobber

@@ -1,0 +1,25 @@
+name: bc_addon_rulist
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 1 * * 1"
+
+jobs:
+  build:
+    runs-on: Windows-2022
+    steps:
+    - name: Make dir
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      shell: cmd
+      run: |
+        md lists\hostlist
+        md lists\ipset
+        md lists\exclude
+        md bin
+        md lang
+        md strategy
+        curl -o reestr_hostname_resolvable_ip4.txt https://raw.githubusercontent.com/bol-van/rulist/refs/heads/main/reestr_hostname_resolvable_ip4.txt
+        curl -o reestr_resolved_ip4.txt https://raw.githubusercontent.com/bol-van/rulist/refs/heads/main/reestr_resolved_ip4.txt
+        7z a bc_addon_rulist.zip bin lang lists strategy
+        gh release upload for_bc_addon bc_addon_rulist.zip -R %GITHUB_REPOSITORY% --clobber

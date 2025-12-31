@@ -1,0 +1,21 @@
+name: Deletion completed workflow
+on: [workflow_dispatch]
+jobs:
+  build:
+    runs-on: Windows-2022
+    steps:
+    - name: Delete completed workflow
+      shell: cmd
+      env:  
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        set /a foo=0
+        for /f "delims=" %%a in ('gh run list -s completed -R %GITHUB_REPOSITORY%') do set /a foo+=1
+        echo.Количество завершенных workflow : %foo%
+        echo ::group::Удалим %foo% завершенных workflow.
+        for /f "delims=" %%a in ('gh run list -s completed -R %GITHUB_REPOSITORY% --json databaseId --jq .[].databaseId') do (
+          gh run delete -R %GITHUB_REPOSITORY% %%a >nul
+          echo.Delete workflow id : %%a
+        )
+        echo ::endgroup::
+        echo.Готово.

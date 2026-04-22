@@ -1,0 +1,7 @@
+#tcp 443 
+
+$cloudflare_dns
+--wf-raw=@cloudflare_dns.raw
+
+#$1: cloudflare
+--dpi-desync=fake
